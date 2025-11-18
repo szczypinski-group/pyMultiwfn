@@ -44,11 +44,13 @@ class MultiwfnOutputParser:
             Dictionary mapping atom indices to charges
         """
         charges = {}
-        pattern = r"^\s*(\d+)\(.*?\)\s+([-+]?\d+\.\d+)"
+        # More flexible pattern - handles various spacing
+        pattern = r"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+([-+]?\d+\.\d+)"
         
         in_charge_section = False
         for line in stdout.split('\n'):
-            if method in line or "Atomic charges" in line:
+            # Look for section header
+            if method.lower() in line.lower() or "atomic charges" in line.lower():
                 in_charge_section = True
                 continue
             
@@ -58,8 +60,10 @@ class MultiwfnOutputParser:
                     atom_idx = int(match.group(1))
                     charge = float(match.group(2))
                     charges[atom_idx] = charge
-                elif line.strip() == "":
-                    break
+                elif line.strip() == "" or "sum" in line.lower():
+                    # End of section
+                    if charges:  # Only break if we found charges
+                        break
                     
         return charges
     
@@ -170,7 +174,9 @@ class MultiwfnJob:
         if not self.input_file.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
             
-        self.multiwfn_exe = self._find_executable(multiwfn_exe)
+        # Don't search for executable during init - only when running
+        self._multiwfn_exe_path = multiwfn_exe
+        self.multiwfn_exe = None  # Will be set during run()
         self.working_dir = Path(working_dir) if working_dir else Path.cwd()
         self.batch_commands = []
         self.stdout = None
@@ -258,6 +264,10 @@ class MultiwfnJob:
         self
             For method chaining
         """
+        # Find executable if not already set
+        if self.multiwfn_exe is None:
+            self.multiwfn_exe = self._find_executable(self._multiwfn_exe_path)
+        
         # Ensure exit command
         if not self.batch_commands or self.batch_commands[-1] != "q":
             self.batch_commands.append("q")
