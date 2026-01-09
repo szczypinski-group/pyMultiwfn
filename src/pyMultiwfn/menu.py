@@ -900,9 +900,13 @@ def custom_menu(seq):
         
     Returns:
         Menu sequence with proper exit
+        
+    Raises:
+        TypeError: If seq is not a list
     """
-    if isinstance(seq, str):
-        seq = [seq]
+    if not isinstance(seq, list):
+        raise TypeError("seq must be a list of menu choices")
+    seq = list(seq)  # Make a copy
     if not seq or seq[-1] != "q":
         seq.append("q")
     return seq
@@ -957,6 +961,405 @@ def bond_analysis_suite():
         'fuzzy': fuzzy_bond_order(),
         'laplacian': laplacian_bond_order()
     }
+
+
+def _combine_sequences(functions):
+    """Helper to combine multiple function sequences into one."""
+    combined = []
+    for func in functions:
+        seq = func()
+        if seq and seq[-1] == 'q':
+            seq = seq[:-1]
+        combined.extend(seq)
+    combined.append('q')
+    return combined
+
+
+def run_all():
+    """
+    Run all no-argument analysis functions in a single sequence.
+    
+    Returns
+    -------
+    list
+        Combined menu sequence for all analyses
+    """
+    functions = [
+        # Topology (Menu 2)
+        topology_search_cps,
+        topology_generate_paths,
+        topology_interbasin_surfaces,
+        topology_analysis_complete,
+        topology_esp_analysis,
+        topology_lol_analysis,
+        
+        # Line (Menu 3)
+        line_esp,
+        
+        # Plane maps (Menu 4)
+        plane_map_density,
+        plane_map_esp,
+        plane_map_elf,
+        plane_map_lol,
+        plane_map_gradient,
+        plane_map_laplacian,
+        
+        # Cube generation (Menu 5)
+        cube_density,
+        cube_spin_density,
+        cube_elf,
+        cube_lol,
+        cube_esp,
+        cube_laplacian,
+        cube_fukui_minus,
+        cube_fukui_plus,
+        cube_dual_descriptor,
+        
+        # Wavefunction (Menu 6)
+        check_wavefunction,
+        print_orbital_info,
+        print_basis_info,
+        
+        # Charges (Menu 7)
+        hirshfeld_charge,
+        vdd_population,
+        mulliken_population,
+        lowdin_population,
+        becke_charge,
+        adch_charge,
+        chelpg_charge,
+        mk_charge,
+        aim_charge,
+        hirshfeld_i_charge,
+        cm5_charge,
+        eem_charge,
+        resp_charge,
+        gasteiger_charge,
+        mbis_charge,
+        
+        # Orbital composition (Menu 8)
+        loba_oxidation_state,
+        
+        # Bond order (Menu 9)
+        mayer_bond_order,
+        multicenter_bond_order,
+        wiberg_bond_order,
+        mulliken_bond_order,
+        fuzzy_bond_order,
+        laplacian_bond_order,
+        wiberg_decomposition,
+        ibsi_analysis,
+        av1245_index,
+        
+        # DOS (Menu 10)
+        plot_dos,
+        plot_pdos,
+        plot_opdos,
+        plot_ldos,
+        plot_photoelectron_spectrum,
+        plot_cohp,
+        
+        # Spectrum (Menu 11)
+        plot_ir_spectrum,
+        plot_raman_spectrum,
+        plot_uv_vis_spectrum,
+        plot_ecd_spectrum,
+        plot_vcd_spectrum,
+        plot_roa_spectrum,
+        plot_nmr_spectrum,
+        plot_fluorescence_spectrum,
+        plot_pvs,
+        predict_color,
+        
+        # Surface (Menu 12)
+        surface_analysis_esp,
+        surface_analysis_alie,
+        surface_area_volume,
+        becke_surface,
+        hirshfeld_surface,
+        surface_extrema,
+        
+        # Grid (Menu 13)
+        export_cube,
+        grid_math_operations,
+        grid_extract_plane,
+        grid_plot_integral_curve,
+        
+        # Basin/Fuzzy (Menu 14-15)
+        adndp_analysis,
+        fuzzy_integrate_property,
+        atomic_dipole_moments,
+        atomic_overlap_matrix,
+        localization_delocalization_index,
+        pdi_aromaticity,
+        flu_aromaticity,
+        flu_pi_aromaticity,
+        multicenter_di,
+        ita_aromaticity,
+        atomic_volume_polarizability,
+        cda_analysis,
+        basin_analysis_aim,
+        basin_analysis_elf,
+        basin_integrate_property,
+        
+        # Excitation (Menu 18)
+        transition_density_matrix,
+        charge_transfer_analysis,
+        delta_r_index,
+        transition_dipole_moments,
+        generate_nto,
+        ifct_analysis,
+        lambda_index,
+        cts_analysis,
+        
+        # Localization (Menu 19)
+        boys_localization,
+        pipek_mezey_localization,
+        
+        # Weak interactions (Menu 20)
+        nci_analysis,
+        nci_promolecular,
+        anci_analysis,
+        iri_analysis,
+        dori_analysis,
+        vdw_potential,
+        igm_analysis,
+        igmh_analysis,
+        aigm_analysis,
+        migm_analysis,
+        
+        # EDA (Menu 21)
+        eda_ff,
+        eda_sbl,
+        sobeda_analysis,
+        dispersion_atomic_contribution,
+        
+        # CDFT (Menu 22)
+        cdft_analysis,
+        fukui_function,
+        dual_descriptor,
+        condensed_fukui,
+        ets_nocv_analysis,
+        
+        # Polarizability (Menu 23)
+        parse_polarizability,
+        sos_polarizability,
+        polarizability_density,
+        unit_sphere_polarizability,
+        
+        # Aromaticity (Menu 24-25)
+        icss_analysis,
+        nics_scan,
+        homa_index,
+        homac_homer,
+        nics_1d_scan,
+        nics_2d_map,
+        
+        # Utilities (Menu 100+)
+        scatter_graph_two_functions,
+        export_various_files,
+        vdw_volume,
+        integrate_whole_space,
+        orbital_overlap_integral,
+        monitor_scf_convergence,
+        fragment_guess_input,
+        atomic_coordination,
+        orbital_overlap_centroid,
+        biorthogonalization,
+        lolipop_index,
+        intermolecular_overlap,
+        generate_fock_matrix,
+        electron_transport_route,
+        combine_fragments,
+        hellmann_feynman_forces,
+        geometry_properties,
+        detect_pi_orbitals,
+        fit_function_to_atoms,
+        cvb_index,
+        atomic_bond_dipoles,
+        multiple_orbital_cubes,
+        radial_distribution,
+        orbital_correspondence,
+        average_bond_length,
+        orbital_integrals,
+        function_moments,
+        energy_index,
+        orbital_contributions_to_grid,
+        domain_analysis,
+        correlation_index,
+        natural_orbitals,
+        coulomb_exchange_integrals,
+        bla_boa_analysis,
+        spatial_delocalization_index,
+        bod_nado_analysis,
+        lowdin_orthogonalization,
+        free_volume_in_cell,
+        fit_atomic_radial_density,
+        stm_image,
+        electric_multipole_moments,
+        orbital_energies_from_fock,
+        geometry_operations,
+        surface_distance_projection,
+        determine_fermi_level,
+        complete_qtaim_analysis,
+        fukui_dual_descriptor_cubes,
+        complete_aromaticity_analysis,
+        molecular_properties_summary,
+    ]
+    
+    return _combine_sequences(functions)
+
+
+def run_all_charges():
+    """Run all charge/population analysis methods."""
+    functions = [
+        hirshfeld_charge,
+        vdd_population,
+        mulliken_population,
+        lowdin_population,
+        becke_charge,
+        adch_charge,
+        chelpg_charge,
+        mk_charge,
+        aim_charge,
+        hirshfeld_i_charge,
+        cm5_charge,
+        eem_charge,
+        resp_charge,
+        gasteiger_charge,
+        mbis_charge,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_bond_orders():
+    """Run all bond order analysis methods."""
+    functions = [
+        mayer_bond_order,
+        multicenter_bond_order,
+        wiberg_bond_order,
+        mulliken_bond_order,
+        fuzzy_bond_order,
+        laplacian_bond_order,
+        wiberg_decomposition,
+        ibsi_analysis,
+        av1245_index,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_weak_interactions():
+    """Run all weak interaction analyses."""
+    functions = [
+        nci_analysis,
+        nci_promolecular,
+        anci_analysis,
+        iri_analysis,
+        dori_analysis,
+        vdw_potential,
+        igm_analysis,
+        igmh_analysis,
+        aigm_analysis,
+        migm_analysis,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_topology():
+    """Run all topology analyses."""
+    functions = [
+        topology_search_cps,
+        topology_generate_paths,
+        topology_interbasin_surfaces,
+        topology_analysis_complete,
+        topology_esp_analysis,
+        topology_lol_analysis,
+        complete_qtaim_analysis,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_cubes():
+    """Run all cube file generations."""
+    functions = [
+        cube_density,
+        cube_spin_density,
+        cube_elf,
+        cube_lol,
+        cube_esp,
+        cube_laplacian,
+        cube_fukui_minus,
+        cube_fukui_plus,
+        cube_dual_descriptor,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_spectra():
+    """Run all spectrum analyses."""
+    functions = [
+        plot_dos,
+        plot_pdos,
+        plot_opdos,
+        plot_ldos,
+        plot_photoelectron_spectrum,
+        plot_cohp,
+        plot_ir_spectrum,
+        plot_raman_spectrum,
+        plot_uv_vis_spectrum,
+        plot_ecd_spectrum,
+        plot_vcd_spectrum,
+        plot_roa_spectrum,
+        plot_nmr_spectrum,
+        plot_fluorescence_spectrum,
+        plot_pvs,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_surfaces():
+    """Run all surface analyses."""
+    functions = [
+        surface_analysis_esp,
+        surface_analysis_alie,
+        surface_area_volume,
+        becke_surface,
+        hirshfeld_surface,
+        surface_extrema,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_aromaticity():
+    """Run all aromaticity analyses."""
+    functions = [
+        pdi_aromaticity,
+        flu_aromaticity,
+        flu_pi_aromaticity,
+        ita_aromaticity,
+        icss_analysis,
+        nics_scan,
+        homa_index,
+        homac_homer,
+        nics_1d_scan,
+        nics_2d_map,
+        complete_aromaticity_analysis,
+    ]
+    return _combine_sequences(functions)
+
+
+def run_all_cdft():
+    """Run all CDFT/reactivity analyses."""
+    functions = [
+        cdft_analysis,
+        fukui_function,
+        dual_descriptor,
+        condensed_fukui,
+        ets_nocv_analysis,
+        fukui_dual_descriptor_cubes,
+    ]
+    return _combine_sequences(functions)
+
 
 # =========================================================================
 # Documentation helper
