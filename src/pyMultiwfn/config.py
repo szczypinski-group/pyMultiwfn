@@ -1,7 +1,6 @@
 """Configuration management for pyMultiwfn."""
 
 import platform
-import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -15,12 +14,13 @@ class MultiwfnError(Exception):
 @dataclass(slots=True)
 class MultiwfnConfig:
     """
-    Configuration and executable discovery for Multiwfn.
+    Configuration for Multiwfn execution.
     
     Attributes
     ----------
     exe_path : Path, optional
-        Explicit path to Multiwfn executable
+        Explicit path to Multiwfn executable. If not provided,
+        looks for executable in bin/ directory relative to this package.
     working_dir : Path
         Working directory for output files
     timeout : int, optional
@@ -43,39 +43,22 @@ class MultiwfnConfig:
         return self._resolved_exe
     
     def _find_executable(self) -> Path:
-        """Find Multiwfn executable in common locations."""
-        # Check explicit path
+        """Find Multiwfn executable in bin/ directory."""
         if self.exe_path:
-            if Path(self.exe_path).exists():
-                return Path(self.exe_path)
+            path = Path(self.exe_path)
+            if path.exists():
+                return path
             raise MultiwfnError(f"Specified executable not found: {self.exe_path}")
-        
-        # Check PATH
-        if (found := shutil.which("Multiwfn")):
-            return Path(found)
         
         is_windows = platform.system() == "Windows"
         exe_name = "Multiwfn.exe" if is_windows else "Multiwfn"
         
-        # Check project bin/ directory (walk up to 5 levels)
-        current = Path(__file__).resolve().parent
-        for _ in range(5):
-            bin_exe = current / "bin" / exe_name
-            if bin_exe.exists():
-                return bin_exe
-            current = current.parent
-        
-        # Check common system locations
-        candidates = [
-            Path.home() / "Multiwfn" / exe_name,
-            Path(f"C:/Multiwfn/{exe_name}") if is_windows else Path("/usr/local/bin/Multiwfn"),
-            Path(f"C:/Program Files/Multiwfn/{exe_name}") if is_windows else Path("/opt/Multiwfn/Multiwfn"),
-        ]
-        
-        for path in candidates:
-            if path.exists() and path.is_file():
-                return path
+        # Check bin/ directory relative to this package
+        bin_exe = Path(__file__).resolve().parent / "bin" / exe_name
+        if bin_exe.exists():
+            return bin_exe
         
         raise MultiwfnError(
-            "Multiwfn executable not found. Please specify path with exe_path parameter."
+            f"Multiwfn executable not found at {bin_exe}. "
+            "Please place the executable in the bin/ directory or specify exe_path."
         )
