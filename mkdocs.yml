@@ -1,0 +1,33 @@
+site_name: pyMultiwfn Documentation
+site_url: https://szczypinski-group.github.io/pyMultiwfn/
+repo_url: https://github.com/szczypinski-group/pyMultiwfn
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src"] # Looking at the root for the pyMultiwfn folder
+          options:
+            show_root_heading: true
+            show_source: true
+
+nav:
+  - Home: index.md
+  - API Reference:
+    - Configuration: config.md
+    - Job Execution: job.md
+    - Results: result.md
+    - Parsers: parsers.md
+    - Analysis: analysis.md
+    - Menu Sequences: menu.md

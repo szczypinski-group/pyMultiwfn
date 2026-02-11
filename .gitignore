@@ -209,5 +209,5 @@ __marimo__/
 # VSCode
 .vscode/
 
-#Unit Testing
-tests/
+#Unit Testing data
+tests/test_data/
