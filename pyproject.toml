@@ -53,7 +53,7 @@ lint.ignore = [
 ]
 
     [tool.ruff.lint.pydocstyle]
-    convention = "google"
+    convention = "numpy"
 
 [tool.mypy]
 exclude = "tests/"

@@ -8,7 +8,7 @@ from pathlib import Path
 class MultiwfnResult:
     """Encapsulates results from a Multiwfn execution.
 
-    Attributes:
+    Attributes
     ----------
     stdout : str
         Standard output from Multiwfn
@@ -35,8 +35,8 @@ class MultiwfnResult:
     def success(self) -> bool:
         """Check if execution was successful.
 
-        Notes:
-        ------
+        Notes
+        -----
         Multiwfn often returns non-zero codes in batch mode even on success.
         We check for actual error indicators instead of just return code.
 

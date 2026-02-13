@@ -33,7 +33,7 @@ class ChargeParser(OutputParser):
         method : str
             Charge method name (e.g., "Hirshfeld", "ADCH", "RESP")
 
-        Returns:
+        Returns
         -------
         dict
             Dictionary mapping atom indices to charges
@@ -81,7 +81,7 @@ class BondOrderParser(OutputParser):
         stdout : str
             Multiwfn standard output
 
-        Returns:
+        Returns
         -------
         dict
             Dictionary mapping atom pairs to bond orders
@@ -129,7 +129,7 @@ class CriticalPointParser(OutputParser):
         stdout : str
             Multiwfn standard output
 
-        Returns:
+        Returns
         -------
         list
             List of dictionaries containing CP information.
@@ -186,7 +186,7 @@ class SpectrumParser(OutputParser):
         stdout : str
             Multiwfn standard output
 
-        Returns:
+        Returns
         -------
         dict
             Dictionary with 'frequencies' and 'intensities' lists

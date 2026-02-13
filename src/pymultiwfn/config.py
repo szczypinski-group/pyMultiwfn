@@ -14,7 +14,7 @@ class MultiwfnError(Exception):
 class TimeoutConfig:
     """Timeout configuration.
 
-    Attributes:
+    Attributes
     ----------
     default : int
         Default timeout for simple analyses (seconds)
@@ -25,7 +25,7 @@ class TimeoutConfig:
     cube : int
         Timeout for cube file generation
 
-    Examples:
+    Examples
     --------
     >>> timeout = TimeoutConfig(default=120, topology=600)
     >>> timeout.get_for_analysis('topology_search_cps')
@@ -128,7 +128,7 @@ class TimeoutConfig:
         analysis_name : str
             Name of the analysis function
 
-        Returns:
+        Returns
         -------
         int
             Timeout in seconds
@@ -153,7 +153,7 @@ class TimeoutConfig:
 class MultiwfnConfig:
     """Configuration for Multiwfn execution.
 
-    Attributes:
+    Attributes
     ----------
     exe_path : Path, optional
         Explicit path to Multiwfn executable. If not provided,
@@ -168,7 +168,7 @@ class MultiwfnConfig:
     verbose : bool
         Whether to print output during execution
 
-    Examples:
+    Examples
     --------
     >>> # Simple configuration
     >>> config = MultiwfnConfig(timeout=300, verbose=True)
@@ -233,7 +233,7 @@ class MultiwfnConfig:
         analysis_name : str, optional
             Name of the analysis. If None, returns default timeout.
 
-        Returns:
+        Returns
         -------
         int
             Timeout in seconds

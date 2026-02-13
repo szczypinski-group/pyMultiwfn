@@ -1,6 +1,6 @@
 """Complete Multiwfn menu mapping for batch automation.
 
-Notes:
+Notes
 -----
 Based on Multiwfn 3.8 (dev) manual.
 
@@ -12,7 +12,7 @@ from enum import Enum
 class Menu(Enum):
     """Enumeration of all Multiwfn menu functions.
 
-    Examples:
+    Examples
     --------
     >>> Menu.HIRSHFELD_CHARGE.get_sequence()
     ['7', '1', 'q']
@@ -289,7 +289,7 @@ def custom_sequence(seq: list[str]) -> list[str]:
     seq : list of str
         Menu choices
 
-    Returns:
+    Returns
     -------
     list of str
         Sequence with 'q' appended if not present

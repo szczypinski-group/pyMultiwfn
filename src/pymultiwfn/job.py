@@ -17,7 +17,7 @@ class MultiwfnJobBuilder:
 
     Provides a fluent interface for configuring and building jobs.
 
-    Examples:
+    Examples
     --------
     >>> from pyMultiwfn.menu import Menu
     >>> job = (MultiwfnJobBuilder("molecule.wfn")
@@ -146,7 +146,7 @@ class MultiwfnJobBuilder:
     def build(self) -> "MultiwfnJob":
         """Build the MultiwfnJob instance.
 
-        Returns:
+        Returns
         -------
         MultiwfnJob
             Configured job ready for execution
@@ -184,7 +184,7 @@ class MultiwfnJob:
     config : MultiwfnConfig, optional
         Configuration object
 
-    Examples:
+    Examples
     --------
     >>> from pyMultiwfn import MultiwfnJob
     >>> from pyMultiwfn.menu import Menu
@@ -221,7 +221,7 @@ class MultiwfnJob:
         input_file : str or Path
             Path to wavefunction file
 
-        Returns:
+        Returns
         -------
         MultiwfnJobBuilder
             Builder instance
@@ -263,7 +263,7 @@ class MultiwfnJob:
         *args
             Additional arguments for the menu sequence
 
-        Returns:
+        Returns
         -------
         self
             For method chaining
@@ -283,7 +283,7 @@ class MultiwfnJob:
         commands : list of str
             List of commands to add
 
-        Returns:
+        Returns
         -------
         self
             For method chaining
@@ -294,7 +294,7 @@ class MultiwfnJob:
     def clear_commands(self) -> "MultiwfnJob":
         """Clear all commands.
 
-        Returns:
+        Returns
         -------
         self
             For method chaining
@@ -311,7 +311,7 @@ class MultiwfnJob:
         override : int, optional
             If provided, use this timeout value directly
 
-        Returns:
+        Returns
         -------
         int
             Timeout in seconds
@@ -349,12 +349,12 @@ class MultiwfnJob:
         timeout : int, optional
             Timeout in seconds (overrides config and automatic calculation)
 
-        Returns:
+        Returns
         -------
         MultiwfnResult
             Execution results
 
-        Raises:
+        Raises
         ------
         MultiwfnError
             If execution times out or fails with errors
