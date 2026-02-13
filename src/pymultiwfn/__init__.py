@@ -11,28 +11,21 @@ Basic Usage
 
 __version__ = "0.2.0"
 
-# Config (includes MultiwfnError)
-# Menu submodule
-from . import menu
-from .config import MultiwfnConfig, MultiwfnError
-
-# Job
-from .job import MultiwfnJob, MultiwfnJobBuilder
-
-# Parsers
-from .parsers import (
+from pymultiwfn.config import MultiwfnConfig, MultiwfnError
+from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
+from pymultiwfn.menu import Menu
+from pymultiwfn.parsers import (
     BondOrderParser,
     ChargeParser,
     CriticalPointParser,
     OutputParser,
     SpectrumParser,
 )
-
-# Result
-from .result import MultiwfnResult
+from pymultiwfn.result import MultiwfnResult
 
 __all__ = [
     "__version__",
+    "Menu",
     # Classes
     "MultiwfnJob",
     "MultiwfnJobBuilder",
