@@ -1,21 +1,59 @@
 [build-system]
-requires = ["setuptools>=65", "wheel"]
-build-backend = "setuptools.build_meta"
+requires      = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
 
 [project]
 name = "pyMultiwfn"
 version = "0.1.0"
 description = "Python interface and automation toolkit for Multiwfn"
+requires-python = ">=3.12"
 authors = [
-    { name="Pierre-Louis Valero", email="ypkh17@durham.ac.uk" }
+    { name = "Pierre-Louis Valero", email = "ypkh17@durham.ac.uk" },
+    { name = "Filip T. Szczypiński", email = "filip.t.szczypinski@durham.ac.uk" },
 ]
-readme = "README.md"
-license = { file = "LICENSE" }
-requires-python = ">=3.8"
+
+readme       = "README.md"
+license      = { file = "LICENSE" }
 dependencies = []
 
-[tool.setuptools]
-package-dir = { "" = "src" }
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "interrogate>=1.7.0",
+    "nox>=2025.10.16",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.2",
+]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.interrogate]
+verbose                    = 2
+ignore-setters             = true
+ignore-property-decorators = true
+ignore-magic               = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 79
+target-version = "py311"
+lint.select = [
+    "E",   # pycodestyle
+    "F",   # Pyflakes
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "TD",  # flake8-todos
+    "PTH", # flake8-use-pathlib
+    "ANN", # flake8-annotations
+    "I",   # isort
+    "N",   # PEP8 naming
+    "D",   # pydocstyle
+]
+lint.ignore = [
+    "D105",
+]
+
+    [tool.ruff.lint.pydocstyle]
+    convention = "google"
