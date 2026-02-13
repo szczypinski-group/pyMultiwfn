@@ -3,7 +3,7 @@ requires      = ["uv_build>=0.9.5,<0.10.0"]
 build-backend = "uv_build"
 
 [project]
-name = "pyMultiwfn"
+name = "pymultiwfn"
 version = "0.1.0"
 description = "Python interface and automation toolkit for Multiwfn"
 requires-python = ">=3.12"
@@ -32,9 +32,6 @@ ignore-setters             = true
 ignore-property-decorators = true
 ignore-magic               = true
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-
 [tool.ruff]
 line-length = 79
 target-version = "py311"
@@ -57,3 +54,6 @@ lint.ignore = [
 
     [tool.ruff.lint.pydocstyle]
     convention = "google"
+
+[tool.mypy]
+exclude = "tests/"

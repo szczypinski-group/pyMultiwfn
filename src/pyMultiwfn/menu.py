@@ -1,28 +1,29 @@
-"""
-Complete Multiwfn menu mapping for batch automation.
+"""Complete Multiwfn menu mapping for batch automation.
+
+Notes:
+-----
 Based on Multiwfn 3.8 (dev) manual.
+
 """
 
 from enum import Enum
-from typing import List
 
 
 class Menu(Enum):
-    """
-    Enumeration of all Multiwfn menu functions.
-    
-    Examples
+    """Enumeration of all Multiwfn menu functions.
+
+    Examples:
     --------
     >>> Menu.HIRSHFELD_CHARGE.get_sequence()
     ['7', '1', 'q']
-    
+
     >>> job.add_menu(Menu.HIRSHFELD_CHARGE)
     >>> job.add_menu(Menu.MAYER_BOND_ORDER)
     """
-    
+
     # Main Menu 0: Visualization
     VIEW_STRUCTURE = ("0",)
-    
+
     # Main Menu 2: Topology analysis
     TOPOLOGY_SEARCH_CPS = ("2", "2", "-1")
     TOPOLOGY_GENERATE_PATHS = ("2", "3")
@@ -30,10 +31,10 @@ class Menu(Enum):
     TOPOLOGY_ANALYSIS_COMPLETE = ("2", "2", "-1", "3", "4")
     TOPOLOGY_ESP_ANALYSIS = ("2", "-2", "2", "-1")
     TOPOLOGY_LOL_ANALYSIS = ("2", "-10", "2", "-1")
-    
+
     # Main Menu 3: Line analysis
     LINE_ESP = ("3", "12")
-    
+
     # Main Menu 4: Plane maps
     PLANE_MAP_DENSITY = ("4", "1", "1")
     PLANE_MAP_ESP = ("4", "12", "1")
@@ -41,7 +42,7 @@ class Menu(Enum):
     PLANE_MAP_LOL = ("4", "5", "1")
     PLANE_MAP_GRADIENT = ("4", "2", "1")
     PLANE_MAP_LAPLACIAN = ("4", "3", "1")
-    
+
     # Main Menu 5: Cube generation
     CUBE_DENSITY = ("5", "1", "2", "0")
     CUBE_SPIN_DENSITY = ("5", "2", "2", "0")
@@ -52,13 +53,13 @@ class Menu(Enum):
     CUBE_FUKUI_MINUS = ("5", "0", "-1", "2", "0")
     CUBE_FUKUI_PLUS = ("5", "0", "1", "2", "0")
     CUBE_DUAL_DESCRIPTOR = ("5", "0", "3", "2", "0")
-    
+
     # Main Menu 6: Wavefunction
     CHECK_WAVEFUNCTION = ("6",)
     PRINT_ORBITAL_INFO = ("6", "1")
     PRINT_BASIS_INFO = ("6", "2")
     MODIFY_OCCUPATION = ("6", "3")
-    
+
     # Main Menu 7: Population analysis and atomic charges
     HIRSHFELD_CHARGE = ("7", "1")
     VDD_POPULATION = ("7", "2")
@@ -75,10 +76,10 @@ class Menu(Enum):
     RESP_CHARGE = ("7", "18")
     GASTEIGER_CHARGE = ("7", "19")
     MBIS_CHARGE = ("7", "20")
-    
+
     # Main Menu 8: Orbital composition analysis
     LOBA_OXIDATION_STATE = ("8", "100")
-    
+
     # Main Menu 9: Bond order analysis
     MAYER_BOND_ORDER = ("9", "1")
     MULTICENTER_BOND_ORDER = ("9", "2")
@@ -89,7 +90,7 @@ class Menu(Enum):
     WIBERG_DECOMPOSITION = ("9", "9")
     IBSI_ANALYSIS = ("9", "10")
     AV1245_INDEX = ("9", "11")
-    
+
     # Main Menu 10: DOS
     PLOT_DOS = ("10", "1")
     PLOT_PDOS = ("10", "2")
@@ -97,7 +98,7 @@ class Menu(Enum):
     PLOT_LDOS = ("10", "4")
     PLOT_PHOTOELECTRON_SPECTRUM = ("10", "5")
     PLOT_COHP = ("10", "6")
-    
+
     # Main Menu 11: Spectra
     PLOT_IR_SPECTRUM = ("11", "1")
     PLOT_RAMAN_SPECTRUM = ("11", "2")
@@ -109,7 +110,7 @@ class Menu(Enum):
     PLOT_FLUORESCENCE_SPECTRUM = ("11", "8")
     PLOT_PVS = ("11", "9")
     PREDICT_COLOR = ("11", "10")
-    
+
     # Main Menu 12: Surface analysis
     SURFACE_ANALYSIS_ESP = ("12", "1")
     SURFACE_ANALYSIS_ALIE = ("12", "2")
@@ -117,16 +118,16 @@ class Menu(Enum):
     BECKE_SURFACE = ("12", "4")
     HIRSHFELD_SURFACE = ("12", "5")
     SURFACE_EXTREMA = ("12", "6")
-    
+
     # Main Menu 13: Grid processing
     EXPORT_CUBE = ("13", "0")
     GRID_MATH_OPERATIONS = ("13", "11")
     GRID_EXTRACT_PLANE = ("13", "2")
     GRID_PLOT_INTEGRAL_CURVE = ("13", "18")
-    
+
     # Main Menu 14: AdNDP
     ADNDP_ANALYSIS = ("14",)
-    
+
     # Main Menu 15: Fuzzy atomic space
     FUZZY_INTEGRATE_PROPERTY = ("15", "1")
     ATOMIC_DIPOLE_MOMENTS = ("15", "2")
@@ -138,15 +139,15 @@ class Menu(Enum):
     MULTICENTER_DI = ("15", "11")
     ITA_AROMATICITY = ("15", "12")
     ATOMIC_VOLUME_POLARIZABILITY = ("15", "13")
-    
+
     # Main Menu 16: CDA
     CDA_ANALYSIS = ("16",)
-    
+
     # Main Menu 17: Basin analysis
     BASIN_ANALYSIS_AIM = ("17", "1")
     BASIN_ANALYSIS_ELF = ("17", "2")
     BASIN_INTEGRATE_PROPERTY = ("17", "3")
-    
+
     # Main Menu 18: Excitation analysis
     HOLE_ELECTRON_ANALYSIS = ("18", "1")
     TRANSITION_DENSITY_MATRIX = ("18", "2")
@@ -157,11 +158,11 @@ class Menu(Enum):
     IFCT_ANALYSIS = ("18", "8")
     LAMBDA_INDEX = ("18", "14")
     CTS_ANALYSIS = ("18", "16")
-    
+
     # Main Menu 19: Localization
     BOYS_LOCALIZATION = ("19", "1")
     PIPEK_MEZEY_LOCALIZATION = ("19", "2")
-    
+
     # Main Menu 20: Weak interactions
     NCI_ANALYSIS = ("20", "1")
     NCI_PROMOLECULAR = ("20", "2")
@@ -173,28 +174,28 @@ class Menu(Enum):
     IGMH_ANALYSIS = ("20", "11")
     AIGM_ANALYSIS = ("20", "12")
     MIGM_ANALYSIS = ("20", "-10")
-    
+
     # Main Menu 21: EDA
     EDA_FF = ("21", "1")
     EDA_SBL = ("21", "2")
     SOBEDA_ANALYSIS = ("21", "3")
     DISPERSION_ATOMIC_CONTRIBUTION = ("21", "4")
-    
+
     # Main Menu 22: CDFT
     CDFT_ANALYSIS = ("22",)
     FUKUI_FUNCTION = ("22", "1")
     DUAL_DESCRIPTOR = ("22", "2")
     CONDENSED_FUKUI = ("22", "3")
-    
+
     # Main Menu 23: ETS-NOCV
     ETS_NOCV_ANALYSIS = ("23",)
-    
+
     # Main Menu 24: Polarizability
     PARSE_POLARIZABILITY = ("24", "1")
     SOS_POLARIZABILITY = ("24", "2")
     POLARIZABILITY_DENSITY = ("24", "3")
     UNIT_SPHERE_POLARIZABILITY = ("24", "5")
-    
+
     # Main Menu 25: Aromaticity
     ICSS_ANALYSIS = ("25", "3")
     NICS_SCAN = ("25", "4")
@@ -202,7 +203,7 @@ class Menu(Enum):
     HOMAC_HOMER = ("25", "7")
     NICS_1D_SCAN = ("25", "13")
     NICS_2D_MAP = ("25", "14")
-    
+
     # Main Menu 100: Utilities Part 1
     SCATTER_GRAPH_TWO_FUNCTIONS = ("100", "1")
     EXPORT_VARIOUS_FILES = ("100", "2")
@@ -223,7 +224,7 @@ class Menu(Enum):
     GEOMETRY_PROPERTIES = ("100", "21")
     DETECT_PI_ORBITALS = ("100", "22")
     FIT_FUNCTION_TO_ATOMS = ("100", "23")
-    
+
     # Main Menu 200: Utilities Part 2
     CVB_INDEX = ("200", "1")
     ATOMIC_BOND_DIPOLES = ("200", "2")
@@ -243,7 +244,7 @@ class Menu(Enum):
     SPATIAL_DELOCALIZATION_INDEX = ("200", "19")
     BOD_NADO_ANALYSIS = ("200", "20")
     LOWDIN_ORTHOGONALIZATION = ("200", "21")
-    
+
     # Main Menu 300: Utilities Part 3
     FREE_VOLUME_IN_CELL = ("300", "1")
     FIT_ATOMIC_RADIAL_DENSITY = ("300", "2")
@@ -253,44 +254,42 @@ class Menu(Enum):
     GEOMETRY_OPERATIONS = ("300", "7")
     SURFACE_DISTANCE_PROJECTION = ("300", "8")
     DETERMINE_FERMI_LEVEL = ("300", "9")
-    
-    def get_sequence(self, *args) -> List[str]:
-        """
-        Get the menu sequence with 'q' appended.
-        
+
+    def get_sequence(self) -> list[str]:
+        """Get the menu sequence with 'q' appended.
+
         Parameters
         ----------
         *args
             Additional arguments to append (e.g., orbital index)
         """
         result = list(self.value)
-        if args:
-            result.extend(str(arg) for arg in args)
-        result.append('q')
+        # if args:
+        #     result.extend(str(arg) for arg in args)
+        result.append("q")
         return result
-    
+
     @classmethod
-    def search(cls, keyword: str) -> List['Menu']:
+    def search(cls, keyword: str) -> list["Menu"]:
         """Search menu items by keyword in name."""
         keyword = keyword.lower()
         return [m for m in cls if keyword in m.name.lower()]
-    
+
     @classmethod
-    def list_all(cls) -> List[str]:
+    def list_all(cls) -> list[str]:
         """List all menu item names."""
         return [m.name for m in cls]
 
 
-def custom_sequence(seq: List[str]) -> List[str]:
-    """
-    Create a custom menu sequence.
-    
+def custom_sequence(seq: list[str]) -> list[str]:
+    """Create a custom menu sequence.
+
     Parameters
     ----------
     seq : list of str
         Menu choices
-        
-    Returns
+
+    Returns:
     -------
     list of str
         Sequence with 'q' appended if not present
