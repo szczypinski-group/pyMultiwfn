@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Tuple, Union
 from .parsers import ParserRegistry
 
 
-@dataclass(slots=True)
+@dataclass
 class MultiwfnResult:
     """
     Encapsulates results from a Multiwfn execution.

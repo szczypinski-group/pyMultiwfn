@@ -5,10 +5,11 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import List, Optional, Union
 
-from .config import MultiwfnConfig, MultiwfnError
+from .config import MultiwfnConfig, MultiwfnError, TimeoutConfig
 from .result import MultiwfnResult
+from .menu import Menu
 
 
 class MultiwfnJobBuilder:
@@ -19,15 +20,14 @@ class MultiwfnJobBuilder:
     
     Examples
     --------
+    >>> from pyMultiwfn.menu import Menu
     >>> job = (MultiwfnJobBuilder("molecule.wfn")
     ...        .with_working_dir(Path("/output"))
     ...        .with_timeout(300)
-    ...        .with_menu_sequence(menu.hirshfeld_charge)
-    ...        .with_menu_sequence(menu.mayer_bond_order)
+    ...        .with_menu(Menu.HIRSHFELD_CHARGE)
+    ...        .with_menu(Menu.MAYER_BOND_ORDER)
     ...        .build())
     """
-    
-    __slots__ = ('_input_file', '_commands', '_working_dir', '_timeout', '_exe_path', '_verbose')
     
     def __init__(self, input_file: Union[str, Path]):
         """
@@ -44,9 +44,10 @@ class MultiwfnJobBuilder:
         
         self._commands: List[str] = []
         self._working_dir: Optional[Path] = None
-        self._timeout: Optional[int] = None
+        self._timeout: Optional[Union[int, TimeoutConfig]] = None
         self._exe_path: Optional[Path] = None
         self._verbose: bool = False
+        self._analysis_names: List[str] = []  # Track analysis names for timeout
     
     @property
     def input_file(self) -> Path:
@@ -54,15 +55,19 @@ class MultiwfnJobBuilder:
         return self._input_file
     
     @property
-    def timeout(self) -> Optional[int]:
+    def timeout(self) -> Optional[Union[int, TimeoutConfig]]:
         """Get the timeout value."""
         return self._timeout
     
     @timeout.setter
-    def timeout(self, value: Optional[int]) -> None:
+    def timeout(self, value: Optional[Union[int, TimeoutConfig]]) -> None:
         """Set timeout with validation."""
-        if value is not None and (not isinstance(value, int) or value <= 0):
-            raise ValueError("Timeout must be a positive integer")
+        if value is not None:
+            if isinstance(value, int):
+                if value <= 0:
+                    raise ValueError("Timeout must be a positive integer")
+            elif not isinstance(value, TimeoutConfig):
+                raise TypeError("Timeout must be int, TimeoutConfig, or None")
         self._timeout = value
     
     def with_working_dir(self, path: Union[str, Path]) -> 'MultiwfnJobBuilder':
@@ -70,8 +75,16 @@ class MultiwfnJobBuilder:
         self._working_dir = Path(path)
         return self
     
-    def with_timeout(self, seconds: int) -> 'MultiwfnJobBuilder':
-        """Set execution timeout in seconds."""
+    def with_timeout(self, seconds: Union[int, TimeoutConfig]) -> 'MultiwfnJobBuilder':
+        """
+        Set execution timeout.
+        
+        Parameters
+        ----------
+        seconds : int or TimeoutConfig
+            Either a simple timeout in seconds, or a TimeoutConfig
+            for analysis-specific timeouts
+        """
         self.timeout = seconds
         return self
     
@@ -100,21 +113,22 @@ class MultiwfnJobBuilder:
         self._verbose = config.verbose
         return self
     
-    def with_menu_sequence(self, menu_func: Callable, **kwargs) -> 'MultiwfnJobBuilder':
+    def with_menu(self, menu_item: Menu, *args) -> 'MultiwfnJobBuilder':
         """
-        Add a menu sequence from a menu function.
+        Add a menu sequence from a Menu enum member.
         
         Parameters
         ----------
-        menu_func : callable
-            Menu function from menu.py
-        **kwargs
-            Arguments to pass to the menu function
+        menu_item : Menu
+            Menu enum member
+        *args
+            Additional arguments for the menu sequence
         """
-        sequence = menu_func(**kwargs) if kwargs else menu_func()
+        sequence = menu_item.get_sequence(*args)
         if sequence and sequence[-1] == 'q':
             sequence = sequence[:-1]
         self._commands.extend(sequence)
+        self._analysis_names.append(menu_item.name.lower())
         return self
     
     def with_custom_commands(self, commands: List[str]) -> 'MultiwfnJobBuilder':
@@ -147,6 +161,7 @@ class MultiwfnJobBuilder:
         
         job = MultiwfnJob(self._input_file, config=config)
         job._commands = self._commands.copy()
+        job._analysis_names = self._analysis_names.copy()
         return job
     
     def __repr__(self) -> str:
@@ -173,13 +188,14 @@ class MultiwfnJob:
         
     Examples
     --------
+    >>> from pyMultiwfn import MultiwfnJob
+    >>> from pyMultiwfn.menu import Menu
     >>> job = MultiwfnJob("molecule.wfn")
-    >>> job.add_menu_sequence(menu.hirshfeld_charge)
+    >>> job.add_menu(Menu.HIRSHFELD_CHARGE)
+    >>> job.add_menu(Menu.MAYER_BOND_ORDER)
     >>> result = job.run()
     >>> charges = result.parse_charges()
     """
-    
-    __slots__ = ('_input_file', '_config', '_commands', '_result')
     
     def __init__(
         self,
@@ -193,6 +209,7 @@ class MultiwfnJob:
         self._config = config or MultiwfnConfig()
         self._commands: List[str] = []
         self._result: Optional[MultiwfnResult] = None
+        self._analysis_names: List[str] = []  # Track analysis names for timeout
     
     @classmethod
     def builder(cls, input_file: Union[str, Path]) -> MultiwfnJobBuilder:
@@ -236,26 +253,27 @@ class MultiwfnJob:
         """Check if job has been executed."""
         return self._result is not None
     
-    def add_menu_sequence(self, menu_func: Callable, **kwargs) -> 'MultiwfnJob':
+    def add_menu(self, menu_item: Menu, *args) -> 'MultiwfnJob':
         """
-        Add a menu sequence from a menu function.
+        Add a menu sequence from a Menu enum member.
         
         Parameters
         ----------
-        menu_func : callable
-            Menu function from menu.py
-        **kwargs
-            Arguments to pass to the menu function
+        menu_item : Menu
+            Menu enum member
+        *args
+            Additional arguments for the menu sequence
             
         Returns
         -------
         self
             For method chaining
         """
-        sequence = menu_func(**kwargs) if kwargs else menu_func()
+        sequence = menu_item.get_sequence(*args)
         if sequence and sequence[-1] == 'q':
             sequence = sequence[:-1]
         self._commands.extend(sequence)
+        self._analysis_names.append(menu_item.name.lower())
         return self
     
     def add_custom_commands(self, commands: List[str]) -> 'MultiwfnJob':
@@ -285,7 +303,43 @@ class MultiwfnJob:
             For method chaining
         """
         self._commands.clear()
+        self._analysis_names.clear()
         return self
+    
+    def _calculate_timeout(self, override: Optional[int] = None) -> int:
+        """
+        Calculate the appropriate timeout for this job.
+        
+        Parameters
+        ----------
+        override : int, optional
+            If provided, use this timeout value directly
+            
+        Returns
+        -------
+        int
+            Timeout in seconds
+        """
+        if override is not None:
+            return override
+        
+        # If no analysis names tracked, use default
+        if not self._analysis_names:
+            return self._config.get_timeout()
+        
+        # Get the maximum timeout across all analyses
+        max_timeout = 0
+        for name in self._analysis_names:
+            timeout = self._config.get_timeout(name)
+            max_timeout = max(max_timeout, timeout)
+        
+        # If multiple analyses, add buffer time
+        if len(self._analysis_names) > 1:
+            # Add 30 seconds per additional analysis as buffer
+            buffer = (len(self._analysis_names) - 1) * 30
+            max_timeout += buffer
+        
+        return max_timeout
     
     def run(self, verbose: Optional[bool] = None, timeout: Optional[int] = None) -> MultiwfnResult:
         """
@@ -296,15 +350,20 @@ class MultiwfnJob:
         verbose : bool, optional
             Print stdout during execution (overrides config)
         timeout : int, optional
-            Timeout in seconds (overrides config)
+            Timeout in seconds (overrides config and automatic calculation)
             
         Returns
         -------
         MultiwfnResult
             Execution results
+            
+        Raises
+        ------
+        MultiwfnError
+            If execution times out or fails with errors
         """
         verbose = verbose if verbose is not None else self._config.verbose
-        timeout = timeout if timeout is not None else self._config.timeout
+        effective_timeout = self._calculate_timeout(timeout)
         
         exe = self._config.executable
         
@@ -338,12 +397,16 @@ class MultiwfnJob:
                 )
                 
                 try:
-                    stdout, stderr = proc.communicate(timeout=timeout)
+                    stdout, stderr = proc.communicate(timeout=effective_timeout)
                     returncode = proc.returncode
                 except subprocess.TimeoutExpired:
                     proc.kill()
                     stdout, stderr = proc.communicate()
-                    raise MultiwfnError(f"Multiwfn execution timed out after {timeout}s")
+                    raise MultiwfnError(
+                        f"Multiwfn execution timed out after {effective_timeout}s. "
+                        f"Analyses: {', '.join(self._analysis_names) if self._analysis_names else 'custom'}. "
+                        f"Consider increasing timeout or using TimeoutConfig for complex analyses."
+                    )
             
             execution_time = time.time() - start_time
             

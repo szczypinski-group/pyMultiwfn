@@ -1,10 +1,15 @@
-"""Output parsers for Multiwfn results."""
+"""Output parsers for Multiwfn results, especially those with perhaps more complciated or less well formatted outputs."""
 
 import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from .config import MultiwfnError
+
+
+# Shared float pattern for all numeric parsing
+# Matches: 1, -1, 1., .5, -0.5, 1e10, .5E-1, -1.2e+03, 1.23E-02
+FLOAT_PATTERN = r"[-+]?(?:\d+\.\d*|\d*\.\d+|\d+)(?:[Ee][-+]?\d+)?"
 
 
 class OutputParser(ABC):
@@ -36,24 +41,25 @@ class ChargeParser(OutputParser):
             Dictionary mapping atom indices to charges
         """
         charges = {}
-        pattern = r"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+([-+]?\d+\.\d+)"
-        
+        # Match atom index, element in parentheses, then a floating-point charge
+        # Supports optional sign, optional leading zero, and scientific notation
+        pattern = rf"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})"
+
         in_charge_section = False
         for line in stdout.split('\n'):
             if method.lower() in line.lower() or "atomic charges" in line.lower():
                 in_charge_section = True
                 continue
-            
+
             if in_charge_section:
-                match = re.match(pattern, line)
-                if match:
-                    atom_idx = int(match.group(1))
-                    charge = float(match.group(2))
+                if match := re.match(pattern, line):
+                    atom_idx = int(match[1])
+                    charge = float(match[2])
                     charges[atom_idx] = charge
-                elif line.strip() == "" or "sum" in line.lower():
+                elif line.strip() == "" or "sum of atomic charges" in line.lower():
                     if charges:
                         break
-        
+
         return charges
 
 
@@ -78,30 +84,27 @@ class BondOrderParser(OutputParser):
         # Pattern 1: "   1  -    2    1.4523"
         # Pattern 2: "   1(C ) -    2(C ):  1.4523"
         patterns = [
-            r"^\s*(\d+)\s*-\s*(\d+)\s+([-+]?\d+\.\d+)",
-            r"^\s*(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*([-+]?\d+\.\d+)",
+            rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})",
+            rf"^\s*(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*({FLOAT_PATTERN})",
         ]
-        
+
         for line in stdout.split('\n'):
             for pattern in patterns:
-                match = re.match(pattern, line)
-                if match:
-                    atom1 = int(match.group(1))
-                    atom2 = int(match.group(2))
-                    bo = float(match.group(3))
-                    # Ensure consistent ordering (smaller index first)
+                if match := re.match(pattern, line):
+                    atom1 = int(match[1])
+                    atom2 = int(match[2])
+                    bo = float(match[3])
                     if atom1 > atom2:
                         atom1, atom2 = atom2, atom1
                     bond_orders[(atom1, atom2)] = bo
                     break
-        
+
         return bond_orders
 
 
 class CriticalPointParser(OutputParser):
     """Parser for critical point information."""
     
-    # Map CP types to names
     CP_TYPE_NAMES = {
         '(3,-3)': 'nuclear',
         '(3,-1)': 'bond',
@@ -121,34 +124,28 @@ class CriticalPointParser(OutputParser):
         Returns
         -------
         list
-            List of dictionaries containing CP information
+            List of dictionaries containing CP information.
+            Position is None if not found in output.
         """
         cps = []
-        
+
         # Pattern for format: "CP   1 (3,-3) Nuclear critical point"
         # followed by "Position (Bohr):    0.000000    0.000000    0.000000"
         pattern = r"CP\s+(\d+)\s+\((\d+),([+-]?\d+)\)"
-        pos_pattern = r"Position.*?:\s+([-+]?\d+\.?\d*[Ee]?[+-]?\d*)\s+([-+]?\d+\.?\d*[Ee]?[+-]?\d*)\s+([-+]?\d+\.?\d*[Ee]?[+-]?\d*)"
-        
+        pos_pattern = rf"Position.*?:\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+
         lines = stdout.split('\n')
         for i, line in enumerate(lines):
-            match = re.search(pattern, line)
-            if match:
-                cp_index = int(match.group(1))
-                cp_type = f"({match.group(2)},{match.group(3)})"
-                
-                # Look for position in next few lines
-                position = (0.0, 0.0, 0.0)
+            if match := re.search(pattern, line):
+                cp_index = int(match[1])
+                cp_type = f"({match[2]},{match[3]})"
+
+                position = None
                 for j in range(i, min(i + 5, len(lines))):
-                    pos_match = re.search(pos_pattern, lines[j])
-                    if pos_match:
-                        position = (
-                            float(pos_match.group(1)),
-                            float(pos_match.group(2)),
-                            float(pos_match.group(3))
-                        )
+                    if pos_match := re.search(pos_pattern, lines[j]):
+                        position = float(pos_match[1]), float(pos_match[2]), float(pos_match[3])
                         break
-                
+
                 cp = {
                     'index': cp_index,
                     'type': cp_type,
@@ -156,7 +153,7 @@ class CriticalPointParser(OutputParser):
                     'position': position
                 }
                 cps.append(cp)
-        
+
         return cps
 
 
@@ -178,24 +175,20 @@ class SpectrumParser(OutputParser):
             Dictionary with 'frequencies' and 'intensities' lists
         """
         spectrum = {'frequencies': [], 'intensities': []}
-        
-        # Pattern 1: "500.00 cm^-1 ... Intensity: 12.34"
-        # Pattern 2: "    500.00           12.34" (two columns)
-        pattern1 = r"(\d+\.?\d*)\s+cm\^?-1.*?Intensity:\s+([-+]?\d+\.?\d*)"
-        pattern2 = r"^\s+(\d+\.?\d+)\s+([-+]?\d+\.?\d+)\s*$"
-        
+
+        pattern1 = rf"({FLOAT_PATTERN})\s+cm\^?-1.*?Intensity:\s+({FLOAT_PATTERN})"
+        pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
+
         for match in re.finditer(pattern1, stdout):
             spectrum['frequencies'].append(float(match.group(1)))
             spectrum['intensities'].append(float(match.group(2)))
-        
-        # If pattern1 didn't match, try pattern2
+
         if not spectrum['frequencies']:
             for line in stdout.split('\n'):
-                match = re.match(pattern2, line)
-                if match:
-                    spectrum['frequencies'].append(float(match.group(1)))
-                    spectrum['intensities'].append(float(match.group(2)))
-        
+                if match := re.match(pattern2, line):
+                    spectrum['frequencies'].append(float(match[1]))
+                    spectrum['intensities'].append(float(match[2]))
+
         return spectrum
 
 
@@ -266,7 +259,6 @@ class ParserRegistry:
         return list(cls._parsers.keys())
 
 
-# Register default parsers
 ParserRegistry.register('charges', ChargeParser())
 ParserRegistry.register('bond_orders', BondOrderParser())
 ParserRegistry.register('critical_points', CriticalPointParser())

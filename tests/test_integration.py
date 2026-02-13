@@ -15,8 +15,6 @@ from pyMultiwfn import (
     MultiwfnError,
     ParserRegistry,
     menu,
-    run_analysis,
-    list_functions,
 )
 
 
@@ -30,21 +28,23 @@ class TestRealFileLoading:
     
     def test_load_wfx_file(self, real_wfx_file, mock_executable):
         """Can create job with real .wfx file."""
-        config = MultiwfnConfig(exe_path=mock_executable)
-        job = MultiwfnJob(real_wfx_file, config=config)
-        
-        assert job.input_file == real_wfx_file
-        assert job.input_file.exists()
-        assert job.input_file.suffix == '.wfx'
+        self._extracted_from_test_load_molden_file_3(
+            mock_executable, real_wfx_file, '.wfx'
+        )
     
     def test_load_molden_file(self, real_molden_file, mock_executable):
         """Can create job with real .molden file."""
+        self._extracted_from_test_load_molden_file_3(
+            mock_executable, real_molden_file, '.molden'
+        )
+
+    # TODO Rename this here and in `test_load_wfx_file` and `test_load_molden_file`
+    def _extracted_from_test_load_molden_file_3(self, mock_executable, arg1, arg2):
         config = MultiwfnConfig(exe_path=mock_executable)
-        job = MultiwfnJob(real_molden_file, config=config)
-        
-        assert job.input_file == real_molden_file
+        job = MultiwfnJob(arg1, config=config)
+        assert job.input_file == arg1
         assert job.input_file.exists()
-        assert job.input_file.suffix == '.molden'
+        assert job.input_file.suffix == arg2
     
     def test_wfx_file_content(self, real_wfx_file):
         """Verify .wfx file has expected content structure."""
@@ -179,21 +179,6 @@ class TestRealMultiwfnExecution:
         
         if len(charges) == 0 and len(bonds) == 0:
             pytest.skip("Could not parse any results from output")
-    
-    def test_run_analysis_function(self, real_wfx_file, real_executable, temp_dir):
-        """Test run_analysis convenience function."""
-        try:
-            result = run_analysis(
-                real_wfx_file,
-                'hirshfeld_charge',
-                exe_path=real_executable,
-                working_dir=temp_dir,
-                timeout=120
-            )
-        except MultiwfnError as e:
-            pytest.skip(f"Multiwfn execution failed: {e}")
-        
-        assert result.success
     
     def test_wavefunction_check(self, real_wfx_file, real_executable, temp_dir):
         """Run wavefunction check."""
