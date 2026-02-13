@@ -7,7 +7,7 @@ Basic Usage
 >>> job.add_menu_sequence(menu.hirshfeld_charge)
 >>> result = job.run()
 >>> charges = result.parse_charges()
-"""  # noqa: N999
+"""
 
 __version__ = "0.2.0"
 
