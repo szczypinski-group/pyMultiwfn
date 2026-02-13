@@ -9,6 +9,8 @@ Basic Usage
 >>> charges = result.parse_charges()
 """
 
+__version__ = "0.1.1"
+
 from pymultiwfn.config import MultiwfnConfig, MultiwfnError
 from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
 from pymultiwfn.menu import Menu
@@ -36,6 +38,4 @@ __all__ = [
     "BondOrderParser",
     "CriticalPointParser",
     "SpectrumParser",
-    # Submodules
-    "menu",
 ]
