@@ -9,8 +9,6 @@ Basic Usage
 >>> charges = result.parse_charges()
 """
 
-__version__ = "0.1.0"
-
 from pymultiwfn.config import MultiwfnConfig, MultiwfnError
 from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
 from pymultiwfn.menu import Menu
@@ -24,7 +22,6 @@ from pymultiwfn.parsers import (
 from pymultiwfn.result import MultiwfnResult
 
 __all__ = [
-    "__version__",
     "Menu",
     # Classes
     "MultiwfnJob",
