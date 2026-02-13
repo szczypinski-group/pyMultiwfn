@@ -9,7 +9,7 @@ Basic Usage
 >>> charges = result.parse_charges()
 """
 
-__version__ = "0.2.0"
+__version__ = "0.1.0"
 
 from pymultiwfn.config import MultiwfnConfig, MultiwfnError
 from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
