@@ -13,7 +13,7 @@ authors = [
 ]
 
 readme       = "README.md"
-license      = { file = "LICENSE" }
+license      = "MPL-2.0"
 dependencies = []
 
 [dependency-groups]
