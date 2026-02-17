@@ -1,6 +1,7 @@
 # TEMPORARY
 
 tests/
+src/pymultiwfn/wip_analysis.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

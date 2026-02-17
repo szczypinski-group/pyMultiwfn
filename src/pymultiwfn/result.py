@@ -2,6 +2,14 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
+from pymultiwfn.parsers import (
+    BondOrderParser,
+    ChargeParser,
+    CriticalPointParser,
+    SpectrumParser,
+)
 
 
 @dataclass
@@ -39,11 +47,9 @@ class MultiwfnResult:
         -----
         Multiwfn often returns non-zero codes in batch mode even on success.
         We check for actual error indicators instead of just return code.
-
         """
         if self.returncode is None or self.returncode < 0:
             return False
-        # Check stderr for error indicators
         error_indicators = [
             "error",
             "fatal",
@@ -54,65 +60,79 @@ class MultiwfnResult:
         has_error = any(ind in self.stderr.lower() for ind in error_indicators)
         return not has_error
 
-    # def parse(
-    #     self,
-    #     parser_name: str,
-    # ) -> Any:
-    #     """Parse output using a registered parser.
+    def parse_charges(self, method: str = "hirshfeld") -> dict[int, float]:
+        """Parse atomic charges from output.
 
-    #     Parameters
-    #     ----------
-    #     parser_name : str
-    #         Name of the parser to use
-    #     **kwargs
-    #         Additional arguments to pass to the parser
+        Parameters
+        ----------
+        method : str
+            Charge method name (e.g., "hirshfeld", "mulliken", "adch")
 
-    #     Returns:
-    #     -------
-    #     Any
-    #         Parsed data
-    #     """
-    #     return ParserRegistry.parse(parser_name, self.stdout, **kwargs)
+        Returns
+        -------
+        dict[int, float]
+            Dictionary mapping atom indices to charges
+        """
+        return ChargeParser.parse(self.stdout, method=method)
 
-    # def parse_charges(self, method: str = "hirshfeld") -> dict[int, float]:
-    #     """Parse atomic charges from output."""
-    #     return self.parse("charges", method=str(method))
+    def parse_bond_orders(self) -> dict[tuple[int, int], float]:
+        """Parse bond orders from output.
 
-    # def parse_bond_orders(self) -> dict[tuple[int, int], float]:
-    #     """Parse bond orders from output."""
-    #     return self.parse("bond_orders")
+        Returns
+        -------
+        dict[tuple[int, int], float]
+            Dictionary mapping atom pairs to bond orders
+        """
+        return BondOrderParser.parse(self.stdout)
 
-    # def parse_critical_points(self) -> list[dict[str, Any]]:
-    #     """Parse critical points from output."""
-    #     return self.parse("critical_points")
+    def parse_critical_points(self) -> list[dict[str, Any]]:
+        """Parse critical points from output.
 
-    # def parse_spectrum(self) -> dict[str, list[float]]:
-    #     """Parse spectrum data from output."""
-    #     return self.parse("spectrum")
+        Returns
+        -------
+        list[dict[str, Any]]
+            List of critical point dictionaries
+        """
+        return CriticalPointParser.parse(self.stdout)
 
-    # def save_output(self, filename: str | Path) -> None:
-    #     """Save output to file."""
-    #     with open(filename, "w", encoding="utf-8") as f:
-    #         f.write(self.stdout)
+    def parse_spectrum(self) -> dict[str, list[float]]:
+        """Parse spectrum data from output.
 
-    # def __str__(self) -> str:
-    #     """Human-readable string representation."""
-    #     status = (
-    #         "SUCCESS" if self.success else f"FAILED (code {self.returncode})"
-    #     )
-    #     return (
-    #               f"MultiwfnResult({status}, {self.execution_time:.2f}s, F
-    #               f"{len(self.commands)} commands)"
-    #     )
+        Returns
+        -------
+        dict[str, list[float]]
+            Dictionary with 'frequencies' and 'intensities' lists
+        """
+        return SpectrumParser.parse(self.stdout)
 
-    # def __repr__(self) -> str:
-    #     """Detailed string representation for debugging."""
-    #     return (
-    #         f"MultiwfnResult("
-    #         f"returncode={self.returncode}, "
-    #         f"execution_time={self.execution_time:.3f}, "
-    #         f"input_file={self.input_file!r}, "
-    #         f"commands={self.commands!r}, "
-    #         f"stdout_len={len(self.stdout)}, "
-    #         f"stderr_len={len(self.stderr)})"
-    #     )
+    def save_output(self, filename: str | Path) -> None:
+        """Save stdout to file.
+
+        Parameters
+        ----------
+        filename : str or Path
+            Output file path
+        """
+        Path(filename).write_text(self.stdout, encoding="utf-8")
+
+    def __str__(self) -> str:
+        """Human-readable string representation."""
+        status = (
+            "SUCCESS" if self.success else f"FAILED (code {self.returncode})"
+        )
+        return (
+            f"MultiwfnResult({status}, {self.execution_time:.2f}s, "
+            f"{len(self.commands)} commands)"
+        )
+
+    def __repr__(self) -> str:
+        """Detailed string representation for debugging."""
+        return (
+            f"MultiwfnResult("
+            f"returncode={self.returncode}, "
+            f"execution_time={self.execution_time:.3f}, "
+            f"input_file={self.input_file!r}, "
+            f"commands={self.commands!r}, "
+            f"stdout_len={len(self.stdout)}, "
+            f"stderr_len={len(self.stderr)})"
+        )

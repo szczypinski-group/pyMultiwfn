@@ -243,11 +243,11 @@ class MultiwfnConfig:
         return self.timeout_config.get_for_analysis(analysis_name)
 
     @property
-    def executable(self) -> Path | None:
+    def executable(self) -> Path:
         """Get the resolved Multiwfn executable path."""
         if self._resolved_exe is None:
             object.__setattr__(self, "_resolved_exe", self._find_executable())
-        return self._resolved_exe
+        return self._resolved_exe  # type: ignore[return-value]
 
     def _find_executable(self) -> Path:
         """Find Multiwfn executable in bin/ directory."""

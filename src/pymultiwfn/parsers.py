@@ -1,19 +1,14 @@
-"""Output parsers for Multiwfn result.
-
-Especially those with perhaps more complicated or worse formatted outputs.
-
-"""
+"""Output parsers for Multiwfn results."""
 
 import re
 from typing import Any
 
 # Shared float pattern for all numeric parsing
-# Matches: 1, -1, 1., .5, -0.5, 1e10, .5E-1, -1.2e+03, 1.23E-02
 FLOAT_PATTERN = r"[-+]?(?:\d+\.\d*|\d*\.\d+|\d+)(?:[Ee][-+]?\d+)?"
 
 
 class OutputParser:
-    """Parent class for output parsers."""
+    """Base class for output parsers."""
 
     pass
 
@@ -21,9 +16,8 @@ class OutputParser:
 class ChargeParser(OutputParser):
     """Parser for atomic charges."""
 
-    def parse(
-        self, stdout: str, method: str = "Hirshfeld"
-    ) -> dict[int, float]:
+    @staticmethod
+    def parse(stdout: str, method: str = "Hirshfeld") -> dict[int, float]:
         """Extract atomic charges from Multiwfn output.
 
         Parameters
@@ -35,12 +29,10 @@ class ChargeParser(OutputParser):
 
         Returns
         -------
-        dict
+        dict[int, float]
             Dictionary mapping atom indices to charges
         """
-        charges = {}
-        # Match atom id, element in parentheses, then a floating-point charge
-        # Supports optional sign, leading zero, and scientific notation
+        charges: dict[int, float] = {}
         pattern = rf"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})"
 
         in_charge_section = False
@@ -70,9 +62,9 @@ class ChargeParser(OutputParser):
 class BondOrderParser(OutputParser):
     """Parser for bond orders."""
 
+    @staticmethod
     def parse(
-        self,
-        stdout: str,
+        stdout: str, **kwargs: OutputParser
     ) -> dict[tuple[int, int], float]:
         """Extract bond orders from Multiwfn output.
 
@@ -83,12 +75,10 @@ class BondOrderParser(OutputParser):
 
         Returns
         -------
-        dict
+        dict[tuple[int, int], float]
             Dictionary mapping atom pairs to bond orders
         """
-        bond_orders = {}
-        # Pattern 1: "   1  -    2    1.4523"
-        # Pattern 2: "   1(C ) -    2(C ):  1.4523"
+        bond_orders: dict[tuple[int, int], float] = {}
         patterns = [
             rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})",
             rf"^\s*(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*({FLOAT_PATTERN})",
@@ -111,17 +101,15 @@ class BondOrderParser(OutputParser):
 class CriticalPointParser(OutputParser):
     """Parser for critical point information."""
 
-    CP_TYPE_NAMES = {
+    CP_TYPE_NAMES: dict[str, str] = {
         "(3,-3)": "nuclear",
         "(3,-1)": "bond",
         "(3,+1)": "ring",
         "(3,+3)": "cage",
     }
 
-    def parse(
-        self,
-        stdout: str,
-    ) -> list[dict[str, Any]]:
+    @staticmethod
+    def parse(stdout: str, **kwargs: OutputParser) -> list[dict[str, Any]]:
         """Extract critical point information from topology analysis.
 
         Parameters
@@ -131,14 +119,11 @@ class CriticalPointParser(OutputParser):
 
         Returns
         -------
-        list
-            List of dictionaries containing CP information.
-            Position is None if not found in output.
+        list[dict[str, Any]]
+            List of dictionaries containing CP information
         """
-        cps = []
+        cps: list[dict[str, Any]] = []
 
-        # Pattern for format: "CP   1 (3,-3) Nuclear critical point"
-        # followed by "Position (Bohr):    0.000000    0.000000    0.000000"
         pattern = r"CP\s+(\d+)\s+\((\d+),([+-]?\d+)\)"
         pos_pattern = (
             rf"Position.*?:\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
@@ -151,7 +136,7 @@ class CriticalPointParser(OutputParser):
                 cp_index = int(match[1])
                 cp_type = f"({match[2]},{match[3]})"
 
-                position = None
+                position: tuple[float, float, float] | None = None
                 for j in range(i, min(i + 5, len(lines))):
                     if pos_match := re.search(pos_pattern, lines[j]):
                         position = (
@@ -164,7 +149,9 @@ class CriticalPointParser(OutputParser):
                 cp = {
                     "index": cp_index,
                     "type": cp_type,
-                    "cp_type": self.CP_TYPE_NAMES.get(cp_type, "unknown"),
+                    "cp_type": CriticalPointParser.CP_TYPE_NAMES.get(
+                        cp_type, "unknown"
+                    ),
                     "position": position,
                 }
                 cps.append(cp)
@@ -175,10 +162,8 @@ class CriticalPointParser(OutputParser):
 class SpectrumParser(OutputParser):
     """Parser for spectrum data."""
 
-    def parse(
-        self,
-        stdout: str,
-    ) -> dict[str, list[float]]:
+    @staticmethod
+    def parse(stdout: str, **kwargs: OutputParser) -> dict[str, list[float]]:
         """Extract spectrum data (frequencies, intensities).
 
         Parameters
@@ -188,7 +173,7 @@ class SpectrumParser(OutputParser):
 
         Returns
         -------
-        dict
+        dict[str, list[float]]
             Dictionary with 'frequencies' and 'intensities' lists
         """
         spectrum: dict[str, list[float]] = {
@@ -207,8 +192,7 @@ class SpectrumParser(OutputParser):
 
         if not spectrum["frequencies"]:
             for line in stdout.split("\n"):
-                match2 = re.match(pattern2, line)
-                if match2 is not None:
+                if match2 := re.match(pattern2, line):
                     spectrum["frequencies"].append(float(match2[1]))
                     spectrum["intensities"].append(float(match2[2]))
 

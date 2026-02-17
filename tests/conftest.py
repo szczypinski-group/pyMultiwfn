@@ -20,20 +20,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 # Path Fixtures
 # =============================================================================
 
+
 @pytest.fixture(scope="session")
-def project_root():
+def project_root() -> Path:
     """Path to project root (PYMULTIWFN/)."""
     return Path(__file__).parent.parent
 
 
 @pytest.fixture(scope="session")
-def test_data_dir(project_root):
+def test_data_dir(project_root: Path) -> Path:
     """Path to test data directory."""
     return project_root / "tests" / "test_data"
 
 
 @pytest.fixture(scope="session")
-def real_wfx_file(test_data_dir):
+def real_wfx_file(test_data_dir: Path) -> Path:
     """Real .wfx test file."""
     path = test_data_dir / "M062X_TZVPP_D30.wfx"
     if not path.exists():
@@ -42,7 +43,7 @@ def real_wfx_file(test_data_dir):
 
 
 @pytest.fixture(scope="session")
-def real_molden_file(test_data_dir):
+def real_molden_file(test_data_dir: Path) -> Path:
     """Real .molden test file."""
     path = test_data_dir / "M062X_TZVPP_D30.molden"
     if not path.exists():
@@ -51,11 +52,11 @@ def real_molden_file(test_data_dir):
 
 
 @pytest.fixture(scope="session")
-def real_executable(project_root):
+def real_executable(project_root: Path) -> Path:
     """Real Multiwfn executable from bin/ folder."""
     exe_name = "Multiwfn.exe" if platform.system() == "Windows" else "Multiwfn"
     exe_path = project_root / "bin" / exe_name
-    
+
     if not exe_path.exists():
         pytest.skip(f"Multiwfn executable not found: {exe_path}")
     return exe_path
@@ -65,14 +66,15 @@ def real_executable(project_root):
 # Temporary Fixtures
 # =============================================================================
 
+
 @pytest.fixture
-def temp_dir(tmp_path):
+def temp_dir(tmp_path: Path) -> Path:
     """Temporary directory for test outputs."""
     return tmp_path
 
 
 @pytest.fixture
-def mock_wfn_file(temp_dir):
+def mock_wfn_file(temp_dir: Path) -> Path:
     """Create a mock wavefunction file."""
     path = temp_dir / "mock.wfn"
     path.write_text("mock wavefunction content")
@@ -80,7 +82,7 @@ def mock_wfn_file(temp_dir):
 
 
 @pytest.fixture
-def mock_executable(temp_dir):
+def mock_executable(temp_dir: Path) -> Path:
     """Create a mock Multiwfn executable."""
     if platform.system() == "Windows":
         exe_path = temp_dir / "Multiwfn.exe"
@@ -96,8 +98,9 @@ def mock_executable(temp_dir):
 # Sample Output Fixtures
 # =============================================================================
 
+
 @pytest.fixture
-def sample_hirshfeld_output():
+def sample_hirshfeld_output() -> str:
     """Sample Multiwfn output for Hirshfeld charge analysis."""
     return """
  Hirshfeld charges:
@@ -112,7 +115,7 @@ def sample_hirshfeld_output():
 
 
 @pytest.fixture
-def sample_mulliken_output():
+def sample_mulliken_output() -> str:
     """Sample Multiwfn output for Mulliken population."""
     return """
  Mulliken atomic charges:
@@ -127,7 +130,7 @@ def sample_mulliken_output():
 
 
 @pytest.fixture
-def sample_mayer_output():
+def sample_mayer_output() -> str:
     """Sample Multiwfn output for Mayer bond order analysis."""
     return """
  Mayer bond orders:
@@ -142,7 +145,7 @@ def sample_mayer_output():
 
 
 @pytest.fixture
-def sample_wiberg_output():
+def sample_wiberg_output() -> str:
     """Sample Multiwfn output for Wiberg bond order analysis."""
     return """
  Wiberg bond orders (NAO basis):
@@ -153,7 +156,7 @@ def sample_wiberg_output():
 
 
 @pytest.fixture
-def sample_topology_output():
+def sample_topology_output() -> str:
     """Sample Multiwfn output for topology analysis."""
     return """
  Searching critical points...
@@ -179,7 +182,7 @@ def sample_topology_output():
 
 
 @pytest.fixture
-def sample_spectrum_output():
+def sample_spectrum_output() -> str:
     """Sample Multiwfn output for spectrum analysis."""
     return """
  IR Spectrum:
@@ -196,9 +199,15 @@ def sample_spectrum_output():
 # Pytest Markers
 # =============================================================================
 
-def pytest_configure(config):
+
+def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
     config.addinivalue_line("markers", "slow: marks tests as slow")
     config.addinivalue_line("markers", "integration: marks integration tests")
-    config.addinivalue_line("markers", "requires_multiwfn: marks tests requiring Multiwfn executable")
-    config.addinivalue_line("markers", "real_files: marks tests using real wavefunction files")
+    config.addinivalue_line(
+        "markers",
+        "requires_multiwfn: marks tests requiring Multiwfn executable",
+    )
+    config.addinivalue_line(
+        "markers", "real_files: marks tests using real wavefunction files"
+    )
