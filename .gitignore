@@ -1,7 +1,3 @@
-# TEMPORARY
-
-tests/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -214,6 +210,5 @@ __marimo__/
 .vscode/
 
 #Unit Testing data
-tests/test_data/
 
 .DS_Store

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import pytest
+import pytest  # type: ignore
 
 from pymultiwfn import MultiwfnConfig, MultiwfnError
 
