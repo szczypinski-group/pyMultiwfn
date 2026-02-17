@@ -1,16 +1,16 @@
 """Python wrapper for Multiwfn batch automation.
 
-Basic Usage
------------
->>> from pymultiwfn import MultiwfnJob, menu
->>> job = MultiwfnJob("molecule.wfn")
->>> job.add_menu_sequence(menu.hirshfeld_charge)
->>> result = job.run()
->>> charges = result.parse_charges()
+Usage
+-----
+>>> import pymultiwfn
+>>> mol = pymultiwfn.load("molecule.wfn")
+>>> charges = mol.run_charges()
+>>> result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
 """
 
 __version__ = "0.1.1"
 
+from pymultiwfn.analysis import MultiwfnAnalysis
 from pymultiwfn.config import MultiwfnConfig, MultiwfnError
 from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
 from pymultiwfn.menu import Menu
@@ -23,14 +23,52 @@ from pymultiwfn.parsers import (
 )
 from pymultiwfn.result import MultiwfnResult
 
+# Alias for convenience
+Analysis = MultiwfnAnalysis
+
+
+def load(
+    filepath: str,
+    config: MultiwfnConfig | None = None,
+) -> MultiwfnAnalysis:
+    """Load a wavefunction file for analysis.
+
+    Parameters
+    ----------
+    filepath : str or Path
+        Path to wavefunction file (.wfn, .fchk, .molden, etc.)
+    config : MultiwfnConfig, optional
+        Configuration for Multiwfn execution
+
+    Returns
+    -------
+    MultiwfnAnalysis
+        Analysis object with methods to run calculations
+
+    Examples
+    --------
+    >>> import pymultiwfn
+    >>> mol = pymultiwfn.load("molecule.wfn")
+    >>> charges = mol.run_charges()
+    >>> result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
+    """
+    return MultiwfnAnalysis(filepath, config)
+
+
 __all__ = [
+    # Version
+    "__version__",
+    # Main entry point
+    "load",
+    # Analysis class
+    "MultiwfnAnalysis",
+    "Analysis",
+    # Core classes
     "Menu",
-    # Classes
     "MultiwfnJob",
     "MultiwfnJobBuilder",
     "MultiwfnResult",
     "MultiwfnConfig",
-    # Exception
     "MultiwfnError",
     # Parsers
     "OutputParser",
