@@ -1,7 +1,10 @@
 # pyMultiwfn
 A Python wrapper for automating [Multiwfn](http://sobereva.com/multiwfn/) batch calculations.
-This project is currently in progress.
-Information in the README might be inaccurate.
+This project is currently in progress and is regularly maintained.
+Information in the README might be inaccurate.   
+
+Some of the menu functions may be out of date, as they are sourced from the manual(2018).   
+pymultiwfn may not encompass all possible functionality of Multiwfn, but the package is being actively developped to best represent the software
 
 ## Development
 
@@ -51,6 +54,11 @@ all_results = analysis.run_all()
 ## Linting
 Default linting settings and formatting settings (using [`ruff`](https://docs.astral.sh/ruff/)) have been created within `pyproject.toml` and will
 be applied if the optional dependencies have been installed.
+
+
+## Contact
+If you have any question or inquiries, please email me here: ypkh17@durham.ac.uk   
+If you do send an email, please start the subject line with "pymultiwfn:" 
 
 ## Referencing
 If you are using this package, pelase reference:
