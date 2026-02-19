@@ -29,6 +29,7 @@ dev = [
     "zensical>=0.0.23",
     "mkdocstrings[python]>=1.0.3",
     "pytest>=9.0.2",
+    "ipython>=9.10.0",
 ]
 
 [tool.interrogate]
