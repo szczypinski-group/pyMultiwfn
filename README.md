@@ -24,11 +24,11 @@ mol = pymultiwfn.load("molecule.wfn")
 ```
 
 ## Running calculations
-Calculations can be run in a number of different ways:
-    1. running the calculations individually by calling the desired function relating to a specific Multiwfn input
-    2. creating a custom menu, composed of the desired calculations to be run
-    3. Running calculation suites(all charges, all topologies, etc...)
-    4. Running all the avaialble calculations integrated in the package 
+Calculations can be run in a number of different ways:  
+    1. running the calculations individually by calling the desired function relating to a specific Multiwfn input  
+    2. creating a custom menu, composed of the desired calculations to be run  
+    3. Running calculation suites(all charges, all topologies, etc...)  
+    4. Running all the avaialble calculations integrated in the package   
 ```
 from pymultiwfn import Analysis, Menu
 analysis = Analysis("molecule.wfn")
