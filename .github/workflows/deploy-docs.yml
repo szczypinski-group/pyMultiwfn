@@ -29,10 +29,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs
-          pip install mkdocs-material
-          # If you have additional plugins, install them here
-          # e.g. pip install mkdocstrings
+          pip install mkdocs-material mkdocstrings
 
       - name: Build site
         run: mkdocs build --site-dir site
