@@ -7,9 +7,13 @@ import tempfile
 import time
 from pathlib import Path
 
-from .config import MultiwfnConfig, MultiwfnError, TimeoutConfig
-from .menu import Menu
-from .result import MultiwfnResult
+from pymultiwfn.config import (
+    MultiwfnConfig,
+    MultiwfnError,
+    TimeoutConfig,
+)
+from pymultiwfn.menu import Menu
+from pymultiwfn.result import MultiwfnResult
 
 
 class MultiwfnJobBuilder:

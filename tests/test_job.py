@@ -177,7 +177,7 @@ class TestMultiwfnJobExecution:
         job = MultiwfnJob(mock_wfn_file, config=config)
         job.add_menu(Menu.HIRSHFELD_CHARGE)
 
-        with patch("pyMultiwfn.job.subprocess.Popen") as mock_popen:
+        with patch("pymultiwfn.job.subprocess.Popen") as mock_popen:
             mock_process = MagicMock()
             mock_process.communicate.return_value = (b"output", b"")
             mock_process.returncode = 0
@@ -197,7 +197,7 @@ class TestMultiwfnJobExecution:
         job = MultiwfnJob(mock_wfn_file, config=config)
         job.add_menu(Menu.HIRSHFELD_CHARGE)
 
-        with patch("pyMultiwfn.job.subprocess.Popen") as mock_popen:
+        with patch("pymultiwfn.job.subprocess.Popen") as mock_popen:
             mock_process = MagicMock()
             mock_process.communicate.return_value = (
                 b"output",
@@ -237,7 +237,7 @@ class TestMultiwfnJobExecution:
         job = MultiwfnJob(mock_wfn_file, config=config)
         job.add_menu(Menu.HIRSHFELD_CHARGE)
 
-        with patch("pyMultiwfn.job.subprocess.Popen") as mock_popen:
+        with patch("pymultiwfn.job.subprocess.Popen") as mock_popen:
             mock_process = MagicMock()
             mock_process.communicate.return_value = (b"output", b"")
             mock_process.returncode = 0

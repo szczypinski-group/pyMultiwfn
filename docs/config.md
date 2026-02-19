@@ -2,4 +2,4 @@
 
 This module handles the discovery of the Multiwfn executable and global settings.
 
-::: pyMultiwfn.config
+::: pymultiwfn.config
