@@ -32,7 +32,7 @@ jobs:
           pip install mkdocs-material mkdocstrings
 
       - name: Build site
-        run: zensical build --site-dir site
+        run: zensical build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
