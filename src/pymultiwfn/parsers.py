@@ -33,28 +33,47 @@ class ChargeParser(OutputParser):
             Dictionary mapping atom indices to charges
         """
         charges: dict[int, float] = {}
-        pattern = rf"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})"
 
+        # Pattern 1: "Hirshfeld charge of atom     1(C ) is  0.03208687"
+        pattern1 = rf"charge of atom\s+(\d+)\s*\
+                ([A-Za-z]+\s*\)\s+is\s+({FLOAT_PATTERN})"
+        # Pattern 2: "Atom    1(C ):     0.03209323" (Final atomic charges)
+        pattern2 = rf"Atom\s+(\d+)\s*\([A-Za-z]+\s*\)\s*:\s+({FLOAT_PATTERN})"
+        # Pattern 3: Original format "1(C )   -0.0523"
+        pattern3 = rf"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})"
         in_charge_section = False
+        in_final_section = False
+
         for line in stdout.split("\n"):
-            if (
-                method.lower() in line.lower()
-                or "atomic charges" in line.lower()
-            ):
+            # Check for section markers
+            if "final atomic charges" in line.lower():
+                in_final_section = True
+                in_charge_section = True
+                charges.clear()  # Prefer final charges, clear any previous
+                continue
+            elif method.lower() in line.lower() and "charge" in line.lower():
                 in_charge_section = True
                 continue
 
-            if in_charge_section:
-                if match := re.match(pattern, line):
+                # Try pattern 1 (during calculation)
+            if (
+                (match := re.search(pattern1, line, re.IGNORECASE))
+                or (match := re.search(pattern2, line, re.IGNORECASE))
+                or (match := re.match(pattern3, line))
+            ):
+                if in_charge_section or in_final_section:
                     atom_idx = int(match[1])
                     charge = float(match[2])
                     charges[atom_idx] = charge
-                elif (
-                    line.strip() == ""
-                    or "sum of atomic charges" in line.lower()
-                ):
-                    if charges:
-                        break
+            elif (
+                in_final_section
+                and (
+                    "calculation took" in line.lower()
+                    or "if outputting" in line.lower()
+                )
+                and charges
+            ):
+                break
 
         return charges
 
@@ -79,21 +98,39 @@ class BondOrderParser(OutputParser):
             Dictionary mapping atom pairs to bond orders
         """
         bond_orders: dict[tuple[int, int], float] = {}
-        patterns = [
-            rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})",
-            rf"^\s*(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*({FLOAT_PATTERN})",
-        ]
+
+        # Pattern 1: "#    1:         1(C )    2(N )    1.95394965"
+        pattern1 = (
+            rf"#\s*\d+:\s+(\d+)\([^)]+\)\s+(\d+)\([^)]+\)\s+({FLOAT_PATTERN})"
+        )
+
+        # Pattern 2: "1(C ) -    2(C ):  1.4523"
+        pattern2 = (
+            rf"(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*({FLOAT_PATTERN})"
+        )
+
+        # Pattern 3: Simple "1 - 2   1.4523"
+        pattern3 = rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})"
 
         for line in stdout.split("\n"):
-            for pattern in patterns:
-                if match := re.match(pattern, line):
-                    atom1 = int(match[1])
-                    atom2 = int(match[2])
-                    bo = float(match[3])
-                    if atom1 > atom2:
-                        atom1, atom2 = atom2, atom1
-                    bond_orders[(atom1, atom2)] = bo
-                    break
+            match = None
+
+            # Try pattern 1 (Multiwfn 3.8 format)
+            if (
+                (match := re.search(pattern1, line))
+                or (match := re.search(pattern2, line))
+                or (match := re.match(pattern3, line))
+            ):
+                pass
+
+            if match:
+                atom1 = int(match[1])
+                atom2 = int(match[2])
+                bo = float(match[3])
+                # Ensure consistent ordering (smaller index first)
+                if atom1 > atom2:
+                    atom1, atom2 = atom2, atom1
+                bond_orders[(atom1, atom2)] = bo
 
         return bond_orders
 
