@@ -3,7 +3,7 @@ A Python wrapper for automating [Multiwfn](http://sobereva.com/multiwfn/) batch 
 This project is currently in progress and is regularly maintained.
 Information in the README might be inaccurate.   
 
-Some of the menu functions may be out of date, as they are sourced from the manual(2018).   
+All functions from the newest update are implemented with descriptive comments(multiwfn 3.8, 07/01/2026).   
 pymultiwfn may not encompass all possible functionality of Multiwfn, but the package is being actively developped to best represent the software
 
 ## Development
