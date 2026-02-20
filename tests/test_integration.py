@@ -117,20 +117,30 @@ class TestRealMultiwfnExecution:
 
         charges = result.parse_charges("hirshfeld")
         if len(charges) == 0:
-            pytest.skip("Could not parse charges from output")
+            # Save output for debugging
+            debug_file = temp_dir / "hirshfeld_debug.log"
+            debug_file.write_text(result.stdout)
+            pytest.skip(
+                f"Could not parse charges from output. "
+                f"Output saved to: {debug_file}"
+            )
 
         # Charges should sum to approximately total charge
         total = sum(charges.values())
         assert abs(total) < 1.0  # Reasonable for most molecules
 
     def test_mayer_bond_order(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self, real_molden_file: Path, real_executable: Path, temp_dir: Path
     ) -> None:
-        """Run actual Mayer bond order analysis."""
+        """Run actual Mayer bond order analysis.
+        
+        Note: Uses .molden file because Mayer bond order requires basis 
+        function information which .wfx files don't contain.
+        """
         config = MultiwfnConfig(
             exe_path=real_executable, working_dir=temp_dir, timeout=120
         )
-        job = MultiwfnJob(real_wfx_file, config=config)
+        job = MultiwfnJob(real_molden_file, config=config)
         job.add_menu(Menu.MAYER_BOND_ORDER)
 
         try:
@@ -141,7 +151,13 @@ class TestRealMultiwfnExecution:
         assert result.success
         bonds = result.parse_bond_orders()
         if len(bonds) == 0:
-            pytest.skip("Could not parse bond orders from output")
+            # Save output for debugging
+            debug_file = temp_dir / "mayer_debug.log"
+            debug_file.write_text(result.stdout)
+            pytest.skip(
+                f"Could not parse bond orders from output. "
+                f"Output saved to: {debug_file}"
+            )
 
     # def test_topology_analysis(
     #     self, real_wfx_file: Path, real_executable: Path, temp_dir: Path

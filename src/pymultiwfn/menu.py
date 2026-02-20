@@ -55,41 +55,48 @@ class Menu(Enum):
     CUBE_DUAL_DESCRIPTOR = ("5", "0", "3", "2", "0")
 
     # Main Menu 6: Wavefunction
-    CHECK_WAVEFUNCTION = ("6",)
-    PRINT_ORBITAL_INFO = ("6", "1")
-    PRINT_BASIS_INFO = ("6", "2")
-    MODIFY_OCCUPATION = ("6", "3")
+    # Menu 6 shows wavefunction info immediately, then shows submenu
+    # "0" returns to main menu
+    CHECK_WAVEFUNCTION = ("6", "0")
+    PRINT_ORBITAL_INFO = ("6", "1", "0", "0")  # 1=show orbitals, first 0=back, second 0=main
+    PRINT_BASIS_INFO = ("6", "2", "0", "0")
+    MODIFY_OCCUPATION = ("6", "3", "0", "0")
 
     # Main Menu 7: Population analysis and atomic charges
-    HIRSHFELD_CHARGE = ("7", "1")
-    VDD_POPULATION = ("7", "2")
-    MULLIKEN_POPULATION = ("7", "5")
-    LOWDIN_POPULATION = ("7", "6")
-    BECKE_CHARGE = ("7", "10")
-    ADCH_CHARGE = ("7", "11", "1")
-    CHELPG_CHARGE = ("7", "12")
-    MK_CHARGE = ("7", "13")
-    AIM_CHARGE = ("7", "14")
-    HIRSHFELD_I_CHARGE = ("7", "15")
-    CM5_CHARGE = ("7", "16")
-    EEM_CHARGE = ("7", "17")
-    RESP_CHARGE = ("7", "18")
-    GASTEIGER_CHARGE = ("7", "19")
-    MBIS_CHARGE = ("7", "20")
+    # Note: Many charge methods require additional inputs:
+    # - "1" to select built-in atomic densities
+    # - "n" to skip outputting .chg file
+    # - "0" to return to main menu
+    HIRSHFELD_CHARGE = ("7", "1", "1", "n", "0")
+    VDD_POPULATION = ("7", "2", "1", "n", "0")
+    MULLIKEN_POPULATION = ("7", "5", "0")
+    LOWDIN_POPULATION = ("7", "6", "0")
+    BECKE_CHARGE = ("7", "10", "1", "n", "0")
+    ADCH_CHARGE = ("7", "11", "1", "n", "0")
+    CHELPG_CHARGE = ("7", "12", "n", "0")
+    MK_CHARGE = ("7", "13", "n", "0")
+    AIM_CHARGE = ("7", "14", "0")
+    HIRSHFELD_I_CHARGE = ("7", "15", "1", "n", "0")
+    CM5_CHARGE = ("7", "16", "1", "n", "0")
+    EEM_CHARGE = ("7", "17", "n", "0")
+    RESP_CHARGE = ("7", "18", "n", "0")
+    GASTEIGER_CHARGE = ("7", "19", "n", "0")
+    MBIS_CHARGE = ("7", "20", "1", "n", "0")
 
     # Main Menu 8: Orbital composition analysis
-    LOBA_OXIDATION_STATE = ("8", "100")
+    LOBA_OXIDATION_STATE = ("8", "100", "0")
 
     # Main Menu 9: Bond order analysis
-    MAYER_BOND_ORDER = ("9", "1")
-    MULTICENTER_BOND_ORDER = ("9", "2")
-    WIBERG_BOND_ORDER = ("9", "3")
-    MULLIKEN_BOND_ORDER = ("9", "4")
-    FUZZY_BOND_ORDER = ("9", "7")
-    LAPLACIAN_BOND_ORDER = ("9", "8")
-    WIBERG_DECOMPOSITION = ("9", "9")
-    IBSI_ANALYSIS = ("9", "10")
-    AV1245_INDEX = ("9", "11")
+    # Bond order analyses typically need "0" to return to main menu
+    MAYER_BOND_ORDER = ("9", "1", "0")
+    MULTICENTER_BOND_ORDER = ("9", "2", "0")
+    WIBERG_BOND_ORDER = ("9", "3", "0")
+    MULLIKEN_BOND_ORDER = ("9", "4", "0")
+    FUZZY_BOND_ORDER = ("9", "7", "0")
+    LAPLACIAN_BOND_ORDER = ("9", "8", "0")
+    WIBERG_DECOMPOSITION = ("9", "9", "0")
+    IBSI_ANALYSIS = ("9", "10", "0")
+    AV1245_INDEX = ("9", "11", "0")
 
     # Main Menu 10: DOS
     PLOT_DOS = ("10", "1")

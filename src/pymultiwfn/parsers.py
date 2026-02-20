@@ -35,44 +35,64 @@ class ChargeParser(OutputParser):
         charges: dict[int, float] = {}
 
         # Pattern 1: "Hirshfeld charge of atom     1(C ) is  0.03208687"
-        pattern1 = rf"charge of atom\s+(\d+)\s*\
-                ([A-Za-z]+\s*\)\s+is\s+({FLOAT_PATTERN})"
+        pattern1 = (
+            rf"{method}\s+charge of atom\s+(\d+)\s*\([A-Za-z]+\s*\)\s+is\s+"
+            rf"({FLOAT_PATTERN})"
+        )
         # Pattern 2: "Atom    1(C ):     0.03209323" (Final atomic charges)
-        pattern2 = rf"Atom\s+(\d+)\s*\([A-Za-z]+\s*\)\s*:\s+({FLOAT_PATTERN})"
-        # Pattern 3: Original format "1(C )   -0.0523"
+        pattern2 = rf"Atom\s+(\d+)\s*\([A-Za-z]+\s*\)\s*:\s*({FLOAT_PATTERN})"
+        # Pattern 3: "    1(C )   -0.0523" (summary table format)
         pattern3 = rf"^\s*(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})"
+        # Pattern 4: "   1  C      -0.052300" (column format)
+        pattern4 = rf"^\s*(\d+)\s+[A-Za-z]+\s+({FLOAT_PATTERN})"
+
         in_charge_section = False
         in_final_section = False
 
         for line in stdout.split("\n"):
+            line_lower = line.lower()
+
             # Check for section markers
-            if "final atomic charges" in line.lower():
+            if "final atomic charges" in line_lower:
                 in_final_section = True
                 in_charge_section = True
-                charges.clear()  # Prefer final charges, clear any previous
+                charges.clear()  # Prefer final charges
                 continue
-            elif method.lower() in line.lower() and "charge" in line.lower():
+            elif method.lower() in line_lower and "charge" in line_lower:
                 in_charge_section = True
                 continue
 
-                # Try pattern 1 (during calculation)
-            if (
-                (match := re.search(pattern1, line, re.IGNORECASE))
-                or (match := re.search(pattern2, line, re.IGNORECASE))
-                or (match := re.match(pattern3, line))
-            ):
+            # Try pattern 1 first (most specific - includes method name)
+            if match := re.search(pattern1, line, re.IGNORECASE):
+                atom_idx = int(match[1])
+                charge = float(match[2])
+                charges[atom_idx] = charge
+                continue
+
+            # Try pattern 2 (Final atomic charges format)
+            if match := re.search(pattern2, line):
                 if in_charge_section or in_final_section:
                     atom_idx = int(match[1])
                     charge = float(match[2])
                     charges[atom_idx] = charge
-            elif (
-                in_final_section
-                and (
-                    "calculation took" in line.lower()
-                    or "if outputting" in line.lower()
-                )
-                and charges
-            ):
+                continue
+
+            # Try pattern 3 (table format)
+            if in_charge_section and (match := re.match(pattern3, line)):
+                atom_idx = int(match[1])
+                charge = float(match[2])
+                charges[atom_idx] = charge
+                continue
+
+            # Try pattern 4 (column format)
+            if in_charge_section and (match := re.match(pattern4, line)):
+                atom_idx = int(match[1])
+                charge = float(match[2])
+                charges[atom_idx] = charge
+                continue
+
+            # End of section detection
+            if in_final_section and charges and "calculation took" in line_lower:
                 break
 
         return charges
@@ -101,28 +121,37 @@ class BondOrderParser(OutputParser):
 
         # Pattern 1: "#    1:         1(C )    2(N )    1.95394965"
         pattern1 = (
-            rf"#\s*\d+:\s+(\d+)\([^)]+\)\s+(\d+)\([^)]+\)\s+({FLOAT_PATTERN})"
+            rf"#\s*\d+:\s+(\d+)\s*\([^)]+\)\s+(\d+)\s*\([^)]+\)\s+"
+            rf"({FLOAT_PATTERN})"
         )
 
         # Pattern 2: "1(C ) -    2(C ):  1.4523"
         pattern2 = (
-            rf"(\d+)\([^)]+\)\s*-\s*(\d+)\([^)]+\)\s*:\s*({FLOAT_PATTERN})"
+            rf"(\d+)\s*\([^)]+\)\s*-\s*(\d+)\s*\([^)]+\)\s*:\s*"
+            rf"({FLOAT_PATTERN})"
         )
 
         # Pattern 3: Simple "1 - 2   1.4523"
         pattern3 = rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})"
 
+        # Pattern 4: "   1    2    1.4523" (column format)
+        pattern4 = rf"^\s*(\d+)\s+(\d+)\s+({FLOAT_PATTERN})\s*$"
+
+        in_bond_section = False
+
         for line in stdout.split("\n"):
+            line_lower = line.lower()
+
+            # Check for section markers
+            if "bond order" in line_lower or "bond-order" in line_lower:
+                in_bond_section = True
+                continue
+
             match = None
 
-            # Try pattern 1 (Multiwfn 3.8 format)
-            if (
-                (match := re.search(pattern1, line))
-                or (match := re.search(pattern2, line))
-                or (match := re.match(pattern3, line))
-            ):
+            # Try all patterns
+            if match := re.search(pattern1, line):
                 pass
-
             if match:
                 atom1 = int(match[1])
                 atom2 = int(match[2])

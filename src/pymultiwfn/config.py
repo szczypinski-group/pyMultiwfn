@@ -263,7 +263,7 @@ class MultiwfnConfig:
         exe_name = "Multiwfn.exe" if is_windows else "Multiwfn"
 
         # Check bin/ directory relative to this package
-        bin_exe = Path(__file__).resolve().parent / "bin" / exe_name
+        bin_exe = Path(__package__).resolve().parent / "bin" / exe_name
         if bin_exe.exists():
             return bin_exe
 

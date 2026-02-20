@@ -368,12 +368,15 @@ class MultiwfnJob:
         if not commands or commands[-1] != "q":
             commands.append("q")
 
+        commands.insert(0, "")  # Ensure we start with a newline for Multiwfn input
+
         with tempfile.NamedTemporaryFile(
             mode="w",
+            newline="\n",
+            encoding="utf-8",
             delete=False,
             suffix=".inp",
             dir=self._config.working_dir,
-            encoding="utf-8",
         ) as batch_file:
             batch_file.write("\n".join(commands) + "\n")
             batch_path = Path(batch_file.name)
@@ -384,7 +387,7 @@ class MultiwfnJob:
         try:
             os.chdir(self._config.working_dir)
 
-            with batch_path.open(encoding="utf-8") as batch:
+            with batch_path.open(newline="\n") as batch:
                 proc = subprocess.Popen(
                     [str(exe), str(self._input_file)],
                     stdin=batch,
