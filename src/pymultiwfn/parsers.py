@@ -92,7 +92,11 @@ class ChargeParser(OutputParser):
                 continue
 
             # End of section detection
-            if in_final_section and charges and "calculation took" in line_lower:
+            if (
+                in_final_section
+                and charges
+                and "calculation took" in line_lower
+            ):
                 break
 
         return charges

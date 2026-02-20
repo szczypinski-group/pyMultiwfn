@@ -368,7 +368,9 @@ class MultiwfnJob:
         if not commands or commands[-1] != "q":
             commands.append("q")
 
-        commands.insert(0, "")  # Ensure we start with a newline for Multiwfn input
+        commands.insert(
+            0, ""
+        )  # Ensure we start with a newline for Multiwfn input
 
         with tempfile.NamedTemporaryFile(
             mode="w",
