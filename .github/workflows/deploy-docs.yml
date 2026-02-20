@@ -29,10 +29,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mkdocs-material mkdocstrings[python] zensical
+          pip install mkdocs
+          pip install mkdocs-material
+          pip install mkdocstrings[python]
+          # If you have additional plugins, install them here
+          # e.g. pip install mkdocstrings
 
       - name: Build site
-        run: zensical build
+        run: mkdocs build --site-dir site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

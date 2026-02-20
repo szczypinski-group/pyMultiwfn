@@ -61,7 +61,7 @@ class Menu(Enum):
     MODIFY_OCCUPATION = ("6", "3")
 
     # Main Menu 7: Population analysis and atomic charges
-    HIRSHFELD_CHARGE = ("7", "1", "1")
+    HIRSHFELD_CHARGE = ("7", "1")
     VDD_POPULATION = ("7", "2")
     MULLIKEN_POPULATION = ("7", "5")
     LOWDIN_POPULATION = ("7", "6")

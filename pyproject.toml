@@ -12,10 +12,11 @@ authors = [
     { name = "Filip T. Szczypiński", email = "filip.t.szczypinski@durham.ac.uk" },
 ]
 
-readme = "README.md"
-license = "MPL-2.0"
+readme       = "README.md"
+license      = "MPL-2.0"
 dependencies = [
     "matplotlib>=3.10.8",
+    "pytest>=9.0.2",
 ]
 
 [dependency-groups]
@@ -23,13 +24,9 @@ dev = [
     "pre-commit>=4.3.0",
     "interrogate>=1.7.0",
     "nox>=2025.10.16",
+    "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.2",
-    "mkdocs-material>=9.7.2",
-    "zensical>=0.0.23",
-    "mkdocstrings[python]>=1.0.3",
-    "pytest>=9.0.2",
-    "ipython>=9.10.0",
 ]
 
 [tool.interrogate]
