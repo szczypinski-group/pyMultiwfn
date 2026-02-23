@@ -308,7 +308,94 @@ class TestAnalysisCategoryRunners:
             results = mol.run_cubes()
             assert len(results) == len(MultiwfnAnalysis.CUBES)
 
+    def test_run_dos(
+        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+    ) -> None:
+        """Positive: run_dos returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_dos()
+            assert len(results) == len(MultiwfnAnalysis.DOS)
+    
+    def test_run_basin(
+        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+    ) -> None:
+        """Positive: run_basin returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_basin()
+            assert len(results) == len(MultiwfnAnalysis.BASIN)
 
+    def test_run_excitation(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_excitation returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_excitation()
+            assert len(results) == len(MultiwfnAnalysis.EXCITATION)
+    
+    def test_run_orbital_composition(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_orbital_composition returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_orbital_composition()
+            assert len(results) == len(MultiwfnAnalysis.ORBITAL_COMPOSITION)
+    
+    def test_run_orbital_localization(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_orbital_localization returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_orbital_localization()
+            assert len(results) == len(MultiwfnAnalysis.ORBITAL_LOCALIZATION)
+    
+    def test_run_fuzzy_space(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_fuzzy_space returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_fuzzy_space()
+            assert len(results) == len(MultiwfnAnalysis.FUZZY_SPACE)
+    
+    def test_run_eda(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_eda returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_eda()
+            assert len(results) == len(MultiwfnAnalysis.EDA)
+    
+    def test_run_polarizability(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_polarizability returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_polarizability()
+            assert len(results) == len(MultiwfnAnalysis.POLARIZABILITY)
+    
+    def test_run_wavefunction(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_wavefunction_analysis returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_wavefunction()
+            assert len(results) == len(MultiwfnAnalysis.WAVEFUNCTION)
+
+    def test_run_line_plots(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_line_plots returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_line_plots()
+            assert len(results) == len(MultiwfnAnalysis.LINE_PLOTS)
+    
+    def test_run_plane_maps(
+            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+            ) -> None:
+        """Positive: run_plane_maps returns dict."""
+        with patch.object(mol, "run", return_value=mock_result):
+            results = mol.run_plane_maps()
+            assert len(results) == len(MultiwfnAnalysis.PLANE_MAPS)
+    
 class TestAnalysisRunCategory:
     """Tests for MultiwfnAnalysis.run_category method."""
 
