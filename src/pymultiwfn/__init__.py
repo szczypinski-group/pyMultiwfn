@@ -26,7 +26,7 @@ from pymultiwfn.result import MultiwfnResult
 # Alias for convenience
 Analysis = MultiwfnAnalysis
 
-
+#TODO(fs): maybe improve the entry point(multiwfnjob instead of multiwfnanalysis?)
 def load(
     filepath: str,
     config: MultiwfnConfig | None = None,

@@ -32,9 +32,40 @@ class Menu(Enum):
     >>> job.add_menu(Menu.MAYER_BOND_ORDER)
     """
 
+    
+    @classmethod
+    def search(cls, query: str) -> list["Menu"]:
+        """Search menu items by name (case-insensitive).
+
+        Parameters
+        ----------
+        query : str
+            Search string to match against member names
+
+        Returns
+        -------
+        list[Menu]
+            Matching menu items
+        """
+        query_upper = query.upper()
+        return [item for item in cls if query_upper in item.name]
+
+    @classmethod
+    def list_all(cls) -> list[str]:
+        """Return names of all menu items.
+
+        Returns
+        -------
+        list[str]
+            All member names
+        """
+        return [item.name for item in cls]
+
     def get_sequence(self):
         return self.value
 
+    #TODO(fs): make sure all the menu sequences work as expected, I will expand on testing each sequence
+    # to make sure they work as expected.
     # ──────────────────────────────────────────────────────────────────────────
     # Main Menu 0: Show molecular structure / view orbitals
     # ──────────────────────────────────────────────────────────────────────────
@@ -307,9 +338,6 @@ class Menu(Enum):
     # Manually set the occupation number of selected orbitals; set to 0 to
     # remove their contribution from subsequent real-space function evaluations
     MODIFY_OCCUPATION = ("6", "26", "0")
-    # Write the current (possibly edited) wavefunction to new.wfn in the working
-    # directory
-    SAVE_WAVEFUNCTION_WFN = ("6", "0")
     # Remove all core (inner-shell) orbitals from the wavefunction, retaining
     # only valence-shell orbitals for subsequent analyses
     DELETE_INNER_ORBITALS = ("6", "34", "0")

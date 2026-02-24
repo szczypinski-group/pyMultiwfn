@@ -12,7 +12,9 @@ class OutputParser:
 
     pass
 
-
+#TODO(fs): maybe worth looking into making this code less long? I think i went
+# a bit overkill with all the different parsign methods and regex. Maybe some 
+# of the methods can be combined?
 # =============================================================================
 # Menu 7: Population analysis & atomic charges
 # =============================================================================
@@ -79,14 +81,14 @@ class ChargeParser(OutputParser):
             line_lower = line.lower()
 
             # Check for section markers
+            #TODO(fs): lots of if statements here, worth refactoring i think?
             if "final atomic charges" in line_lower:
                 in_final_section = True
                 in_charge_section = True
                 charges.clear()  # Prefer final charges
                 continue
-            elif (
-                method.lower() in line_lower
-                and ("charge" in line_lower or "population" in line_lower)
+            elif method.lower() in line_lower and (
+                "charge" in line_lower or "population" in line_lower
             ):
                 in_charge_section = True
                 continue
@@ -197,9 +199,7 @@ class OrbitalCompositionParser(OutputParser):
         contrib_pattern = (
             rf"([A-Za-z]+)\s+(\d+)\s+.*?:\s+({FLOAT_PATTERN})\s*%"
         )
-        contrib_pattern2 = (
-            rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
-        )
+        contrib_pattern2 = rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
 
         current_orb: dict[str, Any] | None = None
         for line in stdout.split("\n"):
@@ -258,9 +258,7 @@ class BondOrderParser(OutputParser):
     """
 
     @staticmethod
-    def parse(
-        stdout: str, **kwargs: Any
-    ) -> dict[tuple[int, int], float]:
+    def parse(stdout: str, **kwargs: Any) -> dict[tuple[int, int], float]:
         """Extract bond orders from Multiwfn output.
 
         Parameters
@@ -296,13 +294,12 @@ class BondOrderParser(OutputParser):
         for line in stdout.split("\n"):
             match = None
 
-            if match := re.search(pattern1, line):
-                pass
-            elif match := re.search(pattern2, line):
-                pass
-            elif match := re.match(pattern3, line):
-                pass
-            elif match := re.match(pattern4, line):
+            if (
+                (match := re.search(pattern1, line))
+                or (match := re.search(pattern2, line))
+                or (match := re.match(pattern3, line))
+                or (match := re.match(pattern4, line))
+            ):
                 pass
 
             if match:
@@ -578,9 +575,7 @@ class DOSParser(OutputParser):
         list[dict[str, Any]]
             List of dicts with 'index', 'energy_eV', 'occupation'
         """
-        pattern = (
-            rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
-        )
+        pattern = rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
         orbitals: list[dict[str, Any]] = [
             {
                 "index": int(match[1]),
@@ -634,9 +629,7 @@ class SpectrumParser(OutputParser):
             rf"({FLOAT_PATTERN})\s+nm.*?(?:f=|Str[.=])\s*({FLOAT_PATTERN})"
         )
         # NMR: "  Atom  1(C )  shift:  123.45 ppm"
-        pattern_nmr = (
-            rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
-        )
+        pattern_nmr = rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
         # Generic two-column
         pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
 
@@ -729,16 +722,15 @@ class SpectrumParser(OutputParser):
             ("X", rf"X=\s*({FLOAT_PATTERN})"),
             ("Y", rf"Y=\s*({FLOAT_PATTERN})"),
             ("Z", rf"Z=\s*({FLOAT_PATTERN})"),
-            ("R", rf"R=\s*(\d+)"),
-            ("G", rf"G=\s*(\d+)"),
-            ("B", rf"B=\s*(\d+)"),
+            ("R", r"R=\s*(\d+)"),
+            ("G", r"G=\s*(\d+)"),
+            ("B", r"B=\s*(\d+)"),
         ]:
             if m := re.search(pat, stdout):
                 result[pat_name] = (
-                    int(m[1]) if pat_name in ("R", "G", "B")
-                    else float(m[1])
+                    int(m[1]) if pat_name in ("R", "G", "B") else float(m[1])
                 )
-        return result if result else None
+        return result or None
 
 
 # =============================================================================
@@ -805,16 +797,18 @@ class SurfaceParser(OutputParser):
         )
         for match in re.finditer(pattern, stdout, re.IGNORECASE):
             ext_type = "min" if "min" in match[1].lower() else "max"
-            extrema.append({
-                "type": ext_type,
-                "index": int(match[2]),
-                "value": float(match[3]),
-                "position": (
-                    float(match[4]),
-                    float(match[5]),
-                    float(match[6]),
-                ),
-            })
+            extrema.append(
+                {
+                    "type": ext_type,
+                    "index": int(match[2]),
+                    "value": float(match[3]),
+                    "position": (
+                        float(match[4]),
+                        float(match[5]),
+                        float(match[6]),
+                    ),
+                }
+            )
         return extrema
 
 
@@ -863,16 +857,16 @@ class FuzzySpaceParser(OutputParser):
         )
         for match in re.finditer(dip_pattern, stdout, re.IGNORECASE):
             idx = int(match[1])
-            atoms.setdefault(idx, {}).update({
-                "dipole_x": float(match[2]),
-                "dipole_y": float(match[3]),
-                "dipole_z": float(match[4]),
-            })
+            atoms.setdefault(idx, {}).update(
+                {
+                    "dipole_x": float(match[2]),
+                    "dipole_y": float(match[3]),
+                    "dipole_z": float(match[4]),
+                }
+            )
 
         # Atomic volume: "Atom  1  volume:  23.456"
-        vol_pattern = (
-            rf"Atom\s+(\d+).*?volume[=:\s]+({FLOAT_PATTERN})"
-        )
+        vol_pattern = rf"Atom\s+(\d+).*?volume[=:\s]+({FLOAT_PATTERN})"
         for match in re.finditer(vol_pattern, stdout, re.IGNORECASE):
             idx = int(match[1])
             atoms.setdefault(idx, {})["volume"] = float(match[2])
@@ -989,11 +983,13 @@ class BasinParser(OutputParser):
                     in_basin = True
                     continue
                 if in_basin and (m := re.match(simple, line)):
-                    basins.append({
-                        "basin": int(m[1]),
-                        "attractor_element": m[2],
-                        "population": float(m[3]),
-                    })
+                    basins.append(
+                        {
+                            "basin": int(m[1]),
+                            "attractor_element": m[2],
+                            "population": float(m[3]),
+                        }
+                    )
 
         return basins
 
@@ -1084,7 +1080,9 @@ class ExcitationParser(OutputParser):
         result: dict[str, Any] = {}
 
         ct_dist = rf"CT\s+distance[=:\s]+({FLOAT_PATTERN})"
-        ct_amt = rf"(?:transferred|CT)\s+(?:charge|amount)[=:\s]+({FLOAT_PATTERN})"
+        ct_amt = (
+            rf"(?:transferred|CT)\s+(?:charge|amount)[=:\s]+({FLOAT_PATTERN})"
+        )
 
         if match := re.search(ct_dist, stdout, re.IGNORECASE):
             result["CT_distance"] = float(match[1])
@@ -1182,12 +1180,8 @@ class WeakInteractionParser(OutputParser):
         result: dict[str, Any] = {}
 
         patterns: dict[str, str] = {
-            "delta_g_inter": (
-                rf"delta_?g_?inter.*?[=:\s]+({FLOAT_PATTERN})"
-            ),
-            "delta_g_intra": (
-                rf"delta_?g_?intra.*?[=:\s]+({FLOAT_PATTERN})"
-            ),
+            "delta_g_inter": (rf"delta_?g_?inter.*?[=:\s]+({FLOAT_PATTERN})"),
+            "delta_g_intra": (rf"delta_?g_?intra.*?[=:\s]+({FLOAT_PATTERN})"),
             "isosurface_integral": (
                 rf"(?:Integral|integral).*?isosurface.*?[=:\s]+({FLOAT_PATTERN})"
             ),
@@ -1201,7 +1195,9 @@ class WeakInteractionParser(OutputParser):
         cubes: list[str] = []
         cubes.extend(
             match[1]
-            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+            for match in re.finditer(
+                r"(\S+\.cube)\s+has been generated", stdout
+            )
         )
         if cubes:
             result["cube_files"] = cubes
@@ -1234,9 +1230,7 @@ class EDAParser(OutputParser):
         result: dict[str, float] = {}
 
         patterns: dict[str, str] = {
-            "electrostatic": (
-                rf"[Ee]lectrostatic.*?[=:\s]+({FLOAT_PATTERN})"
-            ),
+            "electrostatic": (rf"[Ee]lectrostatic.*?[=:\s]+({FLOAT_PATTERN})"),
             "exchange": rf"[Ee]xchange.*?[=:\s]+({FLOAT_PATTERN})",
             "repulsion": (
                 rf"(?:[Rr]epulsion|Pauli).*?[=:\s]+({FLOAT_PATTERN})"
@@ -1580,13 +1574,15 @@ class CubeParser(OutputParser):
         cubes: list[str] = []
         cubes.extend(
             match[1]
-            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+            for match in re.finditer(
+                r"(\S+\.cube)\s+has been generated", stdout
+            )
         )
         if cubes:
             result["cube_files"] = cubes
 
         # Grid dimensions
-        grid_pat = rf"Grid dimensions:\s*(\d+)\s*x\s*(\d+)\s*x\s*(\d+)"
+        grid_pat = r"Grid dimensions:\s*(\d+)\s*x\s*(\d+)\s*x\s*(\d+)"
         if match := re.search(grid_pat, stdout):
             result["grid_points"] = (
                 int(match[1]),
@@ -1613,8 +1609,6 @@ class CubeParser(OutputParser):
 # =============================================================================
 # Menu 100/200/300: Utilities
 # =============================================================================
-
-
 class UtilityParser(OutputParser):
     """Parser for utility function outputs.
 
@@ -1644,11 +1638,13 @@ class UtilityParser(OutputParser):
             rf"({FLOAT_PATTERN})"
         )
         for match in re.finditer(bl_pattern, stdout, re.IGNORECASE):
-            result["bond_lengths"].append({
-                "atom1": int(match[1]),
-                "atom2": int(match[2]),
-                "length": float(match[3]),
-            })
+            result["bond_lengths"].append(
+                {
+                    "atom1": int(match[1]),
+                    "atom2": int(match[2]),
+                    "length": float(match[3]),
+                }
+            )
 
         # "Angle  1-2-3 :  120.345 degree"
         ang_pattern = (
@@ -1656,10 +1652,12 @@ class UtilityParser(OutputParser):
             rf"({FLOAT_PATTERN})"
         )
         for match in re.finditer(ang_pattern, stdout):
-            result["angles"].append({
-                "atoms": (int(match[1]), int(match[2]), int(match[3])),
-                "angle": float(match[4]),
-            })
+            result["angles"].append(
+                {
+                    "atoms": (int(match[1]), int(match[2]), int(match[3])),
+                    "angle": float(match[4]),
+                }
+            )
 
         # "Dihedral  1-2-3-4 :  -45.678 degree"
         dih_pattern = (
@@ -1667,15 +1665,17 @@ class UtilityParser(OutputParser):
             rf"\s*:\s+({FLOAT_PATTERN})"
         )
         for match in re.finditer(dih_pattern, stdout):
-            result["dihedrals"].append({
-                "atoms": (
-                    int(match[1]),
-                    int(match[2]),
-                    int(match[3]),
-                    int(match[4]),
-                ),
-                "dihedral": float(match[5]),
-            })
+            result["dihedrals"].append(
+                {
+                    "atoms": (
+                        int(match[1]),
+                        int(match[2]),
+                        int(match[3]),
+                        int(match[4]),
+                    ),
+                    "dihedral": float(match[5]),
+                }
+            )
 
         return result
 
@@ -1724,9 +1724,7 @@ class UtilityParser(OutputParser):
         dict[int, float]
             Atom index to coordination number
         """
-        pattern = (
-            rf"Atom\s+(\d+).*?coordination.*?[=:\s]+({FLOAT_PATTERN})"
-        )
+        pattern = rf"Atom\s+(\d+).*?coordination.*?[=:\s]+({FLOAT_PATTERN})"
         coords: dict[int, float] = {
             int(match[1]): float(match[2])
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
