@@ -29,10 +29,11 @@ dev = [
 ]
 
 [tool.interrogate]
-verbose                    = 2
+verbose                    = 1
 ignore-setters             = true
 ignore-property-decorators = true
 ignore-magic               = true
+exlude                     = ["tests/", "menu.py"]
 
 [tool.ruff]
 line-length = 79

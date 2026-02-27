@@ -12,6 +12,7 @@ __version__ = "0.1.1"
 
 from pymultiwfn.analysis import MultiwfnAnalysis
 from pymultiwfn.config import MultiwfnConfig, MultiwfnError
+from pymultiwfn.files.wfn_file import WfnFile
 from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
 from pymultiwfn.menu import Menu
 from pymultiwfn.parsers import (
@@ -26,7 +27,9 @@ from pymultiwfn.result import MultiwfnResult
 # Alias for convenience
 Analysis = MultiwfnAnalysis
 
-#TODO(fs): maybe improve the entry point(multiwfnjob instead of multiwfnanalysis?)
+
+# TODO(fs): maybe improve the entry point  # noqa: TD003
+# (multiwfnjob instead of multiwfnanalysis?)
 def load(
     filepath: str,
     config: MultiwfnConfig | None = None,
@@ -76,4 +79,5 @@ __all__ = [
     "BondOrderParser",
     "CriticalPointParser",
     "SpectrumParser",
+    "WfnFile",
 ]
