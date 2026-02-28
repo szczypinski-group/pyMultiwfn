@@ -33,7 +33,7 @@ verbose                    = 1
 ignore-setters             = true
 ignore-property-decorators = true
 ignore-magic               = true
-exlude                     = ["tests/", "menu.py"]
+exclude                     = ["tests/**", "menu.py"]
 
 [tool.ruff]
 line-length = 79
@@ -52,6 +52,8 @@ lint.select = [
     "D",   # pydocstyle
 ]
 lint.ignore = [
+    "D102",  # Missing docstring in public method (interrogate)
+    "D103",  # Missing docstring in public function (interrogate)
     "D105",
 ]
 

@@ -32,7 +32,6 @@ from pymultiwfn.parsers import (
     WeakInteractionParser,
 )
 
-
 # =============================================================================
 # Fixtures — shared across multiple test classes
 # =============================================================================
@@ -156,10 +155,7 @@ class TestChargeParser:
 
     def test_parse_case_insensitive(self) -> None:
         """Section detection is case-insensitive on method name."""
-        output = (
-            "Final atomic charges:\n"
-            "Atom    1(C ):    -0.05230000\n"
-        )
+        output = "Final atomic charges:\nAtom    1(C ):    -0.05230000\n"
         c1 = ChargeParser.parse(output, method="hirshfeld")
         c2 = ChargeParser.parse(output, method="HIRSHFELD")
         assert c1 == c2
@@ -190,9 +186,7 @@ class TestChargeParser:
     def test_parse_table_format(self) -> None:
         """Pattern 3: '  1(C )  -0.0523' summary table."""
         output = (
-            "Summary of RESP charge\n"
-            "  1(C )  -0.05230\n"
-            "  2(N )   0.12340\n"
+            "Summary of RESP charge\n  1(C )  -0.05230\n  2(N )   0.12340\n"
         )
         charges = ChargeParser.parse(output, method="RESP")
         assert charges[1] == pytest.approx(-0.0523)
@@ -200,11 +194,7 @@ class TestChargeParser:
 
     def test_parse_column_format(self) -> None:
         """Pattern 4: '  1  C  -0.052300' column format."""
-        output = (
-            "EEM charge\n"
-            "  1  C  -0.052300\n"
-            "  2  N   0.123400\n"
-        )
+        output = "EEM charge\n  1  C  -0.052300\n  2  N   0.123400\n"
         charges = ChargeParser.parse(output, method="EEM")
         assert charges[1] == pytest.approx(-0.0523)
         assert charges[2] == pytest.approx(0.1234)
@@ -261,7 +251,12 @@ class TestChargeParser:
         assert ChargeParser.parse("", method="Hirshfeld") == {}
 
     def test_parse_no_charges_section(self) -> None:
-        assert ChargeParser.parse("Random text\nNothing here\n", method="Hirshfeld") == {}
+        assert (
+            ChargeParser.parse(
+                "Random text\nNothing here\n", method="Hirshfeld"
+            )
+            == {}
+        )
 
     def test_parse_dipole_missing(self) -> None:
         assert ChargeParser.parse_dipole("No dipole here") is None
@@ -302,30 +297,27 @@ class TestChargeParser:
         assert charges[2] == pytest.approx(1.0)
 
     def test_zero_charge(self) -> None:
-        output = (
-            "Final atomic charges:\n"
-            "Atom    1(C ):     0.00000000\n"
-        )
-        assert ChargeParser.parse(output, method="Hirshfeld")[1] == pytest.approx(0.0)
+        output = "Final atomic charges:\nAtom    1(C ):     0.00000000\n"
+        assert ChargeParser.parse(output, method="Hirshfeld")[
+            1
+        ] == pytest.approx(0.0)
 
     def test_single_atom(self) -> None:
-        output = (
-            "Final atomic charges:\n"
-            "Atom    1(He):     0.00000000\n"
-        )
+        output = "Final atomic charges:\nAtom    1(He):     0.00000000\n"
         assert len(ChargeParser.parse(output, method="Hirshfeld")) == 1
 
     def test_large_atom_index(self) -> None:
         output = "Final atomic charges:\nAtom  999(Zn):     0.98760000\n"
-        assert ChargeParser.parse(output, method="Hirshfeld")[999] == pytest.approx(0.9876)
+        assert ChargeParser.parse(output, method="Hirshfeld")[
+            999
+        ] == pytest.approx(0.9876)
 
     def test_method_with_special_regex_chars(self) -> None:
         """re.escape handles 'Hirshfeld-I' in Summary section header."""
-        output = (
-            "Summary of Hirshfeld-I charge\n"
-            "  1(C )   0.05000000\n"
-        )
-        assert ChargeParser.parse(output, method="Hirshfeld-I")[1] == pytest.approx(0.05)
+        output = "Summary of Hirshfeld-I charge\n  1(C )   0.05000000\n"
+        assert ChargeParser.parse(output, method="Hirshfeld-I")[
+            1
+        ] == pytest.approx(0.05)
 
     def test_dipole_all_negative_components(self) -> None:
         output = (
@@ -425,7 +417,9 @@ class TestOrbitalCompositionParser:
 
     def test_fractional_occupation(self) -> None:
         output = "Orbital    5  Occ= 1.500000  E= -0.50000 a.u.\n"
-        assert OrbitalCompositionParser.parse(output)[0]["occupation"] == pytest.approx(1.5)
+        assert OrbitalCompositionParser.parse(output)[0][
+            "occupation"
+        ] == pytest.approx(1.5)
 
     def test_oxidation_state_rounding(self) -> None:
         """2.9 rounds to 3."""
@@ -521,7 +515,10 @@ class TestBondOrderParser:
         )
         decomp = BondOrderParser.parse_decomposition(output)
         assert len(decomp) == 3
-        assert decomp[0] == {"orbital": 5, "contribution": pytest.approx(0.23456)}
+        assert decomp[0] == {
+            "orbital": 5,
+            "contribution": pytest.approx(0.23456),
+        }
         assert decomp[2]["contribution"] == pytest.approx(-0.01234)
 
     # ---- Negative ----
@@ -583,19 +580,33 @@ class TestCriticalPointParser:
         assert nuc["position"] == (0.0, 0.0, 0.0)
 
     def test_bond_cp(self, sample_topology_output: str) -> None:
-        bond = [c for c in CriticalPointParser.parse(sample_topology_output) if c["type"] == "(3,-1)"][0]
+        bond = [
+            c
+            for c in CriticalPointParser.parse(sample_topology_output)
+            if c["type"] == "(3,-1)"
+        ][0]
         assert bond["cp_type"] == "bond"
         assert bond["position"][0] == pytest.approx(1.234567)
 
     def test_ring_cp(self, sample_topology_output: str) -> None:
-        ring = [c for c in CriticalPointParser.parse(sample_topology_output) if c["type"] == "(3,+1)"][0]
+        ring = [
+            c
+            for c in CriticalPointParser.parse(sample_topology_output)
+            if c["type"] == "(3,+1)"
+        ][0]
         assert ring["cp_type"] == "ring"
 
     def test_cage_cp(self, sample_topology_output: str) -> None:
-        cage = [c for c in CriticalPointParser.parse(sample_topology_output) if c["type"] == "(3,+3)"][0]
+        cage = [
+            c
+            for c in CriticalPointParser.parse(sample_topology_output)
+            if c["type"] == "(3,+3)"
+        ][0]
         assert cage["cp_type"] == "cage"
 
-    def test_rho_laplacian_ellipticity(self, sample_topology_output: str) -> None:
+    def test_rho_laplacian_ellipticity(
+        self, sample_topology_output: str
+    ) -> None:
         cps = CriticalPointParser.parse(sample_topology_output)
         assert cps[0]["rho"] == pytest.approx(0.298765)
         assert cps[0]["laplacian"] == pytest.approx(-1.123456)
@@ -603,12 +614,19 @@ class TestCriticalPointParser:
 
     def test_parse_bond_paths(self) -> None:
         output = (
-            "Bond path between atom  1(C ) and atom  2(N ), BCP  3, length  2.456\n"
-            "Bond path between atom  2(N ) and atom  5(O ), BCP  7, length  3.123\n"
+            "Bond path between atom  1(C ) and atom  2(N ), BCP  3, "
+            "length  2.456\n"
+            "Bond path between atom  2(N ) and atom  5(O ), BCP  7, "
+            "length  3.123\n"
         )
         paths = CriticalPointParser.parse_bond_paths(output)
         assert len(paths) == 2
-        assert paths[0] == {"atom1": 1, "atom2": 2, "bcp_index": 3, "path_length": pytest.approx(2.456)}
+        assert paths[0] == {
+            "atom1": 1,
+            "atom2": 2,
+            "bcp_index": 3,
+            "path_length": pytest.approx(2.456),
+        }
         assert paths[1]["path_length"] == pytest.approx(3.123)
 
     def test_summary(self, sample_topology_output: str) -> None:
@@ -637,7 +655,11 @@ class TestCriticalPointParser:
 
     def test_ring_cp_no_ellipticity(self, sample_topology_output: str) -> None:
         """Ring CP has no ellipticity line → None."""
-        ring = [c for c in CriticalPointParser.parse(sample_topology_output) if c["type"] == "(3,+1)"][0]
+        ring = [
+            c
+            for c in CriticalPointParser.parse(sample_topology_output)
+            if c["type"] == "(3,+1)"
+        ][0]
         assert ring["ellipticity"] is None
 
     def test_single_cp(self) -> None:
@@ -652,7 +674,9 @@ class TestCriticalPointParser:
         assert cps[0]["laplacian"] is None
 
     def test_unknown_cp_type(self) -> None:
-        cps = CriticalPointParser.parse("CP  1 (2,-1)\nPosition (Bohr):   0.0   0.0   0.0\n")
+        cps = CriticalPointParser.parse(
+            "CP  1 (2,-1)\nPosition (Bohr):   0.0   0.0   0.0\n"
+        )
         assert cps[0]["cp_type"] == "unknown"
 
     def test_summary_all_same_type(self) -> None:
@@ -661,7 +685,11 @@ class TestCriticalPointParser:
 
     def test_positive_laplacian(self, sample_topology_output: str) -> None:
         """Ring and cage CPs have positive Laplacian."""
-        ring = [c for c in CriticalPointParser.parse(sample_topology_output) if c["type"] == "(3,+1)"][0]
+        ring = [
+            c
+            for c in CriticalPointParser.parse(sample_topology_output)
+            if c["type"] == "(3,+1)"
+        ][0]
         assert ring["laplacian"] > 0
 
 
@@ -708,7 +736,11 @@ class TestDOSParser:
         )
         orbs = DOSParser.parse_orbital_energies(output)
         assert len(orbs) == 3
-        assert orbs[0] == {"index": 5, "energy_eV": pytest.approx(-19.234), "occupation": pytest.approx(2.0)}
+        assert orbs[0] == {
+            "index": 5,
+            "energy_eV": pytest.approx(-19.234),
+            "occupation": pytest.approx(2.0),
+        }
 
     # ---- Negative ----
 
@@ -796,7 +828,8 @@ class TestSpectrumParser:
         assert t[0]["osc_strength"] == pytest.approx(0.0123)
 
     def test_parse_color_full(self) -> None:
-        output = "CIE: X=  0.3456  Y=  0.3210  Z=  0.2890  RGB: R= 180  G= 120  B=  90\n"
+        output = "CIE: X=  0.3456  Y=  0.3210  Z=  0.2890  RGB: R= 180  "
+        "G= 120  B=  90\n"
         c = SpectrumParser.parse_color(output)
         assert c is not None
         assert c["X"] == pytest.approx(0.3456)
@@ -806,7 +839,10 @@ class TestSpectrumParser:
     # ---- Negative ----
 
     def test_parse_empty(self) -> None:
-        assert SpectrumParser.parse("") == {"frequencies": [], "intensities": []}
+        assert SpectrumParser.parse("") == {
+            "frequencies": [],
+            "intensities": [],
+        }
 
     def test_transitions_empty(self) -> None:
         assert SpectrumParser.parse_transitions("") == []
@@ -896,7 +932,9 @@ class TestSurfaceParser:
         maxs = [e for e in ext if e["type"] == "max"]
         assert len(mins) == 1 and len(maxs) == 1
         assert mins[0]["value"] == pytest.approx(-45.678)
-        assert mins[0]["position"] == pytest.approx((1.234, 2.345, 3.456), abs=1e-3)
+        assert mins[0]["position"] == pytest.approx(
+            (1.234, 2.345, 3.456), abs=1e-3
+        )
 
     # ---- Negative ----
 
@@ -919,7 +957,9 @@ class TestSurfaceParser:
     def test_extrema_negative_position(self) -> None:
         output = "Local minimum  1:   -10.000  at  -1.000  -2.000  -3.000\n"
         ext = SurfaceParser.parse_extrema(output)
-        assert ext[0]["position"] == pytest.approx((-1.0, -2.0, -3.0), abs=1e-3)
+        assert ext[0]["position"] == pytest.approx(
+            (-1.0, -2.0, -3.0), abs=1e-3
+        )
 
     def test_extrema_single(self) -> None:
         output = "Local maximum  1:    10.000  at   0.0   0.0   0.0\n"
@@ -989,16 +1029,21 @@ class TestFuzzySpaceParser:
 
     def test_di_pair_reordering(self) -> None:
         """DI pair (3,1) stored as (1,3)."""
-        output = "Delocalization index of atom  3(O ) and atom  1(C ):  0.50000\n"
+        output = (
+            "Delocalization index of atom  3(O ) and atom  1(C ):  0.50000\n"
+        )
         r = FuzzySpaceParser.parse_delocalization_indices(output)
         assert (1, 3) in r["delocalization"]
         assert (3, 1) not in r["delocalization"]
-        # Note: li_pattern also matches 'Delocalization' lines (substring match),
+        # Note: li_pattern also matches 'Delocalization'
+        # lines (substring match),
         # so localization dict may contain entries from DI lines
         assert r["delocalization"][(1, 3)] == pytest.approx(0.5)
 
     def test_population_only_no_dipole(self) -> None:
-        a = FuzzySpaceParser.parse_atomic_properties("Atom   1(C ): population=  6.0\n")
+        a = FuzzySpaceParser.parse_atomic_properties(
+            "Atom   1(C ): population=  6.0\n"
+        )
         assert "population" in a[1]
         assert "dipole_x" not in a[1]
 
@@ -1029,14 +1074,16 @@ class TestBasinParser:
         assert b[1]["population"] == pytest.approx(7.1234)
 
     def test_parse_simple_format(self) -> None:
-        output = "basin analysis\nbasin  population\n  1   C    6.01230\n  2   N    7.12340\n"
+        output = "basin analysis\nbasin  population\n  1   C    6.01230\n  2"
+        "   N    7.12340\n"
         b = BasinParser.parse(output)
         assert len(b) == 2
         assert b[0]["attractor_element"] == "C"
         assert b[0]["population"] == pytest.approx(6.0123)
 
     def test_parse_charges_aim(self) -> None:
-        output = "AIM charge of atom  1(C ):  0.03220\nAIM charge of atom  2(N ): -0.12340\n"
+        output = "AIM charge of atom  1(C ):  0.03220\nAIM charge of atom"
+        "  2(N ): -0.12340\n"
         c = BasinParser.parse_charges(output)
         assert c[1] == pytest.approx(0.0322)
         assert c[2] == pytest.approx(-0.1234)
@@ -1099,8 +1146,12 @@ class TestExcitationParser:
         assert r["E_index"] == pytest.approx(4.5678)
         assert r["HDI"] == pytest.approx(0.1234)
         assert r["EDI"] == pytest.approx(0.2345)
-        assert r["hole_centroid"] == pytest.approx((1.234, 2.345, 3.456), abs=1e-3)
-        assert r["electron_centroid"] == pytest.approx((4.567, 5.678, 6.789), abs=1e-3)
+        assert r["hole_centroid"] == pytest.approx(
+            (1.234, 2.345, 3.456), abs=1e-3
+        )
+        assert r["electron_centroid"] == pytest.approx(
+            (4.567, 5.678, 6.789), abs=1e-3
+        )
 
     def test_parse_charge_transfer(self) -> None:
         output = (
@@ -1156,7 +1207,9 @@ class TestExcitationParser:
         assert "hole_centroid" not in r
 
     def test_lambda_below_ct_threshold(self) -> None:
-        r = ExcitationParser.parse_lambda_index("State   1  Lambda:  0.10000\n")
+        r = ExcitationParser.parse_lambda_index(
+            "State   1  Lambda:  0.10000\n"
+        )
         assert r[0]["lambda_index"] < 0.3  # CT state
 
     def test_single_delta_r(self) -> None:
@@ -1206,7 +1259,8 @@ class TestWeakInteractionParser:
         assert "delta_g_inter" not in r
 
     def test_many_cube_files(self) -> None:
-        output = "a.cube has been generated\nb.cube has been generated\nc.cube has been generated\n"
+        output = "a.cube has been generated\nb.cube has been generated"
+        "\nc.cube has been generated\n"
         assert len(WeakInteractionParser.parse(output)["cube_files"]) == 3
 
 
@@ -1240,7 +1294,8 @@ class TestEDAParser:
         assert r["total_interaction"] == pytest.approx(-19.3456)
 
     def test_parse_dispersion_contributions(self) -> None:
-        output = "Atom  1(C )  D3 dispersion:  -2.34560\nAtom  2(N )  D3 dispersion:  -1.56780\n"
+        output = "Atom  1(C )  D3 dispersion:  -2.34560\nAtom  2(N )"
+        "  D3 dispersion:  -1.56780\n"
         c = EDAParser.parse_dispersion_contributions(output)
         assert c[1] == pytest.approx(-2.3456)
         assert c[2] == pytest.approx(-1.5678)
@@ -1264,7 +1319,9 @@ class TestEDAParser:
         assert "exchange" not in r and "polarization" not in r
 
     def test_positive_repulsion(self) -> None:
-        assert EDAParser.parse("Pauli repulsion:   100.0000\n")["repulsion"] > 0
+        assert (
+            EDAParser.parse("Pauli repulsion:   100.0000\n")["repulsion"] > 0
+        )
 
 
 # =============================================================================
@@ -1334,17 +1391,23 @@ class TestCDFTParser:
     # ---- Edge cases ----
 
     def test_global_indices_partial(self) -> None:
-        r = CDFTParser.parse_global_indices("Chemical potential:  -0.1\nHardness:   0.2\n")
+        r = CDFTParser.parse_global_indices(
+            "Chemical potential:  -0.1\nHardness:   0.2\n"
+        )
         assert "chemical_potential" in r and "hardness" in r
         assert "softness" not in r and "IP" not in r
 
     def test_fukui_nucleophilic_site(self) -> None:
         """f+ > f- indicates nucleophilic attack site."""
-        f = CDFTParser.parse_condensed_fukui("Atom   1(C ):  f+= 0.5  f-= 0.1  f0= 0.3\n")
+        f = CDFTParser.parse_condensed_fukui(
+            "Atom   1(C ):  f+= 0.5  f-= 0.1  f0= 0.3\n"
+        )
         assert f[1]["f_plus"] > f[1]["f_minus"]
 
     def test_dual_descriptor_sign(self) -> None:
-        dd = CDFTParser.parse_dual_descriptor("Atom   1(C ):  dual= 0.50000\nAtom   2(O ):  dual=-0.40000\n")
+        dd = CDFTParser.parse_dual_descriptor(
+            "Atom   1(C ):  dual= 0.50000\nAtom   2(O ):  dual=-0.40000\n"
+        )
         assert dd[1] > 0  # nucleophilic
         assert dd[2] < 0  # electrophilic
 
@@ -1403,10 +1466,13 @@ class TestPolarizabilityParser:
         assert "beta_total" not in r and "alpha_xx" not in r
 
     def test_negative_anisotropy(self) -> None:
-        assert PolarizabilityParser.parse("Anisotropy:  -5.0\n")["alpha_aniso"] == pytest.approx(-5.0)
+        assert PolarizabilityParser.parse("Anisotropy:  -5.0\n")[
+            "alpha_aniso"
+        ] == pytest.approx(-5.0)
 
     def test_all_six_tensor_components(self) -> None:
-        output = "alpha_xx: 1\nalpha_xy: 2\nalpha_xz: 3\nalpha_yy: 4\nalpha_yz: 5\nalpha_zz: 6\n"
+        output = "alpha_xx: 1\nalpha_xy: 2\nalpha_xz: 3\nalpha_yy: 4"
+        "\nalpha_yz: 5\nalpha_zz: 6\n"
         r = PolarizabilityParser.parse(output)
         assert len([k for k in r if k.startswith("alpha_")]) == 6
 
@@ -1422,7 +1488,8 @@ class TestAromaticityParser:
     # ---- Positive ----
 
     def test_parse_indices(self) -> None:
-        output = "NICS(0):  -8.12340\nNICS(1):  -10.5678\nNICS_ZZ: -25.67890\nHOMA:   0.98760\nBird index:  92.345\n"
+        output = "NICS(0):  -8.12340\nNICS(1):  -10.5678\nNICS_ZZ: "
+        "-25.67890\nHOMA:   0.98760\nBird index:  92.345\n"
         r = AromaticityParser.parse(output)
         assert r["NICS"] == pytest.approx(-8.1234)
         assert r["NICS_1"] == pytest.approx(-10.5678)
@@ -1456,7 +1523,9 @@ class TestAromaticityParser:
 
     def test_nics_scan_no_header(self) -> None:
         """Data without 'nics scan' header ignored."""
-        d = AromaticityParser.parse_nics_scan("  0.0000   -8.1234\n  1.0000  -10.5678\n")
+        d = AromaticityParser.parse_nics_scan(
+            "  0.0000   -8.1234\n  1.0000  -10.5678\n"
+        )
         assert d["distances"] == []
 
     # ---- Edge cases ----
@@ -1504,18 +1573,25 @@ class TestWavefunctionParser:
         assert WavefunctionParser.parse_orbital_info("") == []
 
     def test_unrelated_text(self) -> None:
-        assert WavefunctionParser.parse_orbital_info("Total energy: -76.0\n") == []
+        assert (
+            WavefunctionParser.parse_orbital_info("Total energy: -76.0\n")
+            == []
+        )
 
     # ---- Edge cases ----
 
     def test_single_orbital(self) -> None:
-        output = "   1   Alpha   Occ= 2.000000   E=  -20.50000 a.u.  -557.715 eV\n"
+        output = (
+            "   1   Alpha   Occ= 2.000000   E=  -20.50000 a.u.  -557.715 eV\n"
+        )
         o = WavefunctionParser.parse_orbital_info(output)
         assert len(o) == 1
         assert o[0]["energy_eV"] == pytest.approx(-557.715)
 
     def test_virtual_orbital_positive_energy(self) -> None:
-        output = "  10   Alpha   Occ= 0.000000   E=   5.12340 a.u.   139.415 eV\n"
+        output = (
+            "  10   Alpha   Occ= 0.000000   E=   5.12340 a.u.   139.415 eV\n"
+        )
         o = WavefunctionParser.parse_orbital_info(output)
         assert o[0]["energy_au"] > 0
 
@@ -1550,7 +1626,9 @@ class TestCubeParser:
         assert "density.cube" in r["cube_files"]
 
     def test_multiple_cubes(self) -> None:
-        output = "density.cube has been generated\nELF.cube has been generated\n"
+        output = (
+            "density.cube has been generated\nELF.cube has been generated\n"
+        )
         assert len(CubeParser.parse(output)["cube_files"]) == 2
 
     # ---- Negative ----
@@ -1575,10 +1653,14 @@ class TestCubeParser:
         assert "cube_files" not in r
 
     def test_asymmetric_grid(self) -> None:
-        assert CubeParser.parse("Grid dimensions: 100 x 80 x 60\n")["grid_points"] == (100, 80, 60)
+        assert CubeParser.parse("Grid dimensions: 100 x 80 x 60\n")[
+            "grid_points"
+        ] == (100, 80, 60)
 
     def test_negative_minimum(self) -> None:
-        assert CubeParser.parse("Minimum value:  -0.50000\n")["min"] == pytest.approx(-0.5)
+        assert CubeParser.parse("Minimum value:  -0.50000\n")[
+            "min"
+        ] == pytest.approx(-0.5)
 
 
 # =============================================================================
@@ -1600,7 +1682,11 @@ class TestUtilityParser:
         )
         r = UtilityParser.parse_geometry(output)
         assert len(r["bond_lengths"]) == 2
-        assert r["bond_lengths"][0] == {"atom1": 1, "atom2": 2, "length": pytest.approx(1.3456)}
+        assert r["bond_lengths"][0] == {
+            "atom1": 1,
+            "atom2": 2,
+            "length": pytest.approx(1.3456),
+        }
         assert r["angles"][0]["angle"] == pytest.approx(120.345)
         assert r["angles"][0]["atoms"] == (1, 2, 3)
         assert r["dihedrals"][0]["dihedral"] == pytest.approx(-45.678)
@@ -1638,12 +1724,21 @@ class TestUtilityParser:
             "spectrum.txt has been generated\n"
         )
         f = UtilityParser.parse_generated_files(output)
-        assert set(f) == {"density.cube", "new.wfn", "output.xyz", "spectrum.txt"}
+        assert set(f) == {
+            "density.cube",
+            "new.wfn",
+            "output.xyz",
+            "spectrum.txt",
+        }
 
     # ---- Negative ----
 
     def test_geometry_empty(self) -> None:
-        assert UtilityParser.parse_geometry("") == {"bond_lengths": [], "angles": [], "dihedrals": []}
+        assert UtilityParser.parse_geometry("") == {
+            "bond_lengths": [],
+            "angles": [],
+            "dihedrals": [],
+        }
 
     def test_multipole_empty(self) -> None:
         assert UtilityParser.parse_multipole_moments("") == {}
@@ -1658,17 +1753,26 @@ class TestUtilityParser:
         assert UtilityParser.parse_generated_files("") == []
 
     def test_unrecognized_extension_ignored(self) -> None:
-        assert UtilityParser.parse_generated_files("output.dat has been generated\n") == []
+        assert (
+            UtilityParser.parse_generated_files(
+                "output.dat has been generated\n"
+            )
+            == []
+        )
 
     # ---- Edge cases ----
 
     def test_geometry_only_bonds(self) -> None:
-        r = UtilityParser.parse_geometry("Bond length between atom  1(C ) and atom  2(N ):  1.5\n")
+        r = UtilityParser.parse_geometry(
+            "Bond length between atom  1(C ) and atom  2(N ):  1.5\n"
+        )
         assert len(r["bond_lengths"]) == 1
         assert r["angles"] == [] and r["dihedrals"] == []
 
     def test_negative_dihedral(self) -> None:
-        r = UtilityParser.parse_geometry("Dihedral  1-2-3-4 :  -179.999 degree\n")
+        r = UtilityParser.parse_geometry(
+            "Dihedral  1-2-3-4 :  -179.999 degree\n"
+        )
         assert r["dihedrals"][0]["dihedral"] == pytest.approx(-179.999)
 
     def test_linear_angle(self) -> None:
@@ -1680,7 +1784,9 @@ class TestUtilityParser:
         assert "BLA" in r and "BOA" not in r
 
     def test_dipole_only_no_quadrupole(self) -> None:
-        r = UtilityParser.parse_multipole_moments("Dipole moment:  X=  0.0  Y=  0.0  Z=  1.5\n")
+        r = UtilityParser.parse_multipole_moments(
+            "Dipole moment:  X=  0.0  Y=  0.0  Z=  1.5\n"
+        )
         assert "dipole" in r and "quadrupole" not in r
 
     def test_all_file_extensions(self) -> None:
@@ -1693,5 +1799,7 @@ class TestUtilityParser:
         assert len(UtilityParser.parse_generated_files(output)) == 8
 
     def test_fractional_coordination_number(self) -> None:
-        c = UtilityParser.parse_coordination_numbers("Atom  1(Pt) coordination number:  5.50000\n")
+        c = UtilityParser.parse_coordination_numbers(
+            "Atom  1(Pt) coordination number:  5.50000\n"
+        )
         assert c[1] == pytest.approx(5.5)

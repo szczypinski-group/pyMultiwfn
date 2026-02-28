@@ -4,7 +4,7 @@ repos:
     hooks:
       - id: interrogate
         args: [--config=pyproject.toml]
-        pass_filenames: true
+        pass_filenames: false
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1

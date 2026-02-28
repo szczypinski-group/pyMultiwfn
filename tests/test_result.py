@@ -11,7 +11,10 @@ class TestMultiwfnResult:
     """Tests for MultiwfnResult."""
 
     @pytest.fixture
-    def sample_result(self, sample_hirshfeld_output: str) -> MultiwfnResult:
+    def sample_result(
+        self,
+        sample_hirshfeld_output: str,
+    ) -> MultiwfnResult:
         """Create a sample result."""
         return MultiwfnResult(
             stdout=sample_hirshfeld_output,
@@ -35,7 +38,8 @@ class TestMultiwfnResult:
         )
 
     def test_success_property_true(
-        self, sample_result: MultiwfnResult
+        self,
+        sample_result: MultiwfnResult,
     ) -> None:
         """Success is True when returncode is 0."""
         assert sample_result.success is True
@@ -99,7 +103,9 @@ class TestMultiwfnResult:
     #     assert len(spectrum["frequencies"]) == 5
 
     def test_save_output(
-        self, sample_result: MultiwfnResult, temp_dir: Path
+        self,
+        sample_result: MultiwfnResult,
+        temp_dir: Path,
     ) -> None:
         """Result can save output to file."""
         output_file = temp_dir / "output.log"
@@ -109,7 +115,10 @@ class TestMultiwfnResult:
         content = output_file.read_text()
         assert "Hirshfeld" in content
 
-    def test_str_representation(self, sample_result: MultiwfnResult) -> None:
+    def test_str_representation(
+        self,
+        sample_result: MultiwfnResult,
+    ) -> None:
         """Result has string representation."""
         s = str(sample_result)
 
@@ -117,12 +126,18 @@ class TestMultiwfnResult:
         assert "1.50s" in s
         assert "4 commands" in s
 
-    def test_str_failed(self, failed_result: MultiwfnResult) -> None:
+    def test_str_failed(
+        self,
+        failed_result: MultiwfnResult,
+    ) -> None:
         """Failed result shows FAILED."""
         s = str(failed_result)
         assert "FAILED" in s
 
-    def test_repr(self, sample_result: MultiwfnResult) -> None:
+    def test_repr(
+        self,
+        sample_result: MultiwfnResult,
+    ) -> None:
         """Result has detailed repr."""
         r = repr(sample_result)
 
