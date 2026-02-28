@@ -19,10 +19,10 @@ Usage
 
 from pathlib import Path
 
-from pymultiwfn.config import MultiwfnConfig
-from pymultiwfn.job import MultiwfnJob
-from pymultiwfn.menu import Menu
-from pymultiwfn.result import MultiwfnResult
+from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.config.config import MultiwfnConfig
+from pymultiwfn.interface.job import MultiwfnJob
+from pymultiwfn.interface.menu import Menu
 
 
 class MultiwfnAnalysis:
@@ -449,9 +449,7 @@ class MultiwfnAnalysis:
     # Category runners
     # =========================================================================
 
-    def run_charges(
-            self, verbose: bool = False
-        ) -> dict[str, MultiwfnResult]:
+    def run_charges(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all charge analyses."""
         return self.run_batch(self.CHARGES, verbose)
 
@@ -461,9 +459,7 @@ class MultiwfnAnalysis:
         """Run all bond order analyses."""
         return self.run_batch(self.BOND_ORDERS, verbose)
 
-    def run_topology(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_topology(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all topology analyses."""
         return self.run_batch(self.TOPOLOGY, verbose)
 
@@ -473,15 +469,11 @@ class MultiwfnAnalysis:
         """Run all weak interaction analyses."""
         return self.run_batch(self.WEAK_INTERACTIONS, verbose)
 
-    def run_spectra(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_spectra(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all spectrum analyses."""
         return self.run_batch(self.SPECTRA, verbose)
 
-    def run_surfaces(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_surfaces(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all surface analyses."""
         return self.run_batch(self.SURFACES, verbose)
 
@@ -491,21 +483,15 @@ class MultiwfnAnalysis:
         """Run all aromaticity analyses."""
         return self.run_batch(self.AROMATICITY, verbose)
 
-    def run_cdft(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_cdft(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all CDFT analyses."""
         return self.run_batch(self.CDFT, verbose)
 
-    def run_dos(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_dos(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all density of states analyses."""
         return self.run_batch(self.DOS, verbose)
 
-    def run_basin(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_basin(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all basin analyses."""
         return self.run_batch(self.BASIN, verbose)
 
@@ -515,9 +501,7 @@ class MultiwfnAnalysis:
         """Run all electron excitation analyses."""
         return self.run_batch(self.EXCITATION, verbose)
 
-    def run_cubes(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_cubes(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all cube generation analyses."""
         return self.run_batch(self.CUBES, verbose)
 
@@ -539,9 +523,7 @@ class MultiwfnAnalysis:
         """Run all fuzzy atomic space analyses."""
         return self.run_batch(self.FUZZY_SPACE, verbose)
 
-    def run_eda(
-        self, verbose: bool = False
-    ) -> dict[str, MultiwfnResult]:
+    def run_eda(self, verbose: bool = False) -> dict[str, MultiwfnResult]:
         """Run all energy decomposition analyses."""
         return self.run_batch(self.EDA, verbose)
 
@@ -632,9 +614,7 @@ class MultiwfnAnalysis:
         return list(cls.CATEGORIES.keys())
 
     @classmethod
-    def list_analyses(
-        cls, category: str | None = None
-    ) -> list[str]:
+    def list_analyses(cls, category: str | None = None) -> list[str]:
         """List available analyses, optionally filtered by category."""
         if category:
             if category not in cls.CATEGORIES:

@@ -10,19 +10,18 @@ Usage
 
 __version__ = "0.1.1"
 
-from pymultiwfn.analysis import MultiwfnAnalysis
-from pymultiwfn.config import MultiwfnConfig, MultiwfnError
-from pymultiwfn.files.wfn_file import WfnFile
-from pymultiwfn.job import MultiwfnJob, MultiwfnJobBuilder
-from pymultiwfn.menu import Menu
-from pymultiwfn.parsers import (
+from pymultiwfn.analysis.analysis import MultiwfnAnalysis
+from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.config.config import MultiwfnConfig, MultiwfnError
+from pymultiwfn.interface.job import MultiwfnJob, MultiwfnJobBuilder
+from pymultiwfn.interface.menu import Menu
+from pymultiwfn.interface.parsers import (
     BondOrderParser,
     ChargeParser,
     CriticalPointParser,
     OutputParser,
     SpectrumParser,
 )
-from pymultiwfn.result import MultiwfnResult
 
 # Alias for convenience
 Analysis = MultiwfnAnalysis

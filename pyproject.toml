@@ -55,6 +55,7 @@ lint.ignore = [
     "D102",  # Missing docstring in public method (interrogate)
     "D103",  # Missing docstring in public function (interrogate)
     "D105",
+    "TD003",  # TODO GH issue links are not always possible
 ]
 
     [tool.ruff.lint.pydocstyle]

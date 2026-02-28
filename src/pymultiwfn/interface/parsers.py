@@ -12,8 +12,9 @@ class OutputParser:
 
     pass
 
-#TODO(fs): maybe worth looking into making this code less long? I think i went
-# a bit overkill with all the different parsign methods and regex. Maybe some 
+
+# TODO(fs): maybe worth looking into making this code less long? I think i went
+# a bit overkill with all the different parsign methods and regex. Maybe some
 # of the methods can be combined?
 # =============================================================================
 # Menu 7: Population analysis & atomic charges
@@ -81,7 +82,7 @@ class ChargeParser(OutputParser):
             line_lower = line.lower()
 
             # Check for section markers
-            #TODO(fs): lots of if statements here, worth refactoring i think?
+            # TODO(fs): lots of if statements here, worth refactoring i think?
             if "final atomic charges" in line_lower:
                 in_final_section = True
                 in_charge_section = True
@@ -258,7 +259,9 @@ class BondOrderParser(OutputParser):
     """
 
     @staticmethod
-    def parse(stdout: str, **kwargs: Any) -> dict[tuple[int, int], float]:
+    def parse(
+        stdout: str,
+    ) -> dict[tuple[int, int], float]:
         """Extract bond orders from Multiwfn output.
 
         Parameters
@@ -408,7 +411,9 @@ class CriticalPointParser(OutputParser):
     }
 
     @staticmethod
-    def parse(stdout: str, **kwargs: Any) -> list[dict[str, Any]]:
+    def parse(
+        stdout: str,
+    ) -> list[dict[str, Any]]:
         """Extract critical point information from topology analysis.
 
         Parameters
@@ -483,7 +488,8 @@ class CriticalPointParser(OutputParser):
             List of dicts with 'atom1', 'atom2', 'bcp_index', 'path_length'
         """
         paths: list[dict[str, Any]] = []
-        # "Bond path between atom  1(C ) and atom  2(N ), BCP  3, length  2.456"
+        # Example:
+        # Bond path between atom  1(C ) and atom  2(N ), BCP  3, length  2.456
         pattern = (
             rf"Bond path between atom\s+(\d+).*?and atom\s+(\d+).*?"
             rf"BCP\s+(\d+).*?length\s+({FLOAT_PATTERN})"
@@ -600,7 +606,9 @@ class SpectrumParser(OutputParser):
     """
 
     @staticmethod
-    def parse(stdout: str, **kwargs: Any) -> dict[str, list[float]]:
+    def parse(
+        stdout: str,
+    ) -> dict[str, list[float]]:
         """Extract spectrum data (frequencies/wavelengths, intensities).
 
         Parameters
@@ -760,8 +768,14 @@ class SurfaceParser(OutputParser):
         result: dict[str, Any] = {}
 
         patterns: dict[str, str] = {
-            "area": rf"(?:Overall|Molecular)\s+surface\s+area.*?:\s+({FLOAT_PATTERN})",
-            "volume": rf"(?:Enclosed|Molecular)\s+volume.*?:\s+({FLOAT_PATTERN})",
+            "area": (
+                rf"(?:Overall|Molecular)\s+"
+                rf"surface\s+area.*?:\s+({FLOAT_PATTERN})"
+            ),
+            "volume": (
+                rf"(?:Enclosed|Molecular)\s+"
+                rf"volume.*?:\s+({FLOAT_PATTERN})"
+            ),
             "V_S_plus": rf"V_S\+.*?:\s+({FLOAT_PATTERN})",
             "V_S_minus": rf"V_S-.*?:\s+({FLOAT_PATTERN})",
             "sigma2_total": rf"sigma\^?2_?tot.*?:\s+({FLOAT_PATTERN})",
@@ -848,7 +862,7 @@ class FuzzySpaceParser(OutputParser):
             idx = int(match[1])
             atoms.setdefault(idx, {})["population"] = float(match[2])
 
-        # Atomic dipole: "Atomic dipole of atom  1(C ):  X= 0.12  Y= 0.34  Z= 0.56"
+        # "Atomic dipole of atom  1(C ):  X= 0.12  Y= 0.34  Z= 0.56"
         dip_pattern = (
             rf"Atomic dipole of atom\s+(\d+).*?"
             rf"X=\s*({FLOAT_PATTERN})\s+"
@@ -1412,7 +1426,10 @@ class PolarizabilityParser(OutputParser):
         result: dict[str, Any] = {}
 
         # Isotropic polarizability
-        iso_pat = rf"[Ii]sotropic.*?(?:alpha|polarizability).*?[=:\s]+({FLOAT_PATTERN})"
+        iso_pat = (
+            rf"[Ii]sotropic.*?(?:alpha|polarizability)"
+            rf".*?[=:\s]+({FLOAT_PATTERN})"
+        )
         if match := re.search(iso_pat, stdout):
             result["alpha_iso"] = float(match[1])
 

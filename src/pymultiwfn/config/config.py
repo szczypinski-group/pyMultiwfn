@@ -1,7 +1,4 @@
-"""
-FINISHED
-Configuration management for pyMultiwfn.
-"""
+"""Configuration management for pyMultiwfn."""
 
 import platform
 from dataclasses import dataclass, field
