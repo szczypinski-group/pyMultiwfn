@@ -20,9 +20,9 @@ Usage
 from pathlib import Path
 
 from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.job import MultiwfnJob
+from pymultiwfn.api.menu import Menu
 from pymultiwfn.config.config import MultiwfnConfig
-from pymultiwfn.interface.job import MultiwfnJob
-from pymultiwfn.interface.menu import Menu
 
 
 class MultiwfnAnalysis:

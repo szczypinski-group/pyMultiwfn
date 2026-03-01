@@ -4,7 +4,7 @@ import platform
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from pymultiwfn.interface.exceptions import MultiwfnError
+from pymultiwfn.api.exceptions import MultiwfnError
 
 
 @dataclass

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from pymultiwfn.interface.parsers import (
+from pymultiwfn.api.parsers import (
     BondOrderParser,
     ChargeParser,
     CriticalPointParser,

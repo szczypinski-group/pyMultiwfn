@@ -8,11 +8,11 @@ import time
 from pathlib import Path
 
 from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.menu import Menu
 from pymultiwfn.config.config import (
     MultiwfnConfig,
     MultiwfnError,
 )
-from pymultiwfn.interface.menu import Menu
 
 
 class MultiwfnJobBuilder:
