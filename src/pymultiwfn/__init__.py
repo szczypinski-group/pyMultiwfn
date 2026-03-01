@@ -34,7 +34,6 @@ __all__ = [
     # Core classes
     "Menu",
     "MultiwfnJob",
-    "MultiwfnJobBuilder",
     "MultiwfnResult",
     "Multiwfn",
     "MultiwfnError",
