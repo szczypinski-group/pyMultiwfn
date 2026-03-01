@@ -67,6 +67,7 @@ We actively welcome contributions from the community. If you do decide to contri
 ### Code standards
 1. Use explicit imports wherever possible.
 2. For class and function definition/calls, split arguments into multiple lines.
+3. Always call functions with keyword arguments.
 
 ## Contact
 If you have any question or inquiries, please email me here: ypkh17@durham.ac.uk
