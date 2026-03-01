@@ -11,7 +11,6 @@ from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.config.config import (
     MultiwfnConfig,
     MultiwfnError,
-    TimeoutConfig,
 )
 from pymultiwfn.interface.menu import Menu
 
@@ -46,7 +45,7 @@ class MultiwfnJobBuilder:
 
         self._commands: list[str] = []
         self._working_dir: Path | None = None
-        self._timeout: int | TimeoutConfig | None = None
+        self._timeout: int | None = None
         self._exe_path: Path | None = None
         self._verbose: bool = False
         self._analysis_names: list[
@@ -59,19 +58,19 @@ class MultiwfnJobBuilder:
         return self._input_file
 
     @property
-    def timeout(self) -> int | TimeoutConfig | None:
+    def timeout(self) -> int | None:
         """Get the timeout value."""
         return self._timeout
 
     @timeout.setter
-    def timeout(self, value: int | TimeoutConfig | None) -> None:
+    def timeout(self, value: int | None) -> None:
         """Set timeout with validation."""
         if value is not None:
             if isinstance(value, int):
                 if value <= 0:
                     raise ValueError("Timeout must be a positive integer")
-            elif not isinstance(value, TimeoutConfig):
-                raise TypeError("Timeout must be int, TimeoutConfig, or None")
+            else:
+                raise TypeError("Timeout must be int or None")
         self._timeout = value
 
     def with_working_dir(self, path: str | Path) -> "MultiwfnJobBuilder":
@@ -79,18 +78,16 @@ class MultiwfnJobBuilder:
         self._working_dir = Path(path)
         return self
 
-    def with_timeout(
-        self, seconds: int | TimeoutConfig
-    ) -> "MultiwfnJobBuilder":
+    def with_timeout(self, timeout: int) -> "MultiwfnJobBuilder":
         """Set execution timeout.
 
         Parameters
         ----------
-        seconds : int or TimeoutConfig
-            Either a simple timeout in seconds, or a TimeoutConfig
-            for analysis-specific timeouts
+        timeout : int
+            Either a simple timeout in seconds or None. If None, there is no
+            timeout for the job.
         """
-        self.timeout = seconds
+        self.timeout = timeout
         return self
 
     def with_executable(self, path: str | Path) -> "MultiwfnJobBuilder":
@@ -203,6 +200,7 @@ class MultiwfnJob:
         self,
         input_file: str | Path,
         config: MultiwfnConfig | None = None,
+        timeout: int | None = None,
     ) -> None:
         """Initialise the mutliwfn job."""
         self._input_file = Path(input_file).resolve()  # Make absolute
@@ -215,6 +213,7 @@ class MultiwfnJob:
         self._analysis_names: list[
             str
         ] = []  # Track analysis names for timeout
+        self._timeout = timeout
 
     @classmethod
     def builder(cls, input_file: str | Path) -> MultiwfnJobBuilder:
@@ -307,42 +306,9 @@ class MultiwfnJob:
         self._analysis_names.clear()
         return self
 
-    def _calculate_timeout(self, override: int | None = None) -> int:
-        """Calculate the appropriate timeout for this job.
-
-        Parameters
-        ----------
-        override : int, optional
-            If provided, use this timeout value directly
-
-        Returns
-        -------
-        int
-            Timeout in seconds
-        """
-        if override is not None:
-            return override
-
-        # If no analysis names tracked, use default
-        if not self._analysis_names:
-            return self._config.get_timeout()
-
-        # Get the maximum timeout across all analyses
-        max_timeout = 0
-        for name in self._analysis_names:
-            timeout = self._config.get_timeout(name)
-            max_timeout = max(max_timeout, timeout)
-
-        # If multiple analyses, add buffer time
-        if len(self._analysis_names) > 1:
-            # Add 30 seconds per additional analysis as buffer
-            buffer = (len(self._analysis_names) - 1) * 30
-            max_timeout += buffer
-
-        return max_timeout
-
     def run(
-        self, verbose: bool | None = None, timeout: int | None = None
+        self,
+        verbose: bool | None = None,
     ) -> MultiwfnResult:
         """Execute the Multiwfn job.
 
@@ -364,7 +330,6 @@ class MultiwfnJob:
             If execution times out or fails with errors
         """
         verbose = verbose if verbose is not None else self._config.verbose
-        effective_timeout = self._calculate_timeout(timeout)
 
         exe = self._config.executable
 
@@ -403,16 +368,14 @@ class MultiwfnJob:
                 )
 
                 try:
-                    stdout, stderr = proc.communicate(
-                        timeout=effective_timeout
-                    )
+                    stdout, stderr = proc.communicate(timeout=self._timeout)
                     returncode = proc.returncode
                 except subprocess.TimeoutExpired as err:
                     proc.kill()
                     stdout, stderr = proc.communicate()
                     raise MultiwfnError(
                         "Multiwfn execution timed out after "
-                        f"{effective_timeout}s. "
+                        f"{self._timeout}s. "
                         f"Analyses: {', '.join(self._analysis_names)}. "
                         "Consider increasing timeout or using "
                         "TimeoutConfig for complex analyses."
