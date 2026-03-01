@@ -24,7 +24,7 @@ from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.menu import Menu
 
 
-class MultiwfnAnalysis:
+class MultiwfnAnalysisEnum:
     """Convenience class for running Multiwfn analyses.
 
     Attributes
