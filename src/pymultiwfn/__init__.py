@@ -13,8 +13,7 @@ __version__ = "0.1.1"
 from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.exceptions import MultiwfnError
-from pymultiwfn.api.job import MultiwfnJob, MultiwfnJobBuilder
-from pymultiwfn.api.menu import Menu
+from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.api.parsers import (
     BondOrderParser,
@@ -23,6 +22,7 @@ from pymultiwfn.api.parsers import (
     OutputParser,
     SpectrumParser,
 )
+from pymultiwfn.enums.menu import Menu
 
 __all__ = [
     # Version

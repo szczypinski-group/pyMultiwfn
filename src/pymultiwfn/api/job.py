@@ -1,185 +1,29 @@
 """Job management for Multiwfn execution."""
 
-import contextlib
-import os
 import subprocess
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
+from uuid import uuid4
 
+from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.exceptions import MultiwfnError
-from pymultiwfn.api.menu import Menu
 from pymultiwfn.api.multiwfn import Multiwfn
-
-
-class MultiwfnJobBuilder:
-    """Builder for constructing MultiwfnJob instances.
-
-    Provides a fluent interface for configuring and building jobs.
-
-    Examples
-    --------
-    >>> from pyMultiwfn.menu import Menu
-    >>> job = (MultiwfnJobBuilder("molecule.wfn")
-    ...        .with_working_dir(Path("/output"))
-    ...        .with_timeout(300)
-    ...        .with_menu(Menu.HIRSHFELD_CHARGE)
-    ...        .with_menu(Menu.MAYER_BOND_ORDER)
-    ...        .build())
-    """
-
-    def __init__(self, input_file: str | Path) -> None:
-        """Initialize the builder.
-
-        Attributes
-        ----------
-        input_file : str or Path
-            Path to wavefunction file
-        """
-        self._input_file = Path(input_file)
-        if not self._input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
-
-        self._commands: list[str] = []
-        self._working_dir: Path | None = None
-        self._timeout: int | None = None
-        self._exe_path: Path | None = None
-        self._verbose: bool = False
-        self._analysis_names: list[
-            str
-        ] = []  # Track analysis names for timeout
-
-    @property
-    def input_file(self) -> Path:
-        """Get the input file path."""
-        return self._input_file
-
-    @property
-    def timeout(self) -> int | None:
-        """Get the timeout value."""
-        return self._timeout
-
-    @timeout.setter
-    def timeout(self, value: int | None) -> None:
-        """Set timeout with validation."""
-        if value is not None:
-            if isinstance(value, int):
-                if value <= 0:
-                    raise ValueError("Timeout must be a positive integer")
-            else:
-                raise TypeError("Timeout must be int or None")
-        self._timeout = value
-
-    def with_working_dir(self, path: str | Path) -> "MultiwfnJobBuilder":
-        """Set the working directory for output files."""
-        self._working_dir = Path(path)
-        return self
-
-    def with_timeout(self, timeout: int) -> "MultiwfnJobBuilder":
-        """Set execution timeout.
-
-        Parameters
-        ----------
-        timeout : int
-            Either a simple timeout in seconds or None. If None, there is no
-            timeout for the job.
-        """
-        self.timeout = timeout
-        return self
-
-    def with_executable(self, path: str | Path) -> "MultiwfnJobBuilder":
-        """Set the path to Multiwfn executable."""
-        self._exe_path = Path(path)
-        return self
-
-    def with_verbose(self, verbose: bool = True) -> "MultiwfnJobBuilder":
-        """Enable or disable verbose output."""
-        self._verbose = verbose
-        return self
-
-    def with_config(self, multiwfn: Multiwfn) -> "MultiwfnJobBuilder":
-        """Set configuration from a Multiwfn object.
-
-        Parameters
-        ----------
-        multiwfn : Multiwfn
-            Configuration object
-        """
-        self._exe_path = multiwfn.exe_path
-        return self
-
-    def with_menu(self, menu_item: Menu) -> "MultiwfnJobBuilder":
-        """Add a menu sequence from a Menu enum member.
-
-        Parameters
-        ----------
-        menu_item : Menu
-            Menu enum member
-        *args
-            Additional arguments for the menu sequence
-        """
-        sequence = menu_item.get_sequence()
-        if sequence and sequence[-1] == "q":
-            sequence = sequence[:-1]
-        self._commands.extend(sequence)
-        self._analysis_names.append(menu_item.name.lower())
-        return self
-
-    def with_custom_commands(
-        self, commands: list[str]
-    ) -> "MultiwfnJobBuilder":
-        """Add custom command sequence.
-
-        Parameters
-        ----------
-        commands : list of str
-            List of commands to add
-        """
-        self._commands.extend(commands)
-        return self
-
-    def build(self) -> "MultiwfnJob":
-        """Build the MultiwfnJob instance.
-
-        Returns
-        -------
-        MultiwfnJob
-            Configured job ready for execution
-        """
-        config = Multiwfn(
-            exe_path=self._exe_path,
-        )
-
-        job = MultiwfnJob(
-            input_file=self._input_file,
-            multiwfn=config,
-            config=config,
-        )
-        job._commands = self._commands.copy()
-        job._analysis_names = self._analysis_names.copy()
-        return job
-
-    def __repr__(self) -> str:
-        return (
-            f"MultiwfnJobBuilder("
-            f"input_file={self._input_file!r}, "
-            f"commands={len(self._commands)}, "
-            f"working_dir={self._working_dir!r}, "
-            f"timeout={self._timeout}, "
-            f"verbose={self._verbose})"
-        )
+from pymultiwfn.enums.menu import Menu
 
 
 class MultiwfnJob:
     """Encapsulates a Multiwfn job.
 
-    Attributes
-    ----------
-    input_file : str or Path
-        Path to wavefunction file
-    config : Multiwfn, optional
-        Configuration object
+    This is the core class for actually interacting with Multiwfn. It connects
+    the requested analyses with menu items, manages the execution of Multiwfn,
+    and captures the results.
+
+    However, this is not the intended entry point for most users. Instead,
+    users should use the MultiwfnAnalysis class, which provides a friendly
+    interface for job creations and analysis.
 
     Examples
     --------
@@ -194,42 +38,187 @@ class MultiwfnJob:
 
     def __init__(
         self,
-        multiwfn: Multiwfn,
         input_file: str | Path,
-        config: Multiwfn | None = None,
+        analysis: MultiwfnAnalysis | None,
+        multiwfn: Multiwfn | None = None,
         timeout: int | None = None,
         work_dir: Path | None = None,
+        verbose: bool = False,
     ) -> None:
-        """Initialise the mutliwfn job."""
-        self._input_file = Path(input_file).resolve()  # Make absolute
-        if not self._input_file.exists():
-            raise FileNotFoundError(f"Input file not found: {input_file}")
-
-        self._config = config or Multiwfn()
-        self._multiwfn = multiwfn or Multiwfn()
-        self._commands: list[str] = []
-        self._result: MultiwfnResult | None = None
-        self._analysis_names: list[
-            str
-        ] = []  # Track analysis names for timeout
-        self._timeout = timeout
-        self.work_dir = work_dir if work_dir is not None else Path.cwd()
-
-    @classmethod
-    def builder(cls, input_file: str | Path) -> MultiwfnJobBuilder:
-        """Create a builder for this job.
+        """Initialise the Mutliwfn job.
 
         Parameters
         ----------
-        input_file : str or Path
-            Path to wavefunction file
+        input_file
+            Path to wavefunction file (e.g., .wfn, .wfx, .fchk).
 
-        Returns
-        -------
-        MultiwfnJobBuilder
-            Builder instance
+        multiwfn
+            Optional Multiwfn configuration. If None , defaults will be used.
+
+        analysis
+            MultiwfnAnalysis to perform. Each analysis entry will be
+            converted into a sequence of menu commands. If None, an empty job
+            will be created for manual command addition.
+
+        timeout
+            Optional timeout in seconds for the Multiwfn execution. If None,
+            there will be noe timeout, which might lead to hanging for complex
+            analysed (e.g., elaborate cube generation).
+
+        work_dir
+            Optional working directory for execution. If None, a temporary
+            location will be used in the current directory.
+
+        verbose
+            If True, print Multiwfn stdout during execution. Defaults to False.
+
+        Notes
+        -----
+        While not recommended, it is possible to create an empty MultiwfnJob
+        without going through setting up any MultiwfnAnalysis. This allows for
+        manual interaction with the Multiwfn executable, but can lead to errors
+        if wrong menu commands are added.
+
         """
-        return MultiwfnJobBuilder(input_file)
+        if not Path(input_file).exists():
+            raise FileNotFoundError(f"Input file not found: {input_file}")
+        self._input_file = Path(input_file).resolve()
+
+        self._multiwfn = multiwfn if multiwfn is not None else Multiwfn()
+        self._commands: list[str] = []
+        self._analysis = analysis
+        self._result: MultiwfnResult | None = None
+        self._timeout = self._validate_timeout(timeout)
+
+        if work_dir is None:
+            today_str = datetime.today().strftime("%Y-%m-%d")
+            today_str += f"_{uuid4()}"
+            work_dir = Path.cwd() / f"{today_str}"
+
+        self._work_dir = work_dir.resolve()
+        self._verbose = verbose
+
+        if analysis is not None:
+            for menu_item in analysis.analyses:
+                self.add_menu(menu_item)
+
+    @classmethod
+    def from_analysis(
+        cls,
+        analysis: MultiwfnAnalysis,
+        multiwfn: Multiwfn | None = None,
+        timeout: int | None = None,
+        work_dir: Path | None = None,
+        verbose: bool = False,
+    ) -> "MultiwfnJob":
+        """Create a MultiwfnJob directly from a MultiwfnAnalysis.
+
+        Parameters
+        ----------
+        analysis
+            MultiwfnAnalysis to perform.
+
+        timeout
+            Optional timeout in seconds for the Multiwfn execution. If None,
+            there will be noe timeout, which might lead to hanging for complex
+            analysed (e.g., elaborate cube generation).
+
+        work_dir
+            Optional working directory for execution. If None, a temporary
+            location will be used in the current directory.
+
+        Return
+        ------
+        A MultiwfnJob instance ready to be executed, with menu commands
+        generated from the analysis configuration.
+
+        Notes
+        -----
+        This is the intended entry point for most users. The input file and
+        menu sequences will be deduced from the provided MultiwfnAnalysis,
+        which will subsequently be updated with the results.
+
+        """
+        return cls(
+            input_file=analysis.input_file,
+            analysis=analysis,
+            multiwfn=multiwfn,
+            timeout=timeout,
+            work_dir=work_dir,
+            verbose=verbose,
+        )
+
+    @classmethod
+    def from_file(
+        cls,
+        input_file: str | Path,
+        analyses: list[Menu] | None = None,
+        multiwfn: Multiwfn | None = None,
+        timeout: int | None = None,
+        work_dir: Path | None = None,
+        verbose: bool = False,
+    ) -> "MultiwfnJob":
+        """Create a MultiwfnJob directly from an input file.
+
+        Parameters
+        ----------
+        input_file
+            Path to wavefunction file (e.g., .wfn, .wfx, .fchk).
+
+        analyses
+            A list of Menu enum members representing the analyses to perform.
+            If None, no analyses will be added and an empty job will be created
+            for manual command addition.
+
+        multiwfn
+            Optional Multiwfn configuration. If None , defaults will be used.
+
+        timeout
+            Optional timeout in seconds for the Multiwfn execution. If None,
+            there will be noe timeout, which might lead to hanging for complex
+            analysed (e.g., elaborate cube generation).
+
+        work_dir
+            Optional working directory for execution. If None, a temporary
+            location will be used in the current directory.
+
+        Return
+        ------
+        A MultiwfnJob instance ready to be executed, with menu commands
+        generated from the analysis configuration.
+
+        Notes
+        -----
+        This is *not* the intended entry point for most users. The input file
+        and menu sequences have to be provided manually; However, this method
+        can be useful for more direct integration with other software.
+
+        """
+        analysis = MultiwfnAnalysis(input_file, analyses)
+        return cls(
+            input_file=input_file,
+            analysis=analysis,
+            multiwfn=multiwfn,
+            timeout=timeout,
+            work_dir=work_dir,
+            verbose=verbose,
+        )
+
+    def _validate_timeout(self, value: int | None) -> int | None:
+        """Validate and set the timeout value."""
+        if value is not None and value <= 0:
+            raise ValueError("Timeout must be a positive integer or None")
+        return value
+
+    @property
+    def timeout(self) -> int | None:
+        """Get the timeout value."""
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, value: int | None) -> None:
+        """Set the timeout value."""
+        self._timeout = self._validate_timeout(value)
 
     @property
     def input_file(self) -> Path:
@@ -238,86 +227,72 @@ class MultiwfnJob:
 
     @property
     def multiwfn(self) -> Multiwfn:
-        """Get the job configuration (read-only)."""
-        return self._config
+        """Get the Multiwfn configuration."""
+        return self._multiwfn
+
+    @multiwfn.setter
+    def multiwfn(self, value: Multiwfn) -> None:
+        """Set the Multiwfn configuration."""
+        if not isinstance(value, Multiwfn):
+            raise ValueError("multiwfn must be an instance of Multiwfn")
+        self._multiwfn = value
+
+    @property
+    def verbose(self) -> bool:
+        """Get the verbosity setting."""
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, value: bool) -> None:
+        """Set the verbosity setting."""
+        self._verbose = value
+
+    @property
+    def work_dir(self) -> Path:
+        """Get the working directory."""
+        return self._work_dir
+
+    @work_dir.setter
+    def work_dir(self, value: Path) -> None:
+        """Set the working directory."""
+        if not isinstance(value, Path):
+            raise ValueError("work_dir must be a Path object")
+        self._work_dir = value.resolve()
 
     @property
     def commands(self) -> list[str]:
         """Get a copy of the current command sequence."""
         return self._commands.copy()
 
-    @property
-    def result(self) -> MultiwfnResult | None:
-        """Get the execution result, if available (read-only)."""
-        return self._result
-
-    @property
-    def has_result(self) -> bool:
-        """Check if job has been executed."""
-        return self._result is not None
-
-    def add_menu(self, menu_item: Menu) -> "MultiwfnJob":
+    def add_menu(self, menu_item: Menu) -> None:
         """Add a menu sequence from a Menu enum member.
 
         Parameters
         ----------
-        menu_item : Menu
+        menu_item
             Menu enum member
-        *args
-            Additional arguments for the menu sequence
 
-        Returns
-        -------
-        self
-            For method chaining
         """
         sequence = menu_item.get_sequence()
         if sequence and sequence[-1] == "q":
             sequence = sequence[:-1]
         self._commands.extend(sequence)
-        self._analysis_names.append(menu_item.name.lower())
-        return self
 
-    def add_custom_commands(self, commands: list[str]) -> "MultiwfnJob":
+    def add_custom_commands(self, commands: list[str]) -> None:
         """Add custom command sequence.
 
         Parameters
         ----------
-        commands : list of str
+        commands
             List of commands to add
 
-        Returns
-        -------
-        self
-            For method chaining
         """
         self._commands.extend(commands)
-        return self
-
-    def clear_commands(self) -> "MultiwfnJob":
-        """Clear all commands.
-
-        Returns
-        -------
-        self
-            For method chaining
-        """
-        self._commands.clear()
-        self._analysis_names.clear()
-        return self
 
     def run(
         self,
-        verbose: bool | None = None,
     ) -> MultiwfnResult:
         """Execute the Multiwfn job.
-
-        Parameters
-        ----------
-        verbose : bool, optional
-            Print stdout during execution (overrides config)
-        timeout : int, optional
-            Timeout in seconds (overrides config and automatic calculation)
 
         Returns
         -------
@@ -328,18 +303,15 @@ class MultiwfnJob:
         ------
         MultiwfnError
             If execution times out or fails with errors
+
         """
-        self.verbose = verbose
-
-        exe = self._multiwfn.exe_path
-
-        commands = self._commands.copy()
-        if not commands or commands[-1] != "q":
+        # Ensure we start with a newline for Multiwfn input
+        commands = ["0", ""] + self._commands
+        if commands[-1] != "q":
             commands.append("q")
 
-        commands.insert(
-            0, ""
-        )  # Ensure we start with a newline for Multiwfn input
+        if not self.work_dir.exists():
+            self.work_dir.mkdir(parents=True, exist_ok=True)
 
         with tempfile.NamedTemporaryFile(
             mode="w",
@@ -350,36 +322,31 @@ class MultiwfnJob:
             dir=self.work_dir,
         ) as batch_file:
             batch_file.write("\n".join(commands) + "\n")
-            batch_path = Path(batch_file.name)
 
-        start_time = time.time()
-        original_dir = Path.cwd()
+            start_time = time.time()
 
-        try:
-            os.chdir(self.work_dir)
+            proc = subprocess.Popen(
+                [str(self.multiwfn.exe_path), str(self.input_file)],
+                stdin=batch_file,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=self.work_dir,
+            )
 
-            with batch_path.open(newline="\n") as batch:
-                proc = subprocess.Popen(
-                    [str(exe), str(self._input_file)],
-                    stdin=batch,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                )
+            try:
+                stdout, stderr = proc.communicate(timeout=self.timeout)
+                returncode = proc.returncode
 
-                try:
-                    stdout, stderr = proc.communicate(timeout=self._timeout)
-                    returncode = proc.returncode
-                except subprocess.TimeoutExpired as err:
-                    proc.kill()
-                    stdout, stderr = proc.communicate()
-                    raise MultiwfnError(
-                        "Multiwfn execution timed out after "
-                        f"{self._timeout}s. "
-                        f"Analyses: {', '.join(self._analysis_names)}. "
-                        "Consider increasing timeout or using "
-                        "TimeoutConfig for complex analyses."
-                    ) from err
+            except subprocess.TimeoutExpired as err:
+                proc.kill()
+                stdout, stderr = proc.communicate()
+                raise MultiwfnError(
+                    "Multiwfn execution timed out after "
+                    f"{self._timeout}s. "
+                    "Consider increasing timeout or using "
+                    "TimeoutConfig for complex analyses."
+                ) from err
 
             execution_time = time.time() - start_time
 
@@ -389,7 +356,7 @@ class MultiwfnJob:
             if isinstance(stderr, bytes):
                 stderr = stderr.decode("utf-8", errors="replace")
 
-            if verbose:
+            if self.verbose:
                 print(stdout)
 
             self._result = MultiwfnResult(
@@ -421,23 +388,16 @@ class MultiwfnJob:
 
             return self._result
 
-        finally:
-            os.chdir(original_dir)
-            with contextlib.suppress(OSError):
-                batch_path.unlink()
-
     def __str__(self) -> str:
-        status = "executed" if self.has_result else "pending"
-        return (
-            f"MultiwfnJob({self._input_file.name}, {len(self._commands)} "
-            f"commands, {status})"
-        )
+        return f"MultiwfnJob on {self._input_file.name}."
 
     def __repr__(self) -> str:
         return (
             f"MultiwfnJob("
             f"input_file={self._input_file!r}, "
-            f"commands={self._commands!r}, "
-            f"config={self._config!r}, "
-            f"has_result={self.has_result})"
+            f"analysis={self._analysis!r}, "
+            f"multiwfn={self._multiwfn!r}, "
+            f"timeout={self._timeout!r}, "
+            f"work_dir={self._work_dir!r}, "
+            f"verbose={self._verbose!r})"
         )
