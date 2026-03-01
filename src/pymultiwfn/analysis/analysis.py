@@ -22,17 +22,17 @@ from pathlib import Path
 from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.menu import Menu
-from pymultiwfn.config.config import MultiwfnConfig
+from pymultiwfn.api.multiwfn import Multiwfn
 
 
 class MultiwfnAnalysis:
     """Convenience class for running Multiwfn analyses.
 
-    Parameters
+    Attributes
     ----------
     filepath : str or Path
         Path to wavefunction file
-    config : MultiwfnConfig, optional
+    config : Multiwfn, optional
         Configuration for Multiwfn execution
 
     Examples
@@ -350,13 +350,13 @@ class MultiwfnAnalysis:
     def __init__(
         self,
         filepath: str | Path,
-        config: MultiwfnConfig | None = None,
+        multiwfn: Multiwfn | None = None,
     ) -> None:
         """Initialize Analysis with a wavefunction file."""
         self._filepath = Path(filepath)
         if not self._filepath.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
-        self._config = config or MultiwfnConfig()
+        self._mwfn = multiwfn or Multiwfn()
 
     @property
     def filepath(self) -> Path:
@@ -364,14 +364,14 @@ class MultiwfnAnalysis:
         return self._filepath
 
     @property
-    def config(self) -> MultiwfnConfig:
+    def config(self) -> Multiwfn:
         """Get the configuration."""
-        return self._config
+        return self._mwfn
 
     @config.setter
-    def config(self, value: MultiwfnConfig) -> None:
+    def config(self, value: Multiwfn) -> None:
         """Set the configuration."""
-        self._config = value
+        self._mwfn = value
 
     # =========================================================================
     # Core run methods
@@ -396,7 +396,11 @@ class MultiwfnAnalysis:
         MultiwfnResult
             Execution result
         """
-        job = MultiwfnJob(self._filepath, config=self._config)
+        job = MultiwfnJob(
+            input_file=self._filepath,
+            multiwfn=self._mwfn,
+            config=self._mwfn,
+        )
         job.add_menu(menu)
         return job.run(verbose=verbose)
 
@@ -419,7 +423,11 @@ class MultiwfnAnalysis:
         MultiwfnResult
             Combined result from all analyses
         """
-        job = MultiwfnJob(self._filepath, config=self._config)
+        job = MultiwfnJob(
+            input_file=self._filepath,
+            multiwfn=self._mwfn,
+            config=self._mwfn,
+        )
         for menu in menus:
             job.add_menu(menu)
         return job.run(verbose=verbose)

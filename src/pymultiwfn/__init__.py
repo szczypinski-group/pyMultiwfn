@@ -15,6 +15,7 @@ from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob, MultiwfnJobBuilder
 from pymultiwfn.api.menu import Menu
+from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.api.parsers import (
     BondOrderParser,
     ChargeParser,
@@ -22,41 +23,6 @@ from pymultiwfn.api.parsers import (
     OutputParser,
     SpectrumParser,
 )
-from pymultiwfn.config.config import MultiwfnConfig
-
-# Alias for convenience
-Analysis = MultiwfnAnalysis
-
-
-# TODO(fs): maybe improve the entry point  # noqa: TD003
-# (multiwfnjob instead of multiwfnanalysis?)
-def load(
-    filepath: str,
-    config: MultiwfnConfig | None = None,
-) -> MultiwfnAnalysis:
-    """Load a wavefunction file for analysis.
-
-    Parameters
-    ----------
-    filepath : str or Path
-        Path to wavefunction file (.wfn, .fchk, .molden, etc.)
-    config : MultiwfnConfig, optional
-        Configuration for Multiwfn execution
-
-    Returns
-    -------
-    MultiwfnAnalysis
-        Analysis object with methods to run calculations
-
-    Examples
-    --------
-    >>> import pymultiwfn
-    >>> mol = pymultiwfn.load("molecule.wfn")
-    >>> charges = mol.run_charges()
-    >>> result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
-    """
-    return MultiwfnAnalysis(filepath, config)
-
 
 __all__ = [
     # Version
@@ -65,13 +31,12 @@ __all__ = [
     "load",
     # Analysis class
     "MultiwfnAnalysis",
-    "Analysis",
     # Core classes
     "Menu",
     "MultiwfnJob",
     "MultiwfnJobBuilder",
     "MultiwfnResult",
-    "MultiwfnConfig",
+    "Multiwfn",
     "MultiwfnError",
     # Parsers
     "OutputParser",

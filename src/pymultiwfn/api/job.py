@@ -8,11 +8,9 @@ import time
 from pathlib import Path
 
 from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.menu import Menu
-from pymultiwfn.config.config import (
-    MultiwfnConfig,
-    MultiwfnError,
-)
+from pymultiwfn.api.multiwfn import Multiwfn
 
 
 class MultiwfnJobBuilder:
@@ -100,18 +98,15 @@ class MultiwfnJobBuilder:
         self._verbose = verbose
         return self
 
-    def with_config(self, config: MultiwfnConfig) -> "MultiwfnJobBuilder":
-        """Set configuration from a MultiwfnConfig object.
+    def with_config(self, multiwfn: Multiwfn) -> "MultiwfnJobBuilder":
+        """Set configuration from a Multiwfn object.
 
         Parameters
         ----------
-        config : MultiwfnConfig
+        multiwfn : Multiwfn
             Configuration object
         """
-        self._exe_path = config.exe_path
-        self._working_dir = config.working_dir
-        self._timeout = config.timeout
-        self._verbose = config.verbose
+        self._exe_path = multiwfn.exe_path
         return self
 
     def with_menu(self, menu_item: Menu) -> "MultiwfnJobBuilder":
@@ -152,14 +147,15 @@ class MultiwfnJobBuilder:
         MultiwfnJob
             Configured job ready for execution
         """
-        config = MultiwfnConfig(
+        config = Multiwfn(
             exe_path=self._exe_path,
-            working_dir=self._working_dir or Path.cwd(),
-            timeout=self._timeout,
-            verbose=self._verbose,
         )
 
-        job = MultiwfnJob(self._input_file, config=config)
+        job = MultiwfnJob(
+            input_file=self._input_file,
+            multiwfn=config,
+            config=config,
+        )
         job._commands = self._commands.copy()
         job._analysis_names = self._analysis_names.copy()
         return job
@@ -182,7 +178,7 @@ class MultiwfnJob:
     ----------
     input_file : str or Path
         Path to wavefunction file
-    config : MultiwfnConfig, optional
+    config : Multiwfn, optional
         Configuration object
 
     Examples
@@ -198,22 +194,26 @@ class MultiwfnJob:
 
     def __init__(
         self,
+        multiwfn: Multiwfn,
         input_file: str | Path,
-        config: MultiwfnConfig | None = None,
+        config: Multiwfn | None = None,
         timeout: int | None = None,
+        work_dir: Path | None = None,
     ) -> None:
         """Initialise the mutliwfn job."""
         self._input_file = Path(input_file).resolve()  # Make absolute
         if not self._input_file.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
 
-        self._config = config or MultiwfnConfig()
+        self._config = config or Multiwfn()
+        self._multiwfn = multiwfn or Multiwfn()
         self._commands: list[str] = []
         self._result: MultiwfnResult | None = None
         self._analysis_names: list[
             str
         ] = []  # Track analysis names for timeout
         self._timeout = timeout
+        self.work_dir = work_dir if work_dir is not None else Path.cwd()
 
     @classmethod
     def builder(cls, input_file: str | Path) -> MultiwfnJobBuilder:
@@ -237,7 +237,7 @@ class MultiwfnJob:
         return self._input_file
 
     @property
-    def config(self) -> MultiwfnConfig:
+    def multiwfn(self) -> Multiwfn:
         """Get the job configuration (read-only)."""
         return self._config
 
@@ -329,9 +329,9 @@ class MultiwfnJob:
         MultiwfnError
             If execution times out or fails with errors
         """
-        verbose = verbose if verbose is not None else self._config.verbose
+        self.verbose = verbose
 
-        exe = self._config.executable
+        exe = self._multiwfn.exe_path
 
         commands = self._commands.copy()
         if not commands or commands[-1] != "q":
@@ -347,7 +347,7 @@ class MultiwfnJob:
             encoding="utf-8",
             delete=False,
             suffix=".inp",
-            dir=self._config.working_dir,
+            dir=self.work_dir,
         ) as batch_file:
             batch_file.write("\n".join(commands) + "\n")
             batch_path = Path(batch_file.name)
@@ -356,7 +356,7 @@ class MultiwfnJob:
         original_dir = Path.cwd()
 
         try:
-            os.chdir(self._config.working_dir)
+            os.chdir(self.work_dir)
 
             with batch_path.open(newline="\n") as batch:
                 proc = subprocess.Popen(
