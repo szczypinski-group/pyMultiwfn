@@ -1,4 +1,9 @@
-"""Configuration interaction with Multiwfn."""
+"""Configuration interaction with Multiwfn.
+
+This class relates to the actual Multiwfn executable (e.g., executable path),
+rather than the details of a specific job/analysis (e.g., timeout and parsing).
+
+"""
 
 import platform
 from pathlib import Path
