@@ -32,7 +32,7 @@ class MultiwfnJobBuilder:
     def __init__(self, input_file: str | Path) -> None:
         """Initialize the builder.
 
-        Parameters
+        Attributes
         ----------
         input_file : str or Path
             Path to wavefunction file
@@ -174,7 +174,7 @@ class MultiwfnJobBuilder:
 class MultiwfnJob:
     """Encapsulates a Multiwfn job.
 
-    Parameters
+    Attributes
     ----------
     input_file : str or Path
         Path to wavefunction file
