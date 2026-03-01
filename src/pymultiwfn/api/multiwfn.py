@@ -36,10 +36,10 @@ class Multiwfn:
     def _parse_exe(self, exe_path: Path | None) -> Path:
         """Parse the executable path."""
         if exe_path:
-            if exe_path.exists():
-                return exe_path
+            if exe_path.resolve().exists():
+                return exe_path.resolve()
             raise MultiwfnError(
-                f"Specified executable not found: {self.exe_path}"
+                f"Specified executable not found: {self.exe_path.resolve()}"
             )
 
         if platform.system() == "Windows":
