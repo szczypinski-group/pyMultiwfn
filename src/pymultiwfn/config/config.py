@@ -4,11 +4,7 @@ import platform
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
-class MultiwfnError(Exception):
-    """Base exception for pyMultiwfn errors."""
-
-    pass
+from pymultiwfn.interface.exceptions import MultiwfnError
 
 
 class TimeoutConfig:
