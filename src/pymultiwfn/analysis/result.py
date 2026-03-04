@@ -13,23 +13,7 @@ from pymultiwfn.api.parsers import (
 
 @dataclass
 class MultiwfnResult:
-    """Encapsulates results from a Multiwfn execution.
-
-    Attributes
-    ----------
-    stdout : str
-        Standard output from Multiwfn
-    stderr : str
-        Standard error from Multiwfn
-    returncode : int
-        Process return code
-    execution_time : float
-        Execution time in seconds
-    commands : list of str
-        Commands that were executed
-    input_file : Path
-        Input file that was processed
-    """
+    """Encapsulates parsed results from a Multiwfn execution."""
 
     type: str
     value: Any

@@ -26,8 +26,7 @@ class MultiwfnJobOutcome:
     return_code: int | None
     execution_time: float
 
-    @property
-    def success(self) -> bool:
+    def is_successful(self) -> bool:
         """Check if execution was successful.
 
         Notes

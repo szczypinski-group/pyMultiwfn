@@ -262,6 +262,13 @@ class MultiwfnJob:
         else:
             return None
 
+    @property
+    def success(self) -> bool | None:
+        if self._result is not None:
+            return self._result.is_successful()
+        else:
+            return None
+
     def _parse_menu(self, menu_item: Menu) -> None:
         """Add a menu sequence from a Menu enum member.
 
@@ -289,7 +296,7 @@ class MultiwfnJob:
 
     def run(
         self,
-    ) -> tuple[str, str, int, float]:
+    ) -> "MultiwfnJob":
         """Execute the Multiwfn job.
 
         Returns
@@ -357,32 +364,17 @@ class MultiwfnJob:
             if self.verbose:
                 print(stdout)
 
-            self._stderr = stderr
-            self._stdout = stdout
-            self._return_code = return_code
-            self._execution_time = execution_time
+            result = MultiwfnJobOutcome(
+                stderr=stderr,
+                stdout=stdout,
+                return_code=return_code,
+                execution_time=execution_time,
+            )
 
-            # Multiwfn often returns non-zero even on success in batch mode
-            # Only fail on obvious errors (negative codes or very high codes)
-            # or if stderr contains clear error messages
-            error_indicators = [
-                "error",
-                "fatal",
-                "cannot open",
-                "not found",
-                "failed to",
-            ]
-            has_error = any(ind in stderr.lower() for ind in error_indicators)
-
-            if (return_code is not None and return_code < 0) or has_error:
-                raise MultiwfnError(
-                    f"Multiwfn failed with return code {return_code}\n"
-                    f"STDERR: {stderr}"
-                )
-
+            self._result = result
             self._executed = True
 
-            return stdout, stderr, return_code, execution_time
+            return self
 
     def __str__(self) -> str:
         return f"MultiwfnJob on {self._input_file.name}."

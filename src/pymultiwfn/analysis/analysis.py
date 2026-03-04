@@ -109,7 +109,7 @@ class MultiwfnAnalysis:
             work_dir=work_dir,
             verbose=verbose,
         )
-        stdout, stderr, return_code, execution_time = job.run()
+        job = job.run()
         self.jobs.append(job)
 
     def add_menu(
