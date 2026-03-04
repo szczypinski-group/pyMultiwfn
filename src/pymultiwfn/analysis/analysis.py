@@ -43,7 +43,7 @@ class MultiwfnAnalysis:
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
-    ) -> MultiwfnResult:
+    ) -> None:
         """Run Multiwfn job specified by the analysis.
 
         Parameters
@@ -76,18 +76,39 @@ class MultiwfnAnalysis:
             Unparsed result of the Multiwfn calculation.
 
         """
-        self._job = MultiwfnJob.from_analysis(
-            analysis=self,
+        for menu in self.analyses:
+            self._create_and_run(
+                analysis=menu,
+                multiwfn=multiwfn,
+                timeout=timeout,
+                work_dir=work_dir,
+                verbose=verbose,
+            )
+
+    def _create_and_run(
+        self,
+        analysis: Menu,
+        multiwfn: Multiwfn | None = None,
+        timeout: int | None = None,
+        work_dir: Path | None = None,
+        verbose: bool = False,
+    ) -> None:
+        """Create and run MultiwfnJob.
+
+        Connection with the API.
+
+        """
+        job = MultiwfnJob(
+            input_file=self.input_file,
+            analysis=analysis,
             multiwfn=multiwfn,
             timeout=timeout,
             work_dir=work_dir,
             verbose=verbose,
-            cached=self.cached,
         )
-
-        self._result = self._job.run()
-
-        return self._result
+        result = job.run()
+        self.jobs.append(job)
+        self.results[analysis] = result
 
     def add_menu(
         self,

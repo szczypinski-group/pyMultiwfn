@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.multiwfn import Multiwfn
@@ -39,12 +38,11 @@ class MultiwfnJob:
     def __init__(
         self,
         input_file: str | Path,
-        analysis: MultiwfnAnalysis | None,
+        analysis: Menu | None,
         multiwfn: Multiwfn | None = None,
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
-        cached: bool = True,
     ) -> None:
         """Initialise the Mutliwfn job.
 
@@ -58,9 +56,9 @@ class MultiwfnJob:
             one will be created.
 
         analysis
-            MultiwfnAnalysis to perform. Each analysis entry will be
-            converted into a sequence of menu commands. If None, an empty job
-            will be created for manual command addition.
+            A Menu enum members representing the analyses to perform.
+            If None, no analyses will be added and an empty job will be created
+            for manual command addition.
 
         timeout
             Optional timeout in seconds for the Multiwfn execution. If None,
@@ -98,80 +96,16 @@ class MultiwfnJob:
 
         self._work_dir = work_dir.resolve()
         self._verbose = verbose
-        self._cached = cached
 
         if analysis is not None:
             self._analysis = analysis
-            for menu_item in analysis.analyses:
-                self.add_menu(menu_item)
-
-        else:
-            self._analysis = MultiwfnAnalysis(
-                input_file=input_file,
-                analyses=[],
-                cached=cached,
-            )
-
-    @classmethod
-    def from_analysis(
-        cls,
-        analysis: MultiwfnAnalysis,
-        multiwfn: Multiwfn | None = None,
-        timeout: int | None = None,
-        work_dir: Path | None = None,
-        verbose: bool = False,
-        cached: bool | None = True,
-    ) -> "MultiwfnJob":
-        """Create a MultiwfnJob directly from a MultiwfnAnalysis.
-
-        Parameters
-        ----------
-        analysis
-            MultiwfnAnalysis to perform.
-
-        multiwfn
-            Multiwfn instance with executable configuration. If None, a default
-            one will be created.
-
-        timeout
-            Optional timeout in seconds for the Multiwfn execution. If None,
-            there will be noe timeout, which might lead to hanging for complex
-            analysed (e.g., elaborate cube generation).
-
-        work_dir
-            Optional working directory for execution. If None, a temporary
-            location will be used in the current directory.
-
-        verbose
-            If True, print Multiwfn stdout during execution. Defaults to False.
-
-        Return
-        ------
-        A MultiwfnJob instance ready to be executed, with menu commands
-        generated from the analysis configuration.
-
-        Notes
-        -----
-        This is the intended entry point for most users. The input file and
-        menu sequences will be deduced from the provided MultiwfnAnalysis,
-        which will subsequently be updated with the results.
-
-        """
-        return cls(
-            input_file=analysis.input_file,
-            analysis=analysis,
-            multiwfn=multiwfn,
-            timeout=timeout,
-            work_dir=work_dir,
-            verbose=verbose,
-            cached=cached if cached is not None else analysis.cached,
-        )
+            self._parse_menu(analysis)
 
     @classmethod
     def from_file(
         cls,
         input_file: str | Path,
-        analyses: list[Menu] | None = None,
+        analysis: Menu | None = None,
         multiwfn: Multiwfn | None = None,
         timeout: int | None = None,
         work_dir: Path | None = None,
@@ -185,7 +119,7 @@ class MultiwfnJob:
         input_file
             Path to wavefunction file (e.g., .wfn, .wfx, .fchk).
 
-        analyses
+        analysis
             A list of Menu enum members representing the analyses to perform.
             If None, no analyses will be added and an empty job will be created
             for manual command addition.
@@ -218,11 +152,6 @@ class MultiwfnJob:
         can be useful for more direct integration with other software.
 
         """
-        analysis = MultiwfnAnalysis(
-            input_file,
-            analyses,
-            cached=cached,
-        )
         return cls(
             input_file=input_file,
             analysis=analysis,
@@ -276,17 +205,6 @@ class MultiwfnJob:
         self._verbose = value
 
     @property
-    def cached(self) -> bool:
-        """Get the cache setting."""
-        return self._cached
-
-    @cached.setter
-    def cached(self, value: bool) -> None:
-        """Set the verbosity setting."""
-        self._verbose = value
-        self._analysis.cached = value
-
-    @property
     def work_dir(self) -> Path:
         """Get the working directory."""
         return self._work_dir
@@ -303,7 +221,7 @@ class MultiwfnJob:
         """Get a copy of the current command sequence."""
         return self._commands.copy()
 
-    def add_menu(self, menu_item: Menu) -> None:
+    def _parse_menu(self, menu_item: Menu) -> None:
         """Add a menu sequence from a Menu enum member.
 
         Parameters
@@ -317,7 +235,7 @@ class MultiwfnJob:
             sequence = sequence[:-1]
         self._commands.extend(sequence)
 
-    def add_custom_commands(self, commands: list[str]) -> None:
+    def add_commands(self, commands: list[str]) -> None:
         """Add custom command sequence.
 
         Parameters
