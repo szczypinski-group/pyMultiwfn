@@ -21,22 +21,17 @@ class MultiwfnAnalysis:
     input_file : str or Path
         Path to the wavefunction file to be analyzed.
 
-    Examples
-    --------
-    >>> # Example of a specific analysis inheriting from MultiwfnAnalysis
-    >>> class ElectronDensityAnalysis(MultiwfnAnalysis):
-    ...     def get_menu_sequence(self) -> list[str]:
-    ...         return ["1", "2", "3"]
-
     """
 
     def __init__(
         self,
         input_file: str | Path,
-        analyses: list[Menu] | None = None,
+        analyses: Menu | list[Menu] | AnalysisClasses | None = None,
     ) -> None:
         self.input_file = input_file
-        self.analyses = analyses if analyses is not None else []
+        self.analyses: list[Menu] = []
+        if analyses is not None:
+            self.add_menu(analyses)
 
     def run(
         self,
@@ -87,7 +82,7 @@ class MultiwfnAnalysis:
 
     def add_menu(
         self,
-        menu: Menu | list[Menu],
+        menu: Menu | list[Menu] | AnalysisClasses,
     ) -> None:
         """Add a Menu enum member to the analysis.
 
@@ -101,6 +96,8 @@ class MultiwfnAnalysis:
             self.analyses.extend(menu)
         elif isinstance(menu, Menu):
             self.analyses.append(menu)
+        elif isinstance(menu, AnalysisClasses):
+            self.add_menu(menu.value)
         else:
             raise TypeError(
                 "Menu has to be a valid Menu enum or a list of Menu enums."
@@ -108,80 +105,80 @@ class MultiwfnAnalysis:
 
     def _add_charges_menus(self) -> None:
         """Run all charge analyses."""
-        self.add_menu(AnalysisClasses.CHARGES.value)
+        self.add_menu(AnalysisClasses.CHARGES)
 
     def _add_bond_orders_menus(self) -> None:
         """Run all bond order analyses."""
-        self.add_menu(AnalysisClasses.BOND_ORDERS.value)
+        self.add_menu(AnalysisClasses.BOND_ORDERS)
 
     def _add_topology_menus(self) -> None:
         """Run all topology analyses."""
-        self.add_menu(AnalysisClasses.TOPOLOGY.value)
+        self.add_menu(AnalysisClasses.TOPOLOGY)
 
     def _add_weak_interactions_menus(self) -> None:
         """Run all weak interaction analyses."""
-        self.add_menu(AnalysisClasses.WEAK_INTERACTIONS.value)
+        self.add_menu(AnalysisClasses.WEAK_INTERACTIONS)
 
     def _add_spectra_menus(self) -> None:
         """Run all spectrum analyses."""
-        self.add_menu(AnalysisClasses.SPECTRA.value)
+        self.add_menu(AnalysisClasses.SPECTRA)
 
     def _add_surfaces_menus(self) -> None:
         """Run all surface analyses."""
-        self.add_menu(AnalysisClasses.SURFACES.value)
+        self.add_menu(AnalysisClasses.SURFACES)
 
     def _add_aromaticity_menus(self) -> None:
         """Run all aromaticity analyses."""
-        self.add_menu(AnalysisClasses.AROMATICITY.value)
+        self.add_menu(AnalysisClasses.AROMATICITY)
 
     def _add_cdft_menus(self) -> None:
         """Run all CDFT analyses."""
-        self.add_menu(AnalysisClasses.CDFT.value)
+        self.add_menu(AnalysisClasses.CDFT)
 
     def _add_dos_menus(self) -> None:
         """Run all density of states analyses."""
-        self.add_menu(AnalysisClasses.DOS.value)
+        self.add_menu(AnalysisClasses.DOS)
 
     def _add_basin_menus(self) -> None:
         """Run all basin analyses."""
-        self.add_menu(AnalysisClasses.BASIN.value)
+        self.add_menu(AnalysisClasses.BASIN)
 
     def _add_excitation_menus(self) -> None:
         """Run all electron excitation analyses."""
-        self.add_menu(AnalysisClasses.EXCITATION.value)
+        self.add_menu(AnalysisClasses.EXCITATION)
 
     def _add_cubes_menus(self) -> None:
         """Run all cube generation analyses."""
-        self.add_menu(AnalysisClasses.CUBES.value)
+        self.add_menu(AnalysisClasses.CUBES)
 
     def _add_orbital_composition_menus(self) -> None:
         """Run all orbital composition analyses."""
-        self.add_menu(AnalysisClasses.ORBITAL_COMPOSITION.value)
+        self.add_menu(AnalysisClasses.ORBITAL_COMPOSITION)
 
     def _add_orbital_localization_menus(self) -> None:
         """Run all orbital localization analyses."""
-        self.add_menu(AnalysisClasses.ORBITAL_LOCALIZATION.value)
+        self.add_menu(AnalysisClasses.ORBITAL_LOCALIZATION)
 
     def _add_fuzzy_space_menus(self) -> None:
         """Run all fuzzy atomic space analyses."""
-        self.add_menu(AnalysisClasses.FUZZY_SPACE.value)
+        self.add_menu(AnalysisClasses.FUZZY_SPACE)
 
     def _add_eda_menus(self) -> None:
         """Run all energy decomposition analyses."""
-        self.add_menu(AnalysisClasses.EDA.value)
+        self.add_menu(AnalysisClasses.EDA)
 
     def _add_polarizability_menus(self) -> None:
         """Run all polarizability analyses."""
-        self.add_menu(AnalysisClasses.POLARIZABILITY.value)
+        self.add_menu(AnalysisClasses.POLARIZABILITY)
 
     def _add_wavefunction_menus(self) -> None:
         """Run all wavefunction check/modify analyses."""
-        self.add_menu(AnalysisClasses.WAVEFUNCTION.value)
+        self.add_menu(AnalysisClasses.WAVEFUNCTION)
 
     def _add_line_plots_menus(self) -> None:
         """Run all line property plot analyses."""
-        self.add_menu(AnalysisClasses.LINE_PLOTS.value)
+        self.add_menu(AnalysisClasses.LINE_PLOTS)
 
     def _add_plane_maps_menus(self) -> None:
         """Run all plane property map analyses."""
-        self.add_menu(AnalysisClasses.PLANE_MAPS.value)
+        self.add_menu(AnalysisClasses.PLANE_MAPS)
