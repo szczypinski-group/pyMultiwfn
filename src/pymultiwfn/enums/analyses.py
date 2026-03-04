@@ -308,3 +308,14 @@ class AnalysisClasses(Enum):
             for analysis in cls:
                 analyses.extend(analysis.value)
             return analyses
+
+    @classmethod
+    def find_category(
+        cls,
+        menu: str,
+    ) -> str | None:
+        """Find which category a menu belongs to."""
+        for analysis in cls:
+            if menu in analysis.value:
+                return analysis.name
+        return None
