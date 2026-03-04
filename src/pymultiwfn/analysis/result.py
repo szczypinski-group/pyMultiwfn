@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from pymultiwfn.api.parsers import (
+from pymultiwfn.analysis.parsers import (
     BondOrderParser,
     ChargeParser,
     CriticalPointParser,
