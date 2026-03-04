@@ -21,7 +21,6 @@ class MultiwfnResult:
     def parse_charges(
         self,
         stdout: str,
-        method: str = "hirshfeld",
     ) -> dict[int, float]:
         """Parse atomic charges from output.
 
@@ -35,7 +34,7 @@ class MultiwfnResult:
         dict[int, float]
             Dictionary mapping atom indices to charges
         """
-        return ChargeParser.parse(stdout, method=method)
+        return ChargeParser.parse(stdout)
 
     def parse_bond_orders(
         self,

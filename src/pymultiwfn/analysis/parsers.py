@@ -31,18 +31,13 @@ class ChargeParser(OutputParser):
     """
 
     @staticmethod
-    def parse(stdout: str, method: str = "Hirshfeld") -> dict[int, float]:
+    def parse(stdout: str) -> dict[int, float]:
         """Extract atomic charges from Multiwfn output.
 
         Parameters
         ----------
         stdout : str
             Multiwfn standard output
-        method : str
-            Charge method name (e.g., "Hirshfeld", "ADCH", "RESP",
-            "Mulliken", "Lowdin", "CHELPG", "MK", "CM5", "MBIS",
-            "DDEC", "Gasteiger", "EEM", "Becke", "VDD", "SCPA",
-            "Stout-Politzer", "Bickelhaupt", "AIM", "Hirshfeld-I")
 
         Returns
         -------
@@ -53,7 +48,7 @@ class ChargeParser(OutputParser):
 
         # Pattern 1: "Hirshfeld charge of atom     1(C ) is  0.03208687"
         pattern1 = (
-            rf"{re.escape(method)}\s+charge of atom\s+(\d+)\s*\([A-Za-z]+"
+            rf"charge of atom\s+(\d+)\s*\([A-Za-z]+"
             rf"\s*\)\s+is\s+({FLOAT_PATTERN})"
         )
         # Pattern 2: "Atom    1(C ):     0.03209323" (Final atomic charges)
@@ -88,9 +83,7 @@ class ChargeParser(OutputParser):
                 in_charge_section = True
                 charges.clear()  # Prefer final charges
                 continue
-            elif method.lower() in line_lower and (
-                "charge" in line_lower or "population" in line_lower
-            ):
+            elif "charge" in line_lower or "population" in line_lower:
                 in_charge_section = True
                 continue
             elif "summary of" in line_lower and "charge" in line_lower:
