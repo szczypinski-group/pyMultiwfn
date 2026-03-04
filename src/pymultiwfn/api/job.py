@@ -53,7 +53,8 @@ class MultiwfnJob:
             Path to wavefunction file (e.g., .wfn, .wfx, .fchk).
 
         multiwfn
-            Optional Multiwfn configuration. If None , defaults will be used.
+            Multiwfn instance with executable configuration. If None, a default
+            one will be created.
 
         analysis
             MultiwfnAnalysis to perform. Each analysis entry will be
@@ -118,6 +119,10 @@ class MultiwfnJob:
         analysis
             MultiwfnAnalysis to perform.
 
+        multiwfn
+            Multiwfn instance with executable configuration. If None, a default
+            one will be created.
+
         timeout
             Optional timeout in seconds for the Multiwfn execution. If None,
             there will be noe timeout, which might lead to hanging for complex
@@ -126,6 +131,9 @@ class MultiwfnJob:
         work_dir
             Optional working directory for execution. If None, a temporary
             location will be used in the current directory.
+
+        verbose
+            If True, print Multiwfn stdout during execution. Defaults to False.
 
         Return
         ------
@@ -171,7 +179,8 @@ class MultiwfnJob:
             for manual command addition.
 
         multiwfn
-            Optional Multiwfn configuration. If None , defaults will be used.
+            Multiwfn instance with executable configuration. If None, a default
+            one will be created.
 
         timeout
             Optional timeout in seconds for the Multiwfn execution. If None,
@@ -181,6 +190,9 @@ class MultiwfnJob:
         work_dir
             Optional working directory for execution. If None, a temporary
             location will be used in the current directory.
+
+        verbose
+            If True, print Multiwfn stdout during execution. Defaults to False.
 
         Return
         ------

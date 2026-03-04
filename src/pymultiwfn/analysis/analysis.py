@@ -2,6 +2,9 @@
 
 from pathlib import Path
 
+from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.job import MultiwfnJob
+from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.analyses import AnalysisClasses
 from pymultiwfn.enums.menu import Menu
 
@@ -34,6 +37,53 @@ class MultiwfnAnalysis:
     ) -> None:
         self.input_file = input_file
         self.analyses = analyses if analyses is not None else []
+
+    def run(
+        self,
+        multiwfn: Multiwfn | None = None,
+        timeout: int | None = None,
+        work_dir: Path | None = None,
+        verbose: bool = False,
+    ) -> MultiwfnResult:
+        """Run Multiwfn job specified by the analysis.
+
+        Parameters
+        ----------
+        analysis
+            MultiwfnAnalysis to perform.
+
+        multiwfn
+            Multiwfn instance with executable configuration. If None, a default
+            one will be created.
+
+        timeout
+            Optional timeout in seconds for the Multiwfn execution. If None,
+            there will be noe timeout, which might lead to hanging for complex
+            analysed (e.g., elaborate cube generation).
+
+        work_dir
+            Optional working directory for execution. If None, a temporary
+            location will be used in the current directory.
+
+        verbose
+            If True, print Multiwfn stdout during execution. Defaults to False.
+
+        Return
+        ------
+            Unparsed result of the Multiwfn calculation.
+
+        """
+        self._job = MultiwfnJob.from_analysis(
+            analysis=self,
+            multiwfn=multiwfn,
+            timeout=timeout,
+            work_dir=work_dir,
+            verbose=verbose,
+        )
+
+        self._result = self._job.run()
+
+        return self._result
 
     def _add_charges_menus(self) -> None:
         """Run all charge analyses."""
