@@ -77,13 +77,16 @@ class MultiwfnAnalysis:
 
         """
         for menu in self.analyses:
-            self._create_and_run(
-                analysis=menu,
-                multiwfn=multiwfn,
-                timeout=timeout,
-                work_dir=work_dir,
-                verbose=verbose,
-            )
+            if self.cached and (menu in self.results):
+                pass
+            else:
+                self._create_and_run(
+                    analysis=menu,
+                    multiwfn=multiwfn,
+                    timeout=timeout,
+                    work_dir=work_dir,
+                    verbose=verbose,
+                )
 
     def _create_and_run(
         self,
@@ -106,9 +109,8 @@ class MultiwfnAnalysis:
             work_dir=work_dir,
             verbose=verbose,
         )
-        result = job.run()
+        stdout, stderr, return_code, execution_time = job.run()
         self.jobs.append(job)
-        self.results[analysis] = result
 
     def add_menu(
         self,

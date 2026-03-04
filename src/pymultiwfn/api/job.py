@@ -7,9 +7,9 @@ from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.multiwfn import Multiwfn
+from pymultiwfn.api.outcome import MultiwfnJobOutcome
 from pymultiwfn.enums.menu import Menu
 
 
@@ -86,7 +86,6 @@ class MultiwfnJob:
 
         self._multiwfn = multiwfn if multiwfn is not None else Multiwfn()
         self._commands: list[str] = []
-        self._result: MultiwfnResult | None = None
         self._timeout = self._validate_timeout(timeout)
 
         if work_dir is None:
@@ -100,6 +99,11 @@ class MultiwfnJob:
         if analysis is not None:
             self._analysis = analysis
             self._parse_menu(analysis)
+
+        # Attributes below are populated on execution.
+
+        self._executed = False
+        self._result: MultiwfnJobOutcome | None = None
 
     @classmethod
     def from_file(
@@ -221,6 +225,43 @@ class MultiwfnJob:
         """Get a copy of the current command sequence."""
         return self._commands.copy()
 
+    @property
+    def executed(self) -> bool:
+        """Get a flag whether the job has been executed (read-only)."""
+        return self._executed
+
+    @property
+    def stderr(self) -> str | None:
+        """Get the standard error from execution (read-only)."""
+        if self._result is not None:
+            return self._result.stderr
+        else:
+            return None
+
+    @property
+    def stdout(self) -> str | None:
+        """Get the standard output from execution (read-only)."""
+        if self._result is not None:
+            return self._result.stdout
+        else:
+            return None
+
+    @property
+    def return_code(self) -> int | None:
+        """Get the return code from execution (read-only)."""
+        if self._result is not None:
+            return self._result.return_code
+        else:
+            return None
+
+    @property
+    def execution_time(self) -> float | None:
+        """Get the execution time (read-only)."""
+        if self._result is not None:
+            return self._result.execution_time
+        else:
+            return None
+
     def _parse_menu(self, menu_item: Menu) -> None:
         """Add a menu sequence from a Menu enum member.
 
@@ -248,7 +289,7 @@ class MultiwfnJob:
 
     def run(
         self,
-    ) -> MultiwfnResult:
+    ) -> tuple[str, str, int, float]:
         """Execute the Multiwfn job.
 
         Returns
@@ -293,7 +334,7 @@ class MultiwfnJob:
 
             try:
                 stdout, stderr = proc.communicate(timeout=self.timeout)
-                returncode = proc.returncode
+                return_code = proc.returncode
 
             except subprocess.TimeoutExpired as err:
                 proc.kill()
@@ -316,14 +357,10 @@ class MultiwfnJob:
             if self.verbose:
                 print(stdout)
 
-            self._result = MultiwfnResult(
-                stdout=stdout,
-                stderr=stderr,
-                returncode=returncode,
-                execution_time=execution_time,
-                commands=commands,
-                input_file=self._input_file,
-            )
+            self._stderr = stderr
+            self._stdout = stdout
+            self._return_code = return_code
+            self._execution_time = execution_time
 
             # Multiwfn often returns non-zero even on success in batch mode
             # Only fail on obvious errors (negative codes or very high codes)
@@ -337,13 +374,15 @@ class MultiwfnJob:
             ]
             has_error = any(ind in stderr.lower() for ind in error_indicators)
 
-            if (returncode is not None and returncode < 0) or has_error:
+            if (return_code is not None and return_code < 0) or has_error:
                 raise MultiwfnError(
-                    f"Multiwfn failed with return code {returncode}\n"
+                    f"Multiwfn failed with return code {return_code}\n"
                     f"STDERR: {stderr}"
                 )
 
-            return self._result
+            self._executed = True
+
+            return stdout, stderr, return_code, execution_time
 
     def __str__(self) -> str:
         return f"MultiwfnJob on {self._input_file.name}."
