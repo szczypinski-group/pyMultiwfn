@@ -27,11 +27,15 @@ class MultiwfnAnalysis:
         self,
         input_file: str | Path,
         analyses: Menu | list[Menu] | AnalysisClasses | None = None,
+        cached: bool = True,
     ) -> None:
         self.input_file = input_file
         self.analyses: list[Menu] = []
         if analyses is not None:
             self.add_menu(analyses)
+        self.results: dict[Menu, MultiwfnResult] = {}
+        self.jobs: list[MultiwfnJob] = []
+        self.cached = cached
 
     def run(
         self,
@@ -63,6 +67,10 @@ class MultiwfnAnalysis:
         verbose
             If True, print Multiwfn stdout during execution. Defaults to False.
 
+        cached,
+            If True, will used cached results for already calculated analyses;
+            otherwise, previous analysis will be overwritten.
+
         Return
         ------
             Unparsed result of the Multiwfn calculation.
@@ -74,6 +82,7 @@ class MultiwfnAnalysis:
             timeout=timeout,
             work_dir=work_dir,
             verbose=verbose,
+            cached=self.cached,
         )
 
         self._result = self._job.run()
@@ -102,6 +111,10 @@ class MultiwfnAnalysis:
             raise TypeError(
                 "Menu has to be a valid Menu enum or a list of Menu enums."
             )
+
+    #######################################################################
+    ### Convenience methods for bulk adding pre-defined AnalysisClasses ###
+    #######################################################################
 
     def _add_charges_menus(self) -> None:
         """Run all charge analyses."""

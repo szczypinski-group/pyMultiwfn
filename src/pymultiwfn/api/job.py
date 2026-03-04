@@ -44,6 +44,7 @@ class MultiwfnJob:
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
+        cached: bool = True,
     ) -> None:
         """Initialise the Mutliwfn job.
 
@@ -87,7 +88,6 @@ class MultiwfnJob:
 
         self._multiwfn = multiwfn if multiwfn is not None else Multiwfn()
         self._commands: list[str] = []
-        self._analysis = analysis
         self._result: MultiwfnResult | None = None
         self._timeout = self._validate_timeout(timeout)
 
@@ -98,10 +98,19 @@ class MultiwfnJob:
 
         self._work_dir = work_dir.resolve()
         self._verbose = verbose
+        self._cached = cached
 
         if analysis is not None:
+            self._analysis = analysis
             for menu_item in analysis.analyses:
                 self.add_menu(menu_item)
+
+        else:
+            self._analysis = MultiwfnAnalysis(
+                input_file=input_file,
+                analyses=[],
+                cached=cached,
+            )
 
     @classmethod
     def from_analysis(
@@ -111,6 +120,7 @@ class MultiwfnJob:
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
+        cached: bool | None = True,
     ) -> "MultiwfnJob":
         """Create a MultiwfnJob directly from a MultiwfnAnalysis.
 
@@ -154,6 +164,7 @@ class MultiwfnJob:
             timeout=timeout,
             work_dir=work_dir,
             verbose=verbose,
+            cached=cached if cached is not None else analysis.cached,
         )
 
     @classmethod
@@ -165,6 +176,7 @@ class MultiwfnJob:
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
+        cached: bool = True,
     ) -> "MultiwfnJob":
         """Create a MultiwfnJob directly from an input file.
 
@@ -206,7 +218,11 @@ class MultiwfnJob:
         can be useful for more direct integration with other software.
 
         """
-        analysis = MultiwfnAnalysis(input_file, analyses)
+        analysis = MultiwfnAnalysis(
+            input_file,
+            analyses,
+            cached=cached,
+        )
         return cls(
             input_file=input_file,
             analysis=analysis,
@@ -258,6 +274,17 @@ class MultiwfnJob:
     def verbose(self, value: bool) -> None:
         """Set the verbosity setting."""
         self._verbose = value
+
+    @property
+    def cached(self) -> bool:
+        """Get the cache setting."""
+        return self._cached
+
+    @cached.setter
+    def cached(self, value: bool) -> None:
+        """Set the verbosity setting."""
+        self._verbose = value
+        self._analysis.cached = value
 
     @property
     def work_dir(self) -> Path:
