@@ -3,7 +3,9 @@
 from pathlib import Path
 
 from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
+from pymultiwfn.api.logging import BatchLogger
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.analyses import AnalysisClasses
 from pymultiwfn.enums.menu import Menu
@@ -25,17 +27,35 @@ class MultiwfnAnalysis:
 
     def __init__(
         self,
-        input_file: str | Path,
+        input_file: str | Path | list[str | Path],
         analyses: Menu | list[Menu] | AnalysisClasses | None = None,
         cached: bool = True,
     ) -> None:
-        self.input_file = input_file
+        # Accept a single file or a list for batch runs.
+        if isinstance(input_file, (str, Path)):
+            self.input_files: list[Path] = [Path(input_file)]
+        else:
+            self.input_files = [Path(f) for f in input_file]
+
+        # Keep a single-file alias for backwards compatibility.
+        self.input_file: Path = self.input_files[0]
+
         self.analyses: list[Menu] = []
         if analyses is not None:
             self.add_menu(analyses)
         self.results: dict[Menu, MultiwfnResult] = {}
         self.jobs: list[MultiwfnJob] = []
         self.cached = cached
+
+        # Populated after run() completes.
+        self._logger: BatchLogger | None = None
+
+    @property
+    def log_path(self) -> Path | None:
+        """Path to the batch log file, available after :meth:`run`."""
+        if self._logger is not None:
+            return self._logger.log_path
+        return None
 
     def run(
         self,
@@ -44,73 +64,111 @@ class MultiwfnAnalysis:
         work_dir: Path | None = None,
         verbose: bool = False,
     ) -> None:
-        """Run Multiwfn job specified by the analysis.
+        """Run all queued Multiwfn analyses across all input files.
+
+        A batch log file is automatically written into *work_dir* (or the
+        current directory if *work_dir* is None). After completion the log
+        path is accessible via :attr:`log_path`.
 
         Parameters
         ----------
-        analysis
-            MultiwfnAnalysis to perform.
-
         multiwfn
-            Multiwfn instance with executable configuration. If None, a default
-            one will be created.
+            Multiwfn instance with executable configuration. If None, a
+            default one will be created.
 
         timeout
-            Optional timeout in seconds for the Multiwfn execution. If None,
-            there will be noe timeout, which might lead to hanging for complex
-            analysed (e.g., elaborate cube generation).
+            Optional timeout in seconds for each Multiwfn execution.
 
         work_dir
             Optional working directory for execution. If None, a temporary
             location will be used in the current directory.
 
         verbose
-            If True, print Multiwfn stdout during execution. Defaults to False.
-
-        cached,
-            If True, will used cached results for already calculated analyses;
-            otherwise, previous analysis will be overwritten.
-
-        Return
-        ------
-            Unparsed result of the Multiwfn calculation.
+            If True, print Multiwfn stdout during execution.
 
         """
-        for menu in self.analyses:
-            if self.cached and (menu in self.results):
-                pass
-            else:
-                self._create_and_run(
-                    analysis=menu,
-                    multiwfn=multiwfn,
-                    timeout=timeout,
-                    work_dir=work_dir,
-                    verbose=verbose,
-                )
+        # Resolve the log directory — put the log alongside the outputs.
+        log_dir = work_dir if work_dir is not None else Path.cwd()
+
+        logger = BatchLogger(log_dir=log_dir)
+        self._logger = logger
+
+        logger.start_batch(
+            files=self.input_files,
+            analyses=self.analyses,
+        )
+
+        try:
+            for input_file in self.input_files:
+                for menu in self.analyses:
+                    if self.cached and (menu in self.results):
+                        logger.log_job_skipped(
+                            input_file=str(input_file),
+                            analysis_name=menu.name,
+                            reason="cached result exists",
+                        )
+                    else:
+                        self._create_and_run(
+                            input_file=input_file,
+                            analysis=menu,
+                            multiwfn=multiwfn,
+                            timeout=timeout,
+                            work_dir=work_dir,
+                            verbose=verbose,
+                            logger=logger,
+                        )
+        finally:
+            # Always finalise the log, even if a job raises.
+            logger.end_batch()
 
     def _create_and_run(
         self,
+        input_file: Path,
         analysis: Menu,
         multiwfn: Multiwfn | None = None,
         timeout: int | None = None,
         work_dir: Path | None = None,
         verbose: bool = False,
+        logger: BatchLogger | None = None,
     ) -> None:
-        """Create and run MultiwfnJob.
-
-        Connection with the API.
-
-        """
+        """Create and run a single MultiwfnJob with automatic logging."""
         job = MultiwfnJob(
-            input_file=self.input_file,
+            input_file=input_file,
             analysis=analysis,
             multiwfn=multiwfn,
             timeout=timeout,
             work_dir=work_dir,
             verbose=verbose,
         )
-        job = job.run()
+
+        # Log the start.
+        log_entry = None
+        if logger is not None:
+            log_entry = logger.log_job_start(
+                input_file=str(input_file),
+                analysis_name=analysis.name,
+                commands=job.commands,
+            )
+
+        error: Exception | None = None
+        try:
+            job = job.run()
+        except (MultiwfnError, Exception) as exc:
+            error = exc
+
         self.jobs.append(job)
+
+        # Log the outcome.
+        if logger is not None and log_entry is not None:
+            logger.log_job_end(
+                entry=log_entry,
+                outcome=job._result,
+                error=error,
+            )
+
+        # Re-raise so the run() loop's try/finally still finalises the log.
+        if error is not None:
+            raise error
 
     def add_menu(
         self,
