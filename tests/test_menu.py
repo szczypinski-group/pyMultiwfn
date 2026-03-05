@@ -72,7 +72,10 @@ class TestMenuCategories:
             Menu.FUZZY_BOND_ORDER,
         ],
     )
-    def test_bond_order_menu_starts_with_9(self, item: Menu) -> None:
+    def test_bond_order_menu_starts_with_9(
+        self,
+        item: Menu,
+    ) -> None:
         """
         Test to ensure bond order analysis menu items start with '9'.
 
@@ -92,7 +95,10 @@ class TestMenuCategories:
             Menu.IGM_ANALYSIS,
         ],
     )
-    def test_weak_interaction_menu_starts_with_20(self, item: Menu) -> None:
+    def test_weak_interaction_menu_starts_with_20(
+        self,
+        item: Menu,
+    ) -> None:
         """
         Test to ensure weak interaction analysis menu items start with '20'.
 

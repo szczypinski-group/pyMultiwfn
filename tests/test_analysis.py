@@ -9,7 +9,6 @@ from unittest.mock import patch
 import pytest
 
 import pymultiwfn
-from pymultiwfn import Menu, MultiwfnAnalysis, MultiwfnConfig, MultiwfnResult
 
 # =============================================================================
 # Fixtures
@@ -17,7 +16,9 @@ from pymultiwfn import Menu, MultiwfnAnalysis, MultiwfnConfig, MultiwfnResult
 
 
 @pytest.fixture
-def mock_wfn_file(tmp_path: Path) -> Path:
+def mock_wfn_file(
+    tmp_path: Path,
+) -> Path:
     """Create a mock wavefunction file."""
     path = tmp_path / "test.wfn"
     path.write_text("mock wavefunction content")
@@ -25,7 +26,9 @@ def mock_wfn_file(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def mock_executable(tmp_path: Path) -> Path:
+def mock_executable(
+    tmp_path: Path,
+) -> Path:
     """Create a mock executable."""
     exe = tmp_path / "Multiwfn"
     exe.write_text("#!/bin/bash\necho 'mock output'")
@@ -34,15 +37,17 @@ def mock_executable(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def mock_config(mock_executable: Path) -> MultiwfnConfig:
+def mock_config(
+    mock_executable: Path,
+) -> pymultiwfn.MultiwfnConfig:
     """Create a mock config."""
-    return MultiwfnConfig(exe_path=mock_executable)
+    return pymultiwfn.MultiwfnConfig(exe_path=mock_executable)
 
 
 @pytest.fixture
-def mock_result() -> MultiwfnResult:
+def mock_result() -> pymultiwfn.MultiwfnResult:
     """Create a mock MultiwfnResult."""
-    return MultiwfnResult(
+    return pymultiwfn.MultiwfnResult(
         stdout="mock output",
         stderr="",
         returncode=0,
@@ -53,7 +58,10 @@ def mock_result() -> MultiwfnResult:
 
 
 @pytest.fixture
-def mol(mock_wfn_file: str, mock_config: MultiwfnConfig) -> MultiwfnAnalysis:
+def mol(
+    mock_wfn_file: str,
+    mock_config: pymultiwfn.MultiwfnConfig,
+) -> pymultiwfn.MultiwfnAnalysis:
     """Create an Analysis instance using pymultiwfn.load()."""
     return pymultiwfn.load(mock_wfn_file, mock_config)
 
@@ -66,18 +74,26 @@ def mol(mock_wfn_file: str, mock_config: MultiwfnConfig) -> MultiwfnAnalysis:
 class TestLoad:
     """Tests for pymultiwfn.load() function."""
 
-    def test_load_returns_analysis(self, mock_wfn_file: str) -> None:
+    def test_load_returns_analysis(
+        self,
+        mock_wfn_file: str,
+    ) -> None:
         """Positive: load returns MultiwfnAnalysis instance."""
         mol = pymultiwfn.load(mock_wfn_file)
-        assert isinstance(mol, MultiwfnAnalysis)
+        assert isinstance(mol, pymultiwfn.MultiwfnAnalysis)
 
-    def test_load_with_string_path(self, mock_wfn_file: str) -> None:
+    def test_load_with_string_path(
+        self,
+        mock_wfn_file: str,
+    ) -> None:
         """Positive: load accepts string path."""
         mol = pymultiwfn.load(str(mock_wfn_file))
         assert mol.filepath == mock_wfn_file
 
     def test_load_with_config(
-        self, mock_wfn_file: str, mock_config: MultiwfnConfig
+        self,
+        mock_wfn_file: str,
+        mock_config: pymultiwfn.MultiwfnConfig,
     ) -> None:
         """Positive: load accepts config parameter."""
         mol = pymultiwfn.load(mock_wfn_file, mock_config)
@@ -101,53 +117,76 @@ class TestLoad:
 class TestAnalysisInit:
     """Tests for MultiwfnAnalysis.__init__."""
 
-    def test_init_with_valid_file(self, mock_wfn_file: Path) -> None:
+    def test_init_with_valid_file(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Positive: Initialize with valid file path."""
-        mol = MultiwfnAnalysis(mock_wfn_file)
+        mol = pymultiwfn.MultiwfnAnalysis(mock_wfn_file)
         assert mol.filepath == mock_wfn_file
 
-    def test_init_with_string_path(self, mock_wfn_file: Path) -> None:
+    def test_init_with_string_path(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Positive: Initialize with string path."""
-        mol = MultiwfnAnalysis(str(mock_wfn_file))
+        mol = pymultiwfn.MultiwfnAnalysis(str(mock_wfn_file))
         assert mol.filepath == mock_wfn_file
 
     def test_init_with_config(
-        self, mock_wfn_file: Path, mock_config: MultiwfnConfig
+        self,
+        mock_wfn_file: Path,
+        mock_config: pymultiwfn.MultiwfnConfig,
     ) -> None:
         """Positive: Initialize with custom config."""
-        mol = MultiwfnAnalysis(mock_wfn_file, mock_config)
+        mol = pymultiwfn.MultiwfnAnalysis(mock_wfn_file, mock_config)
         assert mol.config == mock_config
 
     def test_init_file_not_found(self) -> None:
         """Negative: Raise FileNotFoundError for nonexistent file."""
         with pytest.raises(FileNotFoundError, match="File not found"):
-            MultiwfnAnalysis("/nonexistent/file.wfn")
+            pymultiwfn.MultiwfnAnalysis("/nonexistent/file.wfn")
 
-    def test_init_default_config(self, mock_wfn_file: Path) -> None:
+    def test_init_default_config(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Edge case: Default config is created when none provided."""
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        assert isinstance(mol.config, MultiwfnConfig)
+        mol = pymultiwfn.MultiwfnAnalysis(mock_wfn_file)
+        assert isinstance(mol.config, pymultiwfn.MultiwfnConfig)
 
 
 class TestAnalysisProperties:
     """Tests for MultiwfnAnalysis properties."""
 
-    def test_filepath_property(self, mol: MultiwfnAnalysis) -> None:
+    def test_filepath_property(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Positive: filepath property returns correct path."""
         assert isinstance(mol.filepath, Path)
         assert mol.filepath.exists()
 
-    def test_config_property(self, mol: MultiwfnAnalysis) -> None:
+    def test_config_property(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Positive: config property returns MultiwfnConfig."""
-        assert isinstance(mol.config, MultiwfnConfig)
+        assert isinstance(mol.config, pymultiwfn.MultiwfnConfig)
 
-    def test_config_setter(self, mol: MultiwfnAnalysis) -> None:
+    def test_config_setter(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Positive: config setter updates config."""
-        new_config = MultiwfnConfig(timeout=999)
+        new_config = pymultiwfn.MultiwfnConfig(timeout=999)
         mol.config = new_config
         assert mol.config.timeout == 999
 
-    def test_repr(self, mol: MultiwfnAnalysis) -> None:
+    def test_repr(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Positive: repr returns readable string."""
         r = repr(mol)
         assert "MultiwfnAnalysis" in r
@@ -158,24 +197,31 @@ class TestAnalysisRun:
     """Tests for MultiwfnAnalysis.run method."""
 
     def test_run_returns_result(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run returns MultiwfnResult."""
         with patch.object(mol, "run", return_value=mock_result):
-            result = mol.run(Menu.HIRSHFELD_CHARGE)
-            assert isinstance(result, MultiwfnResult)
+            result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
+            assert isinstance(result, pymultiwfn.MultiwfnResult)
 
     def test_run_with_verbose(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run accepts verbose parameter."""
         with patch.object(mol, "run", return_value=mock_result) as mock_run:
-            mol.run(Menu.HIRSHFELD_CHARGE, verbose=True)
+            mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE, verbose=True)
             mock_run.assert_called_once_with(
-                Menu.HIRSHFELD_CHARGE, verbose=True
+                pymultiwfn.Menu.HIRSHFELD_CHARGE, verbose=True
             )
 
-    def test_run_invalid_menu_type(self, mol: MultiwfnAnalysis) -> None:
+    def test_run_invalid_menu_type(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Negative: run with invalid menu type raises error."""
         with pytest.raises((TypeError, AttributeError)):
             mol.run("not_a_menu")  # type: ignore[arg-type]
@@ -185,50 +231,67 @@ class TestAnalysisRunMultiple:
     """Tests for MultiwfnAnalysis.run_multiple method."""
 
     def test_run_multiple_returns_result(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_multiple returns single MultiwfnResult."""
         with patch.object(mol, "run_multiple", return_value=mock_result):
             result = mol.run_multiple(
-                [Menu.HIRSHFELD_CHARGE, Menu.MAYER_BOND_ORDER]
+                [
+                    pymultiwfn.Menu.HIRSHFELD_CHARGE,
+                    pymultiwfn.Menu.MAYER_BOND_ORDER,
+                ]
             )
-            assert isinstance(result, MultiwfnResult)
+            assert isinstance(result, pymultiwfn.MultiwfnResult)
 
     def test_run_multiple_empty_list(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Edge case: empty menu list."""
         with patch.object(mol, "run_multiple", return_value=mock_result):
             result = mol.run_multiple([])
-            assert isinstance(result, MultiwfnResult)
+            assert isinstance(result, pymultiwfn.MultiwfnResult)
 
 
 class TestAnalysisRunBatch:
     """Tests for MultiwfnAnalysis.run_batch method."""
 
     def test_run_batch_returns_dict(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_batch returns dict of results."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_batch(
-                [Menu.HIRSHFELD_CHARGE, Menu.MAYER_BOND_ORDER]
+                [
+                    pymultiwfn.Menu.HIRSHFELD_CHARGE,
+                    pymultiwfn.Menu.MAYER_BOND_ORDER,
+                ]
             )
             assert isinstance(results, dict)
             assert "hirshfeld_charge" in results
             assert "mayer_bond_order" in results
 
-    def test_run_batch_empty_list(self, mol: MultiwfnAnalysis) -> None:
+    def test_run_batch_empty_list(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Edge case: empty menu list returns empty dict."""
         results = mol.run_batch([])
         assert results == {}
 
     def test_run_batch_keys_lowercase(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: result keys are lowercase menu names."""
         with patch.object(mol, "run", return_value=mock_result):
-            results = mol.run_batch([Menu.HIRSHFELD_CHARGE])
+            results = mol.run_batch([pymultiwfn.Menu.HIRSHFELD_CHARGE])
             assert all(key.islower() for key in results)
 
 
@@ -236,194 +299,255 @@ class TestAnalysisCategoryRunners:
     """Tests for category-specific run methods."""
 
     def test_run_charges(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_charges returns dict with charge results."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_charges()
             assert isinstance(results, dict)
-            assert len(results) == len(MultiwfnAnalysis.CHARGES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CHARGES)
 
     def test_run_bond_orders(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_bond_orders returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_bond_orders()
-            assert len(results) == len(MultiwfnAnalysis.BOND_ORDERS)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.BOND_ORDERS)
 
     def test_run_topology(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_topology returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_topology()
-            assert len(results) == len(MultiwfnAnalysis.TOPOLOGY)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.TOPOLOGY)
 
     def test_run_weak_interactions(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_weak_interactions returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_weak_interactions()
-            assert len(results) == len(MultiwfnAnalysis.WEAK_INTERACTIONS)
+            assert len(results) == len(
+                pymultiwfn.MultiwfnAnalysis.WEAK_INTERACTIONS
+            )
 
     def test_run_spectra(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_spectra returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_spectra()
-            assert len(results) == len(MultiwfnAnalysis.SPECTRA)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.SPECTRA)
 
     def test_run_surfaces(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_surfaces returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_surfaces()
-            assert len(results) == len(MultiwfnAnalysis.SURFACES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.SURFACES)
 
     def test_run_aromaticity(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_aromaticity returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_aromaticity()
-            assert len(results) == len(MultiwfnAnalysis.AROMATICITY)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.AROMATICITY)
 
     def test_run_cdft(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_cdft returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_cdft()
-            assert len(results) == len(MultiwfnAnalysis.CDFT)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CDFT)
 
     def test_run_cubes(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_cubes returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_cubes()
-            assert len(results) == len(MultiwfnAnalysis.CUBES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CUBES)
 
     def test_run_dos(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_dos returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_dos()
-            assert len(results) == len(MultiwfnAnalysis.DOS)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.DOS)
+
     def test_run_basin(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_basin returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_basin()
-            assert len(results) == len(MultiwfnAnalysis.BASIN)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.BASIN)
 
     def test_run_excitation(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_excitation returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_excitation()
-            assert len(results) == len(MultiwfnAnalysis.EXCITATION)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.EXCITATION)
+
     def test_run_orbital_composition(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_orbital_composition returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_orbital_composition()
-            assert len(results) == len(MultiwfnAnalysis.ORBITAL_COMPOSITION)
-    
+            assert len(results) == len(
+                pymultiwfn.MultiwfnAnalysis.ORBITAL_COMPOSITION
+            )
+
     def test_run_orbital_localization(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_orbital_localization returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_orbital_localization()
-            assert len(results) == len(MultiwfnAnalysis.ORBITAL_LOCALIZATION)
-    
+            assert len(results) == len(
+                pymultiwfn.MultiwfnAnalysis.ORBITAL_LOCALIZATION
+            )
+
     def test_run_fuzzy_space(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_fuzzy_space returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_fuzzy_space()
-            assert len(results) == len(MultiwfnAnalysis.FUZZY_SPACE)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.FUZZY_SPACE)
+
     def test_run_eda(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_eda returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_eda()
-            assert len(results) == len(MultiwfnAnalysis.EDA)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.EDA)
+
     def test_run_polarizability(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_polarizability returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_polarizability()
-            assert len(results) == len(MultiwfnAnalysis.POLARIZABILITY)
-    
+            assert len(results) == len(
+                pymultiwfn.MultiwfnAnalysis.POLARIZABILITY
+            )
+
     def test_run_wavefunction(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_wavefunction_analysis returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_wavefunction()
-            assert len(results) == len(MultiwfnAnalysis.WAVEFUNCTION)
+            assert len(results) == len(
+                pymultiwfn.MultiwfnAnalysis.WAVEFUNCTION
+            )
 
     def test_run_line_plots(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_line_plots returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_line_plots()
-            assert len(results) == len(MultiwfnAnalysis.LINE_PLOTS)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.LINE_PLOTS)
+
     def test_run_plane_maps(
-            self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
-            ) -> None:
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
+    ) -> None:
         """Positive: run_plane_maps returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_plane_maps()
-            assert len(results) == len(MultiwfnAnalysis.PLANE_MAPS)
-    
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.PLANE_MAPS)
+
+
 class TestAnalysisRunCategory:
     """Tests for MultiwfnAnalysis.run_category method."""
 
     def test_run_category_valid(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_category with valid category returns dict."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_category("charges")
             assert isinstance(results, dict)
-            assert len(results) == len(MultiwfnAnalysis.CHARGES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CHARGES)
 
-    def test_run_category_invalid(self, mol: MultiwfnAnalysis) -> None:
+    def test_run_category_invalid(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Negative: invalid category raises ValueError."""
         with pytest.raises(ValueError, match="Unknown category"):
             mol.run_category("invalid_category")
 
-    def test_run_category_case_sensitive(self, mol: MultiwfnAnalysis) -> None:
+    def test_run_category_case_sensitive(
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+    ) -> None:
         """Edge case: category names are case-sensitive."""
         with pytest.raises(ValueError, match="Unknown category"):
             mol.run_category("CHARGES")
 
     def test_run_category_all_categories_valid(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: all defined categories are valid."""
         with patch.object(mol, "run", return_value=mock_result):
-            for cat in MultiwfnAnalysis.CATEGORIES:
+            for cat in pymultiwfn.MultiwfnAnalysis.CATEGORIES:
                 results = mol.run_category(cat)
                 assert isinstance(results, dict)
 
@@ -432,7 +556,9 @@ class TestAnalysisRunAll:
     """Tests for MultiwfnAnalysis.run_all method."""
 
     def test_run_all_returns_nested_dict(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_all returns nested dict."""
         with patch.object(mol, "run", return_value=mock_result):
@@ -442,7 +568,9 @@ class TestAnalysisRunAll:
                 assert isinstance(cat_results, dict)
 
     def test_run_all_with_category_filter(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: run_all with specific categories."""
         with patch.object(mol, "run", return_value=mock_result):
@@ -452,15 +580,19 @@ class TestAnalysisRunAll:
             assert "bond_orders" in results
 
     def test_run_all_empty_categories(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Edge case: empty categories list runs all."""
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_all(categories=[])
-            assert len(results) == len(MultiwfnAnalysis.CATEGORIES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CATEGORIES)
 
     def test_run_all_invalid_category_ignored(
-        self, mol: MultiwfnAnalysis, mock_result: MultiwfnResult
+        self,
+        mol: pymultiwfn.MultiwfnAnalysis,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Edge case: invalid categories are silently ignored."""
         with patch.object(mol, "run", return_value=mock_result):
@@ -474,38 +606,38 @@ class TestAnalysisListMethods:
 
     def test_list_categories(self) -> None:
         """Positive: list_categories returns list of strings."""
-        categories = MultiwfnAnalysis.list_categories()
+        categories = pymultiwfn.MultiwfnAnalysis.list_categories()
         assert isinstance(categories, list)
         assert len(categories) > 0
         assert all(isinstance(c, str) for c in categories)
 
     def test_list_categories_contains_expected(self) -> None:
         """Positive: list_categories contains expected categories."""
-        categories = MultiwfnAnalysis.list_categories()
+        categories = pymultiwfn.MultiwfnAnalysis.list_categories()
         expected = ["charges", "bond_orders", "topology"]
         for cat in expected:
             assert cat in categories
 
     def test_list_analyses_all(self) -> None:
         """Positive: list_analyses without filter returns all."""
-        analyses = MultiwfnAnalysis.list_analyses()
+        analyses = pymultiwfn.MultiwfnAnalysis.list_analyses()
         assert isinstance(analyses, list)
         assert len(analyses) > 100
 
     def test_list_analyses_filtered(self) -> None:
         """Positive: list_analyses with category filter."""
-        analyses = MultiwfnAnalysis.list_analyses("charges")
-        assert len(analyses) == len(MultiwfnAnalysis.CHARGES)
+        analyses = pymultiwfn.MultiwfnAnalysis.list_analyses("charges")
+        assert len(analyses) == len(pymultiwfn.MultiwfnAnalysis.CHARGES)
         assert "hirshfeld_charge" in analyses
 
     def test_list_analyses_invalid_category(self) -> None:
         """Negative: invalid category raises ValueError."""
         with pytest.raises(ValueError, match="Unknown category"):
-            MultiwfnAnalysis.list_analyses("invalid")
+            pymultiwfn.MultiwfnAnalysis.list_analyses("invalid")
 
     def test_list_analyses_lowercase(self) -> None:
         """Positive: analysis names are lowercase."""
-        analyses = MultiwfnAnalysis.list_analyses("charges")
+        analyses = pymultiwfn.MultiwfnAnalysis.list_analyses("charges")
         assert all(a.islower() for a in analyses)
 
 
@@ -519,25 +651,27 @@ class TestEdgeCases:
 
     def test_analysis_categories_not_empty(self) -> None:
         """Edge case: all categories have at least one item."""
-        for cat, menus in MultiwfnAnalysis.CATEGORIES.items():
+        for cat, menus in pymultiwfn.MultiwfnAnalysis.CATEGORIES.items():
             assert len(menus) > 0, f"Category {cat} is empty"
 
     def test_analysis_categories_contain_menu_items(self) -> None:
         """Edge case: all category items are Menu enums."""
-        for _cat, menus in MultiwfnAnalysis.CATEGORIES.items():
+        for _cat, menus in pymultiwfn.MultiwfnAnalysis.CATEGORIES.items():
             for menu in menus:
-                assert isinstance(menu, Menu), f"{menu} is not a Menu enum"
+                assert isinstance(menu, pymultiwfn.Menu), (
+                    f"{menu} is not a Menu enum"
+                )
 
     def test_all_categories_in_list(self) -> None:
         """Edge case: list_categories matches CATEGORIES keys."""
-        listed = set(MultiwfnAnalysis.list_categories())
-        defined = set(MultiwfnAnalysis.CATEGORIES.keys())
+        listed = set(pymultiwfn.MultiwfnAnalysis.list_categories())
+        defined = set(pymultiwfn.MultiwfnAnalysis.CATEGORIES.keys())
         assert listed == defined
 
     def test_path_types(self, mock_wfn_file: Path) -> None:
         """Edge case: both str and Path work for filepath."""
-        mol1 = MultiwfnAnalysis(mock_wfn_file)
-        mol2 = MultiwfnAnalysis(str(mock_wfn_file))
+        mol1 = pymultiwfn.MultiwfnAnalysis(mock_wfn_file)
+        mol2 = pymultiwfn.MultiwfnAnalysis(str(mock_wfn_file))
         assert mol1.filepath == mol2.filepath
 
 
@@ -572,7 +706,7 @@ class TestWorkflow:
     """Integration tests for typical workflows."""
 
     def test_typical_workflow(
-        self, mock_wfn_file: str, mock_result: MultiwfnResult
+        self, mock_wfn_file: str, mock_result: pymultiwfn.MultiwfnResult
     ) -> None:
         """Positive: typical workflow works."""
         # Load molecule
@@ -580,11 +714,13 @@ class TestWorkflow:
 
         # Run analysis
         with patch.object(mol, "run", return_value=mock_result):
-            result = mol.run(Menu.HIRSHFELD_CHARGE)
-            assert isinstance(result, MultiwfnResult)
+            result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
+            assert isinstance(result, pymultiwfn.MultiwfnResult)
 
     def test_batch_workflow(
-        self, mock_wfn_file: str, mock_result: MultiwfnResult
+        self,
+        mock_wfn_file: str,
+        mock_result: pymultiwfn.MultiwfnResult,
     ) -> None:
         """Positive: batch workflow works."""
         mol = pymultiwfn.load(mock_wfn_file)
@@ -592,4 +728,4 @@ class TestWorkflow:
         with patch.object(mol, "run", return_value=mock_result):
             results = mol.run_charges()
             assert isinstance(results, dict)
-            assert len(results) == len(MultiwfnAnalysis.CHARGES)
+            assert len(results) == len(pymultiwfn.MultiwfnAnalysis.CHARGES)

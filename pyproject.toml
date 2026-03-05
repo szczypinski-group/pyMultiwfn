@@ -12,11 +12,10 @@ authors = [
     { name = "Filip T. Szczypiński", email = "filip.t.szczypinski@durham.ac.uk" },
 ]
 
-readme       = "README.md"
-license      = "MPL-2.0"
+readme = "README.md"
+license = "MPL-2.0"
 dependencies = [
     "matplotlib>=3.10.8",
-    "pytest>=9.0.2",
 ]
 
 [dependency-groups]
@@ -24,16 +23,17 @@ dev = [
     "pre-commit>=4.3.0",
     "interrogate>=1.7.0",
     "nox>=2025.10.16",
-    "pytest>=8.4.2",
+    "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.2",
 ]
 
 [tool.interrogate]
-verbose                    = 2
+verbose                    = 1
 ignore-setters             = true
 ignore-property-decorators = true
 ignore-magic               = true
+exclude                     = ["tests/**", "menu.py"]
 
 [tool.ruff]
 line-length = 79
@@ -52,7 +52,10 @@ lint.select = [
     "D",   # pydocstyle
 ]
 lint.ignore = [
+    "D102",  # Missing docstring in public method (interrogate)
+    "D103",  # Missing docstring in public function (interrogate)
     "D105",
+    "TD003",  # TODO GH issue links are not always possible
 ]
 
     [tool.ruff.lint.pydocstyle]

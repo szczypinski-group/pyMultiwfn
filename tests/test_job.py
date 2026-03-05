@@ -7,29 +7,38 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pymultiwfn import (
+    Menu,
     MultiwfnConfig,
     MultiwfnError,
     MultiwfnJob,
     MultiwfnJobBuilder,
 )
-from pymultiwfn.menu import Menu
 
 
 class TestMultiwfnJobBuilder:
     """Tests for MultiwfnJobBuilder."""
 
-    def test_builder_creation(self, mock_wfn_file: Path) -> None:
+    def test_builder_creation(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Builder can be created with input file."""
         builder = MultiwfnJobBuilder(mock_wfn_file)
         assert builder._input_file == mock_wfn_file
 
-    def test_builder_from_job(self, mock_wfn_file: Path) -> None:
+    def test_builder_from_job(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Builder can be created via MultiwfnJob.builder()."""
         builder = MultiwfnJob.builder(mock_wfn_file)
         assert isinstance(builder, MultiwfnJobBuilder)
 
     def test_with_config(
-        self, mock_wfn_file: Path, mock_executable: Path, temp_dir: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Builder accepts config."""
         config = MultiwfnConfig(exe_path=mock_executable, working_dir=temp_dir)
@@ -38,12 +47,18 @@ class TestMultiwfnJobBuilder:
         assert builder._exe_path == mock_executable
         assert builder._working_dir == temp_dir
 
-    def test_with_timeout(self, mock_wfn_file: Path) -> None:
+    def test_with_timeout(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Builder accepts timeout."""
         builder = MultiwfnJobBuilder(mock_wfn_file).with_timeout(300)
         assert builder._timeout == 300
 
-    def test_with_invalid_timeout(self, mock_wfn_file: Path) -> None:
+    def test_with_invalid_timeout(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Builder rejects invalid timeout."""
         with pytest.raises(ValueError, match="positive"):
             MultiwfnJobBuilder(mock_wfn_file).with_timeout(-1)
@@ -58,7 +73,10 @@ class TestMultiwfnJobBuilder:
 
     #     assert len(builder._commands) >= 1
 
-    def test_chaining(self, mock_wfn_file: Path) -> None:
+    def test_chaining(
+        self,
+        mock_wfn_file: Path,
+    ) -> None:
         """Builder methods can be chained."""
         builder = (
             MultiwfnJobBuilder(mock_wfn_file)
@@ -70,7 +88,11 @@ class TestMultiwfnJobBuilder:
         assert builder._timeout == 300
         assert len(builder._commands) >= 2  # Has commands from both sequences
 
-    def test_build(self, mock_wfn_file: Path, mock_executable: Path) -> None:
+    def test_build(
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
+    ) -> None:
         """Builder creates job."""
         config = MultiwfnConfig(exe_path=mock_executable)
         job = (
@@ -93,7 +115,9 @@ class TestMultiwfnJob:
     """Tests for MultiwfnJob."""
 
     def test_job_creation(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job can be created."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -102,7 +126,9 @@ class TestMultiwfnJob:
         assert job.input_file == mock_wfn_file
 
     def test_add_menu(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job accepts menu sequences."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -114,7 +140,9 @@ class TestMultiwfnJob:
         # Commands should contain menu entries (7 for charges)
 
     def test_add_multiple_sequences(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job combines multiple sequences."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -129,7 +157,9 @@ class TestMultiwfnJob:
         assert "9" in job.commands  # bond order menu
 
     def test_add_custom_commands(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job accepts custom command list."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -140,7 +170,9 @@ class TestMultiwfnJob:
         assert "7" in job.commands
 
     def test_clear_commands(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job can clear commands."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -153,7 +185,9 @@ class TestMultiwfnJob:
         assert len(job.commands) == 0
 
     def test_method_chaining(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job methods can be chained."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -170,7 +204,9 @@ class TestMultiwfnJobExecution:
     """Tests for job execution (mocked)."""
 
     def test_run_returns_result(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Run returns MultiwfnResult."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -190,7 +226,9 @@ class TestMultiwfnJobExecution:
         assert "output" in result.stdout  # stdout is decoded to string
 
     def test_run_captures_stderr(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Run captures stderr on success."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -211,7 +249,11 @@ class TestMultiwfnJobExecution:
         assert "warning" in result.stderr
         assert result.returncode == 0
 
-    def test_run_timeout(self, mock_wfn_file: Path, temp_dir: Path) -> None:
+    def test_run_timeout(
+        self,
+        mock_wfn_file: Path,
+        temp_dir: Path,
+    ) -> None:
         """Run raises error on timeout."""
         # Create a fake executable that sleeps
         if platform.system() == "Windows":
@@ -230,7 +272,9 @@ class TestMultiwfnJobExecution:
             job.run()
 
     def test_run_stores_result(
-        self, mock_wfn_file: Path, mock_executable: Path
+        self,
+        mock_wfn_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Run stores result on job."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -253,7 +297,9 @@ class TestMultiwfnJobWithRealFiles:
 
     @pytest.mark.real_files
     def test_job_with_real_wfx(
-        self, real_wfx_file: Path, mock_executable: Path
+        self,
+        real_wfx_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job accepts real .wfx file."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -264,7 +310,9 @@ class TestMultiwfnJobWithRealFiles:
 
     @pytest.mark.real_files
     def test_job_with_real_molden(
-        self, real_molden_file: Path, mock_executable: Path
+        self,
+        real_molden_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Job accepts real .molden file."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -275,7 +323,9 @@ class TestMultiwfnJobWithRealFiles:
 
     @pytest.mark.real_files
     def test_builder_with_real_file(
-        self, real_wfx_file: Path, mock_executable: Path
+        self,
+        real_wfx_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Builder works with real file."""
         config = MultiwfnConfig(exe_path=mock_executable)

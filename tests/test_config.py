@@ -53,19 +53,28 @@ class TestMultiwfnConfig:
         assert config.timeout == 300
         assert config.verbose is True
 
-    def test_explicit_exe_path_exists(self, mock_executable: Path) -> None:
+    def test_explicit_exe_path_exists(
+        self,
+        mock_executable: Path,
+    ) -> None:
         """Config uses explicit exe_path when it exists."""
         config = MultiwfnConfig(exe_path=mock_executable)
         assert config.executable == mock_executable
 
-    def test_explicit_exe_path_not_found(self, temp_dir: Path) -> None:
+    def test_explicit_exe_path_not_found(
+        self,
+        temp_dir: Path,
+    ) -> None:
         """Config raises error when explicit exe_path doesn't exist."""
         config = MultiwfnConfig(exe_path=temp_dir / "nonexistent")
 
         with pytest.raises(MultiwfnError, match="not found"):
             _ = config.executable
 
-    def test_executable_cached(self, mock_executable: Path) -> None:
+    def test_executable_cached(
+        self,
+        mock_executable: Path,
+    ) -> None:
         """Executable resolution is cached."""
         config = MultiwfnConfig(exe_path=mock_executable)
 
@@ -75,7 +84,9 @@ class TestMultiwfnConfig:
         assert exe1 is exe2
 
     def test_executable_not_found_anywhere(
-        self, temp_dir: Path, monkeypatch: pytest
+        self,
+        temp_dir: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Config raises error when executable not found anywhere."""
         # Ensure shutil.which returns None
@@ -100,14 +111,20 @@ class TestMultiwfnConfigWithRealExecutable:
     """Tests using real Multiwfn executable."""
 
     @pytest.mark.requires_multiwfn
-    def test_finds_real_executable(self, real_executable: Path) -> None:
+    def test_finds_real_executable(
+        self,
+        real_executable: Path,
+    ) -> None:
         """Config can find real Multiwfn executable."""
         config = MultiwfnConfig(exe_path=real_executable)
         assert config.executable.exists()
         assert "Multiwfn" in config.executable.name
 
     @pytest.mark.requires_multiwfn
-    def test_auto_discovery(self, project_root: Path) -> None:
+    def test_auto_discovery(
+        self,
+        project_root: Path,
+    ) -> None:
         """Config auto-discovers executable in bin/ folder."""
         # This test relies on the walk-up logic finding bin/
         config = MultiwfnConfig()

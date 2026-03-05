@@ -12,11 +12,11 @@ from pathlib import Path
 import pytest
 
 from pymultiwfn import (
+    Menu,
     MultiwfnConfig,
     MultiwfnError,
     MultiwfnJob,
 )
-from pymultiwfn.menu import Menu
 
 # =============================================================================
 # Tests with Real Wavefunction Files (no Multiwfn needed)
@@ -28,7 +28,9 @@ class TestRealFileLoading:
     """Tests that load real wavefunction files."""
 
     def test_load_wfx_file(
-        self, real_wfx_file: Path, mock_executable: Path
+        self,
+        real_wfx_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Can create job with real .wfx file."""
         self._extracted_from_test_load_molden_file_3(
@@ -36,7 +38,9 @@ class TestRealFileLoading:
         )
 
     def test_load_molden_file(
-        self, real_molden_file: Path, mock_executable: Path
+        self,
+        real_molden_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Can create job with real .molden file."""
         self._extracted_from_test_load_molden_file_3(
@@ -48,7 +52,10 @@ class TestRealFileLoading:
     # Rename this here and in `test_load_wfx_file` and
     # `test_load_molden_file`
     def _extracted_from_test_load_molden_file_3(
-        self, mock_executable: Path, arg1: Path, arg2: str
+        self,
+        mock_executable: Path,
+        arg1: Path,
+        arg2: str,
     ) -> None:
         config = MultiwfnConfig(exe_path=mock_executable)
         job = MultiwfnJob(arg1, config=config)
@@ -56,7 +63,10 @@ class TestRealFileLoading:
         assert job.input_file.exists()
         assert job.input_file.suffix == arg2
 
-    def test_wfx_file_content(self, real_wfx_file: Path) -> None:
+    def test_wfx_file_content(
+        self,
+        real_wfx_file: Path,
+    ) -> None:
         """Verify .wfx file has expected content structure."""
         content = real_wfx_file.read_text()
 
@@ -64,7 +74,9 @@ class TestRealFileLoading:
         assert "<Number of Nuclei>" in content or "Number of Nuclei" in content
 
     def test_builder_with_real_files(
-        self, real_wfx_file: Path, mock_executable: Path
+        self,
+        real_wfx_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Builder pattern works with real files."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -98,7 +110,10 @@ class TestRealMultiwfnExecution:
     """
 
     def test_hirshfeld_charge(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_wfx_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Run actual Hirshfeld charge analysis."""
         config = MultiwfnConfig(
@@ -130,11 +145,14 @@ class TestRealMultiwfnExecution:
         assert abs(total) < 1.0  # Reasonable for most molecules
 
     def test_mayer_bond_order(
-        self, real_molden_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_molden_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Run actual Mayer bond order analysis.
-        
-        Note: Uses .molden file because Mayer bond order requires basis 
+
+        Note: Uses .molden file because Mayer bond order requires basis
         function information which .wfx files don't contain.
         """
         config = MultiwfnConfig(
@@ -183,7 +201,10 @@ class TestRealMultiwfnExecution:
     #         pytest.skip("Could not parse critical points from output")
 
     def test_multiple_analyses(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_wfx_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Run multiple analyses in sequence."""
         config = MultiwfnConfig(
@@ -212,7 +233,10 @@ class TestRealMultiwfnExecution:
             pytest.skip("Could not parse any results from output")
 
     def test_wavefunction_check(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_wfx_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Run wavefunction check."""
         config = MultiwfnConfig(
@@ -234,7 +258,10 @@ class TestRealMultiwfnExecution:
         )
 
     def test_save_and_reload_output(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_wfx_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Save output and verify it can be reparsed."""
         config = MultiwfnConfig(
@@ -274,7 +301,10 @@ class TestEndToEndWorkflows:
     """Full workflow tests."""
 
     def test_complete_analysis_workflow(
-        self, real_wfx_file: Path, real_executable: Path, temp_dir: Path
+        self,
+        real_wfx_file: Path,
+        real_executable: Path,
+        temp_dir: Path,
     ) -> None:
         """Complete analysis workflow from file to parsed results."""
         # 1. Create config
@@ -347,7 +377,10 @@ class TestEndToEndWorkflows:
 class TestErrorHandling:
     """Tests for error conditions."""
 
-    def test_missing_input_file(self, mock_executable: Path) -> None:
+    def test_missing_input_file(
+        self,
+        mock_executable: Path,
+    ) -> None:
         """Error when input file doesn't exist."""
         config = MultiwfnConfig(exe_path=mock_executable)
 
@@ -355,7 +388,9 @@ class TestErrorHandling:
             MultiwfnJob(Path("/nonexistent/file.wfx"), config=config)
 
     def test_missing_executable(
-        self, mock_wfn_file: Path, temp_dir: Path
+        self,
+        mock_wfn_file: Path,
+        temp_dir: Path,
     ) -> None:
         """Error when executable doesn't exist."""
         from pymultiwfn import MultiwfnError
@@ -376,7 +411,9 @@ class TestFileCompatibility:
 
     @pytest.mark.real_files
     def test_wfx_extension(
-        self, real_wfx_file: Path, mock_executable: Path
+        self,
+        real_wfx_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Accept .wfx files."""
         config = MultiwfnConfig(exe_path=mock_executable)
@@ -385,7 +422,9 @@ class TestFileCompatibility:
 
     @pytest.mark.real_files
     def test_molden_extension(
-        self, real_molden_file: Path, mock_executable: Path
+        self,
+        real_molden_file: Path,
+        mock_executable: Path,
     ) -> None:
         """Accept .molden files."""
         config = MultiwfnConfig(exe_path=mock_executable)
