@@ -5,8 +5,12 @@ interact with :class:`BatchLogger` directly — it is instantiated
 automatically when :meth:`MultiwfnAnalysis.run` executes and a log file
 is written alongside the calculation outputs.
 
+Uses Python's standard :mod:`logging` package with a dedicated
+``FileHandler`` per batch run.
+
 """
 
+import logging
 import textwrap
 import time
 from dataclasses import dataclass, field
@@ -67,11 +71,18 @@ class BatchLogSummary:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# BatchLogger
+# Constants
 # ─────────────────────────────────────────────────────────────────────────────
 
 _SNIPPET_LENGTH = 2000
 _SEP_WIDTH = 78
+_LOG_FMT = "%(asctime)s | %(levelname)-8s | %(message)s"
+_LOG_DATEFMT = "%Y-%m-%d %H:%M:%S"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BatchLogger
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 class BatchLogger:
@@ -79,6 +90,9 @@ class BatchLogger:
 
     This class is **not** part of the public API. It is created and managed
     automatically by :class:`MultiwfnAnalysis` during execution.
+
+    Wraps a :class:`logging.Logger` with a dedicated :class:`logging.FileHandler`
+    that is removed and closed when the batch ends.
 
     """
 
@@ -107,7 +121,23 @@ class BatchLogger:
         self._input_files: list[str] = []
         self._analysis_names: list[str] = []
 
-        self._fh = open(self._log_path, "w", encoding="utf-8")  # noqa: SIM115
+        # Set up a namespaced logger so multiple concurrent batches don't
+        # collide.  The unique hex suffix keeps each logger/handler isolated.
+        logger_name = f"pymultiwfn.batch.{uuid4().hex[:8]}"
+        self._logger = logging.getLogger(logger_name)
+        self._logger.setLevel(logging.DEBUG)
+        # Prevent propagation to the root logger — this is a file-only log.
+        self._logger.propagate = False
+
+        formatter = logging.Formatter(fmt=_LOG_FMT, datefmt=_LOG_DATEFMT)
+        self._file_handler = logging.FileHandler(
+            self._log_path, mode="w", encoding="utf-8",
+        )
+        self._file_handler.setLevel(logging.DEBUG)
+        self._file_handler.setFormatter(formatter)
+        self._logger.addHandler(self._file_handler)
+
+    # ── public properties ────────────────────────────────────────────────
 
     @property
     def log_path(self) -> Path:
@@ -147,7 +177,7 @@ class BatchLogger:
         self._write_summary(summary)
         self._write_failed_job_details()
         self._write_footer()
-        self._fh.close()
+        self._close()
 
     # ── per-job logging ──────────────────────────────────────────────────
 
@@ -165,7 +195,13 @@ class BatchLogger:
             start_time=datetime.now(),
         )
         self._entries.append(entry)
-        self._write_job_start(entry)
+
+        seq_str = " -> ".join(entry.commands) if entry.commands else "(none)"
+        self._logger.info(
+            "JOB START | %s | file: %s", entry.analysis_name, entry.input_file,
+        )
+        self._logger.info("  Sequence: %s", seq_str)
+
         return entry
 
     def log_job_end(
@@ -211,7 +247,10 @@ class BatchLogger:
             error_message=reason,
         )
         self._entries.append(entry)
-        self._write_job_skipped(entry)
+        self._logger.info(
+            "SKIPPED | %s | file: %s | reason: %s",
+            analysis_name, str(input_file), reason,
+        )
 
     # ── error helpers ────────────────────────────────────────────────────
 
@@ -289,109 +328,109 @@ class BatchLogger:
                 summary.total_execution_time += entry.execution_time
         return summary
 
-    # ── file writing ─────────────────────────────────────────────────────
-
-    def _w(self, text: str) -> None:
-        self._fh.write(text + "\n")
-        self._fh.flush()
-
-    def _sep(self, char: str = "=") -> None:
-        self._w(char * _SEP_WIDTH)
+    # ── writing via logging ──────────────────────────────────────────────
 
     def _write_header(self) -> None:
-        self._sep("=")
-        self._w("  PYMULTIWFN BATCH LOG")
-        self._sep("=")
-        self._w(f"  Started : {self._batch_start:%Y-%m-%d %H:%M:%S}")
-        self._w(f"  Log file: {self._log_path}")
-        self._w("")
-        self._w(f"  Input files ({len(self._input_files)}):")
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info("  PYMULTIWFN BATCH LOG")
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info("  Log file: %s", self._log_path)
+        self._logger.info("")
+        self._logger.info("  Input files (%d):", len(self._input_files))
         for f in self._input_files:
-            self._w(f"    - {f}")
+            self._logger.info("    - %s", f)
         if self._analysis_names:
-            self._w(f"\n  Analyses ({len(self._analysis_names)}):")
+            self._logger.info("")
+            self._logger.info(
+                "  Analyses (%d):", len(self._analysis_names),
+            )
             for a in self._analysis_names:
-                self._w(f"    - {a}")
-        self._sep("=")
-        self._w("")
-
-    def _write_job_start(self, entry: JobLogEntry) -> None:
-        self._sep("-")
-        self._w(
-            f"  JOB START | {entry.analysis_name}"
-            f"  |  file: {entry.input_file}"
-        )
-        self._w(f"  Time    : {entry.start_time:%H:%M:%S}")
-        seq_str = " -> ".join(entry.commands) if entry.commands else "(none)"
-        self._w(f"  Sequence: {seq_str}")
-        self._sep("-")
+                self._logger.info("    - %s", a)
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info("")
 
     def _write_job_end(self, entry: JobLogEntry) -> None:
-        status_tag = entry.status.value
         elapsed = (
             f"{entry.execution_time:.2f}s"
             if entry.execution_time is not None
             else "n/a"
         )
 
-        self._w(f"  RESULT: {status_tag}  |  Multiwfn time: {elapsed}")
-        if entry.return_code is not None:
-            self._w(f"  Return code: {entry.return_code}")
+        if entry.status == JobStatus.SUCCESS:
+            self._logger.info(
+                "JOB END   | %s | file: %s | %s | time: %s | rc: %s",
+                entry.analysis_name,
+                entry.input_file,
+                entry.status.value,
+                elapsed,
+                entry.return_code,
+            )
+        elif entry.status == JobStatus.TIMEOUT:
+            self._logger.error(
+                "JOB END   | %s | file: %s | %s | time: %s | rc: %s",
+                entry.analysis_name,
+                entry.input_file,
+                entry.status.value,
+                elapsed,
+                entry.return_code,
+            )
+            self._write_error_block(entry)
+        else:
+            # FAILED or unexpected
+            self._logger.error(
+                "JOB END   | %s | file: %s | %s | time: %s | rc: %s",
+                entry.analysis_name,
+                entry.input_file,
+                entry.status.value,
+                elapsed,
+                entry.return_code,
+            )
+            self._write_error_block(entry)
 
-        if entry.status in (JobStatus.FAILED, JobStatus.TIMEOUT):
-            self._w("")
-            self._w("  ERROR DETAILS:")
-            if entry.error_message:
-                for line in textwrap.wrap(
-                    entry.error_message, width=_SEP_WIDTH - 4
-                ):
-                    self._w(f"    {line}")
-            if entry.stderr_snippet:
-                self._w("")
-                self._w("  STDERR (first chars):")
-                for line in entry.stderr_snippet.splitlines()[:20]:
-                    self._w(f"    | {line}")
-            if entry.stdout_snippet:
-                self._w("")
-                self._w("  STDOUT (last chars):")
-                for line in entry.stdout_snippet.splitlines()[-20:]:
-                    self._w(f"    | {line}")
-
-        self._w("")
-
-    def _write_job_skipped(self, entry: JobLogEntry) -> None:
-        self._w(
-            f"  SKIPPED | {entry.analysis_name}"
-            f"  |  file: {entry.input_file}"
-            f"  |  reason: {entry.error_message}"
-        )
-        self._w("")
+    def _write_error_block(self, entry: JobLogEntry) -> None:
+        """Write detailed error context at ERROR level."""
+        if entry.error_message:
+            for line in textwrap.wrap(
+                entry.error_message, width=_SEP_WIDTH - 4,
+            ):
+                self._logger.error("  %s", line)
+        if entry.stderr_snippet:
+            self._logger.debug("  STDERR (first %d chars):", self._snippet_length)
+            for line in entry.stderr_snippet.splitlines()[:30]:
+                self._logger.debug("    | %s", line)
+        if entry.stdout_snippet:
+            self._logger.debug("  STDOUT (last %d chars):", self._snippet_length)
+            for line in entry.stdout_snippet.splitlines()[-30:]:
+                self._logger.debug("    | %s", line)
 
     def _write_summary(self, summary: BatchLogSummary) -> None:
-        self._sep("=")
-        self._w("  BATCH SUMMARY")
-        self._sep("=")
-        self._w(f"  Total files       : {summary.total_files}")
-        self._w(f"  Total jobs        : {summary.total_jobs}")
-        self._w(f"  Succeeded         : {summary.succeeded}")
-        self._w(f"  Failed            : {summary.failed}")
-        self._w(f"  Timed out         : {summary.timed_out}")
-        self._w(f"  Skipped (cached)  : {summary.skipped}")
-        self._w(f"  Wall time         : {summary.total_wall_time:.2f}s")
-        self._w(f"  Multiwfn CPU time : {summary.total_execution_time:.2f}s")
-        self._w("")
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info("  BATCH SUMMARY")
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info("  Total files       : %d", summary.total_files)
+        self._logger.info("  Total jobs        : %d", summary.total_jobs)
+        self._logger.info("  Succeeded         : %d", summary.succeeded)
+        self._logger.info("  Failed            : %d", summary.failed)
+        self._logger.info("  Timed out         : %d", summary.timed_out)
+        self._logger.info("  Skipped (cached)  : %d", summary.skipped)
+        self._logger.info("  Wall time         : %.2fs", summary.total_wall_time)
+        self._logger.info(
+            "  Multiwfn CPU time : %.2fs", summary.total_execution_time,
+        )
+        self._logger.info("")
 
+        # Per-file breakdown
         files_seen: dict[str, dict[str, int]] = {}
         for entry in self._entries:
             f = entry.input_file
             files_seen.setdefault(f, {s.value: 0 for s in JobStatus})
             files_seen[f][entry.status.value] += 1
 
-        self._w("  Per-file breakdown:")
+        self._logger.info("  Per-file breakdown:")
         for fname, counts in files_seen.items():
             parts = [f"{k}={v}" for k, v in counts.items() if v > 0]
-            self._w(f"    {fname}: {', '.join(parts)}")
-        self._w("")
+            self._logger.info("    %s: %s", fname, ", ".join(parts))
+        self._logger.info("")
 
     def _write_failed_job_details(self) -> None:
         failures = [
@@ -402,25 +441,37 @@ class BatchLogger:
         if not failures:
             return
 
-        self._sep("-")
-        self._w(f"  FAILED / TIMED-OUT JOBS ({len(failures)})")
-        self._sep("-")
+        self._logger.warning("-" * _SEP_WIDTH)
+        self._logger.warning(
+            "  FAILED / TIMED-OUT JOBS (%d)", len(failures),
+        )
+        self._logger.warning("-" * _SEP_WIDTH)
         for i, entry in enumerate(failures, 1):
-            self._w(
-                f"  {i}. [{entry.status.value}] {entry.analysis_name}"
-                f"  |  {entry.input_file}"
+            self._logger.warning(
+                "  %d. [%s] %s | %s",
+                i, entry.status.value, entry.analysis_name, entry.input_file,
             )
             if entry.error_message:
                 for line in textwrap.wrap(
-                    entry.error_message, width=_SEP_WIDTH - 8
+                    entry.error_message, width=_SEP_WIDTH - 8,
                 ):
-                    self._w(f"       {line}")
-        self._w("")
+                    self._logger.warning("       %s", line)
+        self._logger.warning("")
 
     def _write_footer(self) -> None:
-        self._sep("=")
-        self._w(f"  Finished: {self._batch_end:%Y-%m-%d %H:%M:%S}")
-        self._sep("=")
+        self._logger.info("=" * _SEP_WIDTH)
+        self._logger.info(
+            "  Finished: %s", self._batch_end.strftime("%Y-%m-%d %H:%M:%S"),
+        )
+        self._logger.info("=" * _SEP_WIDTH)
+
+    # ── teardown ─────────────────────────────────────────────────────────
+
+    def _close(self) -> None:
+        """Remove the file handler and close the underlying file."""
+        self._file_handler.flush()
+        self._file_handler.close()
+        self._logger.removeHandler(self._file_handler)
 
     def __enter__(self) -> "BatchLogger":
         return self
@@ -433,5 +484,5 @@ class BatchLogger:
     ) -> None:
         if self._batch_start is not None and self._batch_end is None:
             self.end_batch()
-        if not self._fh.closed:
-            self._fh.close()
+        else:
+            self._close()
