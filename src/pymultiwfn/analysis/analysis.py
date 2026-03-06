@@ -7,6 +7,7 @@ from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.logging import BatchLogger
 from pymultiwfn.api.multiwfn import Multiwfn
+from pymultiwfn.api.result_store import ResultStore
 from pymultiwfn.enums.analyses import AnalysisClasses
 from pymultiwfn.enums.menu import Menu
 
@@ -49,6 +50,7 @@ class MultiwfnAnalysis:
 
         # Populated after run() completes.
         self._logger: BatchLogger | None = None
+        self._stores: dict[Path, ResultStore] = {}
 
     @property
     def log_path(self) -> Path | None:
@@ -56,6 +58,10 @@ class MultiwfnAnalysis:
         if self._logger is not None:
             return self._logger.log_path
         return None
+
+    def get_store(self, input_file: Path | str) -> ResultStore | None:
+        """Return the :class:`ResultStore` for *input_file*, if available."""
+        return self._stores.get(Path(input_file))
 
     def run(
         self,
@@ -67,8 +73,10 @@ class MultiwfnAnalysis:
         """Run all queued Multiwfn analyses across all input files.
 
         A batch log file is automatically written into *work_dir* (or the
-        current directory if *work_dir* is None). After completion the log
-        path is accessible via :attr:`log_path`.
+        current directory if *work_dir* is None). Parsed results are
+        accumulated into a per-molecule ``.json`` file in the same
+        directory. After completion the log path is accessible via
+        :attr:`log_path`.
 
         Parameters
         ----------
@@ -87,7 +95,6 @@ class MultiwfnAnalysis:
             If True, print Multiwfn stdout during execution.
 
         """
-        # Resolve the log directory — put the log alongside the outputs.
         log_dir = work_dir if work_dir is not None else Path.cwd()
 
         logger = BatchLogger(log_dir=log_dir)
@@ -98,14 +105,24 @@ class MultiwfnAnalysis:
             analyses=self.analyses,
         )
 
+        # Create a ResultStore per input file.
+        for input_file in self.input_files:
+            store = ResultStore(
+                input_file=input_file,
+                work_dir=log_dir,
+            )
+            self._stores[input_file] = store
+
         try:
             for input_file in self.input_files:
+                store = self._stores[input_file]
                 for menu in self.analyses:
-                    if self.cached and (menu in self.results):
+                    # Check the JSON store for a cached result.
+                    if self.cached and store.has_result(menu):
                         logger.log_job_skipped(
                             input_file=str(input_file),
                             analysis_name=menu.name,
-                            reason="cached result exists",
+                            reason="cached result exists in JSON store",
                         )
                     else:
                         self._create_and_run(
@@ -116,9 +133,9 @@ class MultiwfnAnalysis:
                             work_dir=work_dir,
                             verbose=verbose,
                             logger=logger,
+                            store=store,
                         )
         finally:
-            # Always finalise the log, even if a job raises.
             logger.end_batch()
 
     def _create_and_run(
@@ -130,6 +147,7 @@ class MultiwfnAnalysis:
         work_dir: Path | None = None,
         verbose: bool = False,
         logger: BatchLogger | None = None,
+        store: ResultStore | None = None,
     ) -> None:
         """Create and run a single MultiwfnJob with automatic logging."""
         job = MultiwfnJob(
@@ -141,7 +159,6 @@ class MultiwfnAnalysis:
             verbose=verbose,
         )
 
-        # Log the start.
         log_entry = None
         if logger is not None:
             log_entry = logger.log_job_start(
@@ -166,7 +183,10 @@ class MultiwfnAnalysis:
                 error=error,
             )
 
-        # Re-raise so the run() loop's try/finally still finalises the log.
+        # Parse and persist the result into the per-molecule JSON.
+        if error is None and store is not None and job.stdout is not None:
+            store.store_result(analysis=analysis, stdout=job.stdout)
+
         if error is not None:
             raise error
 
