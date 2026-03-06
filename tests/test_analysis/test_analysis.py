@@ -10,6 +10,8 @@ from pymultiwfn.enums.menu import Menu
 
 
 class TestMultiwfnAnalysisInit:
+    """Tests for initializing MultiwfnAnalysis."""
+
     def test_single_file(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
         assert mol.input_file == mock_wfn_file
@@ -55,6 +57,8 @@ class TestMultiwfnAnalysisInit:
 
 
 class TestAddMenu:
+    """Tests for the add_menu() method of MultiwfnAnalysis."""
+
     def test_add_single(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
         mol.add_menu(Menu.HIRSHFELD_CHARGE)
@@ -127,6 +131,8 @@ class TestConvenienceMethods:
 
 
 class TestLogPath:
+    """Tests for the log_path property of MultiwfnAnalysis."""
+
     def test_log_path_none_before_run(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
         assert mol.log_path is None

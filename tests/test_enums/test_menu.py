@@ -6,6 +6,8 @@ from pymultiwfn.enums.menu import Menu, custom_sequence
 
 
 class TestMenuStructure:
+    """Tests for the structure of the Menu enum."""
+
     def test_is_enum(self) -> None:
         assert hasattr(Menu, "__members__")
         assert len(Menu) > 100
@@ -17,6 +19,8 @@ class TestMenuStructure:
 
 
 class TestGetSequence:
+    """Tests for Menu.get_sequence()."""
+
     def test_returns_tuple(self) -> None:
         seq = Menu.HIRSHFELD_CHARGE.get_sequence()
         assert isinstance(seq, tuple)
@@ -30,11 +34,16 @@ class TestGetSequence:
 
 
 class TestMenuCategories:
+    """Tests for Menu category properties."""
+
     @pytest.mark.parametrize(
         "item",
         [
-            Menu.HIRSHFELD_CHARGE, Menu.MULLIKEN_POPULATION,
-            Menu.ADCH_CHARGE, Menu.RESP_CHARGE, Menu.CM5_CHARGE,
+            Menu.HIRSHFELD_CHARGE,
+            Menu.MULLIKEN_POPULATION,
+            Menu.ADCH_CHARGE,
+            Menu.RESP_CHARGE,
+            Menu.CM5_CHARGE,
         ],
     )
     def test_charges_start_with_7(self, item: Menu) -> None:
@@ -70,6 +79,8 @@ class TestMenuCategories:
 
 
 class TestSearch:
+    """Tests for Menu.search()."""
+
     def test_search_returns_matches(self) -> None:
         results = Menu.search("hirshfeld")
         assert Menu.HIRSHFELD_CHARGE in results
@@ -83,6 +94,8 @@ class TestSearch:
 
 
 class TestListAll:
+    """Tests for Menu.list_all()."""
+
     def test_returns_names(self) -> None:
         names = Menu.list_all()
         assert "HIRSHFELD_CHARGE" in names
@@ -93,6 +106,8 @@ class TestListAll:
 
 
 class TestCustomSequence:
+    """Tests for the custom_sequence() function."""
+
     def test_appends_q(self) -> None:
         assert custom_sequence(["7", "1"]) == ["7", "1", "q"]
 

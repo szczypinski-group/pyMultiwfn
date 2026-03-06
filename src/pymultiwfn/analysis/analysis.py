@@ -7,7 +7,7 @@ from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.logging import BatchLogger
 from pymultiwfn.api.multiwfn import Multiwfn
-from pymultiwfn.api.result_store import ResultStore
+from pymultiwfn.api.storage import ResultStore
 from pymultiwfn.enums.analyses import AnalysisClasses
 from pymultiwfn.enums.menu import Menu
 
@@ -55,9 +55,7 @@ class MultiwfnAnalysis:
     @property
     def log_path(self) -> Path | None:
         """Path to the batch log file, available after :meth:`run`."""
-        if self._logger is not None:
-            return self._logger.log_path
-        return None
+        return self._logger.log_path if self._logger is not None else None
 
     def get_store(self, input_file: Path | str) -> ResultStore | None:
         """Return the :class:`ResultStore` for *input_file*, if available."""

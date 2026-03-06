@@ -1,6 +1,5 @@
 """Tests for pymultiwfn.api.multiwfn — Multiwfn executable config."""
 
-import platform
 from pathlib import Path
 
 import pytest
@@ -10,6 +9,8 @@ from pymultiwfn.api.multiwfn import Multiwfn
 
 
 class TestMultiwfnInit:
+    """Tests for Multiwfn.__init__() and _parse_exe()."""
+
     def test_with_valid_exe(self, mock_executable: Path) -> None:
         mwfn = Multiwfn(exe_path=mock_executable)
         assert mwfn.exe_path == mock_executable.resolve()

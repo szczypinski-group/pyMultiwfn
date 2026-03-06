@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from pymultiwfn.api.storage import ResultStore, _PARSER_ROUTE
+from pymultiwfn.api.storage import _PARSER_ROUTE, ResultStore
 from pymultiwfn.enums.menu import Menu
 
 
@@ -15,6 +15,8 @@ def store(temp_dir: Path, mock_wfn_file: Path) -> ResultStore:
 
 
 class TestResultStoreInit:
+    """Tests for initializing ResultStore."""
+
     def test_json_path_naming(self, store: ResultStore) -> None:
         assert store.json_path.name == "mock.wfn.json"
 
@@ -23,13 +25,17 @@ class TestResultStoreInit:
         assert "input_file" in data
         assert data["analyses"] == {}
 
-    def test_creates_work_dir(self, temp_dir: Path, mock_wfn_file: Path) -> None:
+    def test_creates_work_dir(
+        self, temp_dir: Path, mock_wfn_file: Path
+    ) -> None:
         sub = temp_dir / "deep" / "nested"
-        store = ResultStore(input_file=mock_wfn_file, work_dir=sub)
+        ResultStore(input_file=mock_wfn_file, work_dir=sub)
         assert sub.exists()
 
 
 class TestStoreAndRetrieve:
+    """Tests for storing parsed results and retrieving them."""
+
     def test_store_charges(self, store: ResultStore) -> None:
         stdout = (
             "Final atomic charges:\n"
@@ -63,12 +69,14 @@ class TestStoreAndRetrieve:
 
 
 class TestPersistence:
+    """Tests that results are persisted to disk and can be reloaded."""
+
     def test_json_written_to_disk(self, store: ResultStore) -> None:
         stdout = "Final atomic charges:\nAtom    1(C ):    -0.05\n"
         store.store_result(Menu.HIRSHFELD_CHARGE, stdout)
         assert store.json_path.exists()
 
-        with open(store.json_path) as f:
+        with Path.open(store.json_path) as f:
             data = json.load(f)
         assert "HIRSHFELD_CHARGE" in data["analyses"]
 
@@ -97,6 +105,8 @@ class TestPersistence:
 
 
 class TestParserRouting:
+    """Tests that different Menu items route to the correct parsers."""
+
     def test_no_parser_returns_none(self, store: ResultStore) -> None:
         """Menu items without a parser route return None."""
         result = store.store_result(Menu.VIEW_STRUCTURE, "some output")
@@ -125,7 +135,9 @@ class TestParserRouting:
         assert "peaks" in parsed
 
     def test_surface_routing(self, store: ResultStore) -> None:
-        stdout = "Overall surface area:  234.5678\nEnclosed volume:  345.6789\n"
+        stdout = (
+            "Overall surface area:  234.5678\nEnclosed volume:  345.6789\n"
+        )
         parsed = store.store_result(Menu.SURFACE_ANALYSIS_ESP, stdout)
         assert parsed is not None
         assert "surface_statistics" in parsed
@@ -137,10 +149,16 @@ class TestParserRouting:
 
     def test_all_charge_menus_routed(self) -> None:
         charge_menus = [
-            Menu.HIRSHFELD_CHARGE, Menu.VDD_POPULATION,
-            Menu.MULLIKEN_POPULATION, Menu.LOWDIN_POPULATION,
-            Menu.ADCH_CHARGE, Menu.CHELPG_CHARGE, Menu.MK_CHARGE,
-            Menu.RESP_CHARGE, Menu.CM5_CHARGE, Menu.MBIS_CHARGE,
+            Menu.HIRSHFELD_CHARGE,
+            Menu.VDD_POPULATION,
+            Menu.MULLIKEN_POPULATION,
+            Menu.LOWDIN_POPULATION,
+            Menu.ADCH_CHARGE,
+            Menu.CHELPG_CHARGE,
+            Menu.MK_CHARGE,
+            Menu.RESP_CHARGE,
+            Menu.CM5_CHARGE,
+            Menu.MBIS_CHARGE,
             Menu.DDEC_CHARGE,
         ]
         for menu in charge_menus:
@@ -148,8 +166,10 @@ class TestParserRouting:
 
     def test_all_bond_order_menus_routed(self) -> None:
         bo_menus = [
-            Menu.MAYER_BOND_ORDER, Menu.WIBERG_BOND_ORDER,
-            Menu.MULLIKEN_BOND_ORDER, Menu.FUZZY_BOND_ORDER,
+            Menu.MAYER_BOND_ORDER,
+            Menu.WIBERG_BOND_ORDER,
+            Menu.MULLIKEN_BOND_ORDER,
+            Menu.FUZZY_BOND_ORDER,
             Menu.LAPLACIAN_BOND_ORDER,
         ]
         for menu in bo_menus:

@@ -6,6 +6,8 @@ from pymultiwfn.analysis.result import MultiwfnResult
 
 
 class TestMultiwfnResult:
+    """Tests for the MultiwfnResult class."""
+
     def test_create(self) -> None:
         r = MultiwfnResult(type="charges", value={"1": 0.05})
         assert r.type == "charges"

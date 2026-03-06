@@ -6,6 +6,8 @@ from pymultiwfn.api.exceptions import MultiwfnError
 
 
 class TestMultiwfnError:
+    """Tests for the MultiwfnError exception class."""
+
     def test_is_exception(self) -> None:
         assert issubclass(MultiwfnError, Exception)
 

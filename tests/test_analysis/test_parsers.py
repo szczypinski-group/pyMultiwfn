@@ -26,13 +26,14 @@ from pymultiwfn.analysis.parsers import (
     WeakInteractionParser,
 )
 
-
 # =========================================================================
 # ChargeParser
 # =========================================================================
 
 
 class TestChargeParser:
+    """Tests for the ChargeParser."""
+
     def test_parse_final_charges(self) -> None:
         output = (
             "Final atomic charges:\n"
@@ -63,7 +64,7 @@ class TestChargeParser:
 
     def test_parse_dipole(self) -> None:
         output = (
-            "Dipole moment:  X=   1.234  Y=  -0.567  Z=   0.901  Tot=   1.623\n"
+            "Dipole moment:X=   1.234  Y=  -0.567  Z=   0.901  Tot=   1.623\n"
         )
         d = ChargeParser.parse_dipole(output)
         assert d is not None
@@ -83,6 +84,8 @@ class TestChargeParser:
 
 
 class TestBondOrderParser:
+    """Tests for the BondOrderParser."""
+
     def test_parse_pattern1(self) -> None:
         output = "#    1:         1(C )    2(N )    1.45230000\n"
         bonds = BondOrderParser.parse(output)
@@ -123,6 +126,8 @@ class TestBondOrderParser:
 
 
 class TestCriticalPointParser:
+    """Tests for the CriticalPointParser."""
+
     def test_parse_all_types(self, sample_topology_output: str) -> None:
         cps = CriticalPointParser.parse(sample_topology_output)
         assert len(cps) == 4
@@ -161,6 +166,8 @@ class TestCriticalPointParser:
 
 
 class TestSpectrumParser:
+    """Tests for the SpectrumParser."""
+
     def test_parse_ir(self, sample_spectrum_output: str) -> None:
         sp = SpectrumParser.parse(sample_spectrum_output)
         assert len(sp["frequencies"]) == 5
@@ -177,9 +184,7 @@ class TestSpectrumParser:
         assert "chemical_shifts" in sp
 
     def test_parse_transitions(self) -> None:
-        output = (
-            "Excited state   1:  E= 3.4567 eV  lam= 358.7 nm  f= 0.0123\n"
-        )
+        output = "Excited state   1:  E= 3.4567 eV  lam= 358.7 nm  f= 0.0123\n"
         t = SpectrumParser.parse_transitions(output)
         assert t[0]["state"] == 1
         assert t[0]["energy_eV"] == pytest.approx(3.4567)
@@ -201,6 +206,8 @@ class TestSpectrumParser:
 
 
 class TestDOSParser:
+    """Tests for the DOSParser."""
+
     def test_parse_tdos(self) -> None:
         output = "TDOS data\n  -15.0000    0.1234\n  -14.0000    0.5678\n"
         data = DOSParser.parse(output)
@@ -221,8 +228,12 @@ class TestDOSParser:
 
 
 class TestSurfaceParser:
+    """Tests for the SurfaceParser."""
+
     def test_parse_descriptors(self) -> None:
-        output = "Overall surface area:  234.5678\nEnclosed volume:  345.6789\n"
+        output = (
+            "Overall surface area:  234.5678\nEnclosed volume:  345.6789\n"
+        )
         r = SurfaceParser.parse(output)
         assert r["area"] == pytest.approx(234.5678)
 
@@ -241,6 +252,8 @@ class TestSurfaceParser:
 
 
 class TestOrbitalCompositionParser:
+    """Tests for the OrbitalCompositionParser."""
+
     def test_parse_composition(self) -> None:
         output = (
             "Orbital    5  Occ= 2.000000  E= -0.72340 a.u.\n"
@@ -259,6 +272,8 @@ class TestOrbitalCompositionParser:
 
 
 class TestFuzzySpaceParser:
+    """Tests for the FuzzySpaceParser."""
+
     def test_atomic_properties(self) -> None:
         output = "Atom   1(C ): population=  5.96780\n"
         a = FuzzySpaceParser.parse_atomic_properties(output)
@@ -276,6 +291,8 @@ class TestFuzzySpaceParser:
 
 
 class TestBasinParser:
+    """Tests for the BasinParser."""
+
     def test_parse(self) -> None:
         output = "Basin   1  attractor at atom  1(C )  population:  5.96780\n"
         b = BasinParser.parse(output)
@@ -290,6 +307,8 @@ class TestBasinParser:
 
 
 class TestExcitationParser:
+    """Tests for the ExcitationParser."""
+
     def test_hole_electron(self) -> None:
         output = "D index:  2.34560\nSr:  0.56780\n"
         r = ExcitationParser.parse_hole_electron(output)
@@ -297,14 +316,20 @@ class TestExcitationParser:
 
     def test_delta_r(self) -> None:
         output = "State   1  Delta_r:  1.23450\n"
-        assert ExcitationParser.parse_delta_r(output)[0]["delta_r"] == pytest.approx(1.2345)
+        assert ExcitationParser.parse_delta_r(output)[0][
+            "delta_r"
+        ] == pytest.approx(1.2345)
 
     def test_lambda_index(self) -> None:
         output = "State   1  Lambda:  0.78900\n"
-        assert ExcitationParser.parse_lambda_index(output)[0]["lambda_index"] == pytest.approx(0.789)
+        assert ExcitationParser.parse_lambda_index(output)[0][
+            "lambda_index"
+        ] == pytest.approx(0.789)
 
 
 class TestWeakInteractionParser:
+    """Tests for the WeakInteractionParser."""
+
     def test_parse(self) -> None:
         output = "delta_g_inter:  0.12340\nRDG.cube has been generated\n"
         r = WeakInteractionParser.parse(output)
@@ -316,6 +341,8 @@ class TestWeakInteractionParser:
 
 
 class TestEDAParser:
+    """Tests for the EDAParser."""
+
     def test_parse(self) -> None:
         output = "Electrostatic:  -45.6789\nDispersion:   -5.6789\n"
         r = EDAParser.parse(output)
@@ -326,6 +353,8 @@ class TestEDAParser:
 
 
 class TestCDFTParser:
+    """Tests for the CDFTParsers."""
+
     def test_global_indices(self) -> None:
         output = "Chemical potential:  -0.15234\nHardness:   0.21345\n"
         r = CDFTParser.parse_global_indices(output)
@@ -338,10 +367,14 @@ class TestCDFTParser:
 
     def test_dual_descriptor(self) -> None:
         output = "Atom   1(C ):  dual= 0.06670\n"
-        assert CDFTParser.parse_dual_descriptor(output)[1] == pytest.approx(0.0667)
+        assert CDFTParser.parse_dual_descriptor(output)[1] == pytest.approx(
+            0.0667
+        )
 
 
 class TestPolarizabilityParser:
+    """Tests for the PolarizabilityParsery."""
+
     def test_parse(self) -> None:
         output = "Isotropic polarizability:  45.67890\nalpha_xx:  56.78900\n"
         r = PolarizabilityParser.parse(output)
@@ -353,6 +386,8 @@ class TestPolarizabilityParser:
 
 
 class TestAromaticityParser:
+    """Tests for the AromaticityParser."""
+
     def test_parse(self) -> None:
         output = "NICS(0):  -8.12340\nHOMA:   0.98760\n"
         r = AromaticityParser.parse(output)
@@ -369,8 +404,12 @@ class TestAromaticityParser:
 
 
 class TestWavefunctionParser:
+    """Tests for the WavefunctionParser."""
+
     def test_orbital_info(self) -> None:
-        output = "   5   Alpha   Occ= 2.000000   E=  -0.72340 a.u.  -19.684 eV\n"
+        output = (
+            "   5   Alpha   Occ= 2.000000   E=  -0.72340 a.u.  -19.684 eV\n"
+        )
         o = WavefunctionParser.parse_orbital_info(output)
         assert o[0]["index"] == 5
         assert o[0]["spin"] == "alpha"
@@ -380,10 +419,11 @@ class TestWavefunctionParser:
 
 
 class TestCubeParser:
+    """Tests for the CubeParser."""
+
     def test_parse(self) -> None:
         output = (
-            "Grid dimensions: 80 x 80 x 80\n"
-            "density.cube has been generated\n"
+            "Grid dimensions: 80 x 80 x 80\ndensity.cube has been generated\n"
         )
         r = CubeParser.parse(output)
         assert r["grid_points"] == (80, 80, 80)
@@ -394,6 +434,8 @@ class TestCubeParser:
 
 
 class TestUtilityParser:
+    """Tests for the UtilityParser."""
+
     def test_geometry(self) -> None:
         output = "Bond length between atom  1(C ) and atom  2(N ):  1.3456\n"
         r = UtilityParser.parse_geometry(output)
@@ -404,7 +446,9 @@ class TestUtilityParser:
         assert r["BLA"] == pytest.approx(0.0567)
 
     def test_generated_files(self) -> None:
-        output = "density.cube has been generated\nnew.wfn has been generated\n"
+        output = (
+            "density.cube has been generated\nnew.wfn has been generated\n"
+        )
         assert len(UtilityParser.parse_generated_files(output)) == 2
 
     def test_empty_geometry(self) -> None:

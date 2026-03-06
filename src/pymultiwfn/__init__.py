@@ -11,17 +11,18 @@ Usage
 __version__ = "0.1.1"
 
 from pymultiwfn.analysis.analysis import MultiwfnAnalysis
-from pymultiwfn.analysis.result import MultiwfnResult
-from pymultiwfn.api.exceptions import MultiwfnError
-from pymultiwfn.api.job import MultiwfnJob
-from pymultiwfn.api.multiwfn import Multiwfn
-from pymultiwfn.api.parsers import (
+from pymultiwfn.analysis.parsers import (
     BondOrderParser,
     ChargeParser,
     CriticalPointParser,
     OutputParser,
     SpectrumParser,
 )
+from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.api.exceptions import MultiwfnError
+from pymultiwfn.api.job import MultiwfnJob
+from pymultiwfn.api.multiwfn import Multiwfn
+from pymultiwfn.api.storage import ResultStore
 from pymultiwfn.enums.menu import Menu
 
 __all__ = [
@@ -44,4 +45,6 @@ __all__ = [
     "CriticalPointParser",
     "SpectrumParser",
     "WfnFile",
+    # Storage
+    "ResultStore",
 ]

@@ -35,6 +35,8 @@ def signal_killed_outcome() -> MultiwfnJobOutcome:
 
 
 class TestIsSuccessful:
+    """Tests for MultiwfnJobOutcome.is_successful()."""
+
     def test_success(self, success_outcome: MultiwfnJobOutcome) -> None:
         assert success_outcome.is_successful() is True
 
@@ -63,7 +65,9 @@ class TestIsSuccessful:
 
     def test_fatal_in_stderr(self) -> None:
         outcome = MultiwfnJobOutcome(
-            stdout="", stderr="fatal: segfault", return_code=0,
+            stdout="",
+            stderr="fatal: segfault",
+            return_code=0,
             execution_time=0.0,
         )
         assert outcome.is_successful() is False
@@ -74,13 +78,17 @@ class TestIsSuccessful:
     )
     def test_all_error_indicators(self, indicator: str) -> None:
         outcome = MultiwfnJobOutcome(
-            stdout="", stderr=f"something {indicator} something",
-            return_code=0, execution_time=0.0,
+            stdout="",
+            stderr=f"something {indicator} something",
+            return_code=0,
+            execution_time=0.0,
         )
         assert outcome.is_successful() is False
 
 
 class TestSaveOutput:
+    """Tests for MultiwfnJobOutcome.save_output()."""
+
     def test_save_and_read(
         self, success_outcome: MultiwfnJobOutcome, temp_dir: Path
     ) -> None:

@@ -7,6 +7,8 @@ from pymultiwfn.enums.menu import Menu
 
 
 class TestAnalysisClassesStructure:
+    """Tests for the structure and contents of AnalysisClasses."""
+
     def test_all_categories_non_empty(self) -> None:
         for category in AnalysisClasses:
             assert len(category.value) > 0, f"{category.name} is empty"
@@ -26,6 +28,8 @@ class TestAnalysisClassesStructure:
 
 
 class TestListCategories:
+    """Tests for AnalysisClasses.list_categories()."""
+
     def test_returns_list(self) -> None:
         cats = AnalysisClasses.list_categories()
         assert isinstance(cats, list)
@@ -39,6 +43,8 @@ class TestListCategories:
 
 
 class TestListAnalyses:
+    """Tests for AnalysisClasses.list_analyses()."""
+
     def test_all_analyses(self) -> None:
         analyses = AnalysisClasses.list_analyses()
         assert len(analyses) > 50
@@ -53,15 +59,16 @@ class TestListAnalyses:
 
 
 class TestFindCategory:
+    """Tests for AnalysisClasses.find_category()."""
+
     def test_find_existing(self) -> None:
-        result = AnalysisClasses.find_category(Menu.HIRSHFELD_CHARGE)
+        result = AnalysisClasses.find_category(Menu.HIRSHFELD_CHARGE.name)
         assert result == "CHARGES"
 
     def test_find_bond_order(self) -> None:
-        result = AnalysisClasses.find_category(Menu.MAYER_BOND_ORDER)
+        result = AnalysisClasses.find_category(Menu.MAYER_BOND_ORDER.name)
         assert result == "BOND_ORDERS"
 
     def test_not_found(self) -> None:
-        # VIEW_STRUCTURE is not in any AnalysisClasses category
-        result = AnalysisClasses.find_category(Menu.VIEW_STRUCTURE)
+        result = AnalysisClasses.find_category(Menu.VIEW_STRUCTURE.name)
         assert result is None

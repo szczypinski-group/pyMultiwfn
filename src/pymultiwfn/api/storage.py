@@ -43,7 +43,6 @@ from pymultiwfn.analysis.parsers import (
 )
 from pymultiwfn.enums.menu import Menu
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Parser routing table
 # ─────────────────────────────────────────────────────────────────────────────
@@ -164,7 +163,9 @@ def _parse_delocalization(stdout: str) -> dict[str, Any]:
 
 
 def _parse_fuzzy_aromaticity(stdout: str) -> dict[str, Any]:
-    return {"aromaticity_indices": FuzzySpaceParser.parse_aromaticity_index(stdout)}
+    return {
+        "aromaticity_indices": FuzzySpaceParser.parse_aromaticity_index(stdout)
+    }
 
 
 def _parse_basin(stdout: str) -> dict[str, Any]:
@@ -483,7 +484,7 @@ class ResultStore:
     def _load(self) -> dict[str, Any]:
         """Load existing JSON or return an empty structure."""
         if self._json_path.exists():
-            with open(self._json_path, encoding="utf-8") as f:
+            with Path.open(self._json_path, encoding="utf-8") as f:
                 return json.load(f)
         return {
             "input_file": str(self._input_file),
@@ -492,7 +493,7 @@ class ResultStore:
 
     def _save(self) -> None:
         """Write the current data to disk."""
-        with open(self._json_path, "w", encoding="utf-8") as f:
+        with Path.open(self._json_path, "w", encoding="utf-8") as f:
             json.dump(self._data, f, indent=2, default=str)
 
     # ── read / write analyses ────────────────────────────────────────────

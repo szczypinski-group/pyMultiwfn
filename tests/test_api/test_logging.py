@@ -6,7 +6,6 @@ import pytest
 
 from pymultiwfn.api.logging import (
     BatchLogger,
-    BatchLogSummary,
     JobLogEntry,
     JobStatus,
 )
@@ -40,6 +39,8 @@ def failed_outcome() -> MultiwfnJobOutcome:
 
 
 class TestBatchLoggerLifecycle:
+    """Tests for the lifecycle of BatchLogger."""
+
     def test_log_file_created(self, logger: BatchLogger) -> None:
         assert logger.log_path.exists()
 
@@ -52,7 +53,9 @@ class TestBatchLoggerLifecycle:
         assert lg.log_path.name == "custom.log"
 
     def test_start_and_end_batch(self, logger: BatchLogger) -> None:
-        logger.start_batch(files=["mol1.wfn"], analyses=[Menu.HIRSHFELD_CHARGE])
+        logger.start_batch(
+            files=["mol1.wfn"], analyses=[Menu.HIRSHFELD_CHARGE]
+        )
         logger.end_batch()
         content = logger.log_path.read_text()
         assert "PYMULTIWFN BATCH LOG" in content
@@ -68,6 +71,8 @@ class TestBatchLoggerLifecycle:
 
 
 class TestJobLogging:
+    """Tests for logging individual jobs."""
+
     def test_log_successful_job(
         self, logger: BatchLogger, success_outcome: MultiwfnJobOutcome
     ) -> None:
@@ -101,6 +106,7 @@ class TestJobLogging:
         logger.end_batch()
 
         assert entry.status == JobStatus.FAILED
+        assert entry.error_message is not None
         assert "cannot open" in entry.error_message
 
         content = logger.log_path.read_text()
@@ -121,6 +127,7 @@ class TestJobLogging:
         logger.end_batch()
 
         assert entry.status == JobStatus.TIMEOUT
+        assert entry.error_message is not None
         assert "MultiwfnError" in entry.error_message
 
     def test_log_skipped_job(self, logger: BatchLogger) -> None:
@@ -148,12 +155,17 @@ class TestJobLogging:
         logger.log_job_end(entry=entry, outcome=None, error=None)
         logger.end_batch()
         assert entry.status == JobStatus.FAILED
+        assert entry.error_message is not None
         assert "no outcome" in entry.error_message.lower()
 
 
 class TestBatchSummary:
+    """Tests that the batch summary correctly counts successes."""
+
     def test_summary_counts(
-        self, logger: BatchLogger, success_outcome: MultiwfnJobOutcome,
+        self,
+        logger: BatchLogger,
+        success_outcome: MultiwfnJobOutcome,
         failed_outcome: MultiwfnJobOutcome,
     ) -> None:
         logger.start_batch(files=["a.wfn", "b.wfn"])
@@ -176,6 +188,8 @@ class TestBatchSummary:
 
 
 class TestJobStatusEnum:
+    """Tests for the JobStatus enum."""
+
     def test_all_values(self) -> None:
         assert len(JobStatus) == 6
         assert JobStatus.SUCCESS.value == "SUCCESS"
@@ -183,6 +197,8 @@ class TestJobStatusEnum:
 
 
 class TestJobLogEntry:
+    """Tests for the JobLogEntry dataclass."""
+
     def test_defaults(self) -> None:
         entry = JobLogEntry(input_file="a.wfn", analysis_name="TEST")
         assert entry.status == JobStatus.PENDING

@@ -1,7 +1,6 @@
 """Tests for pymultiwfn.api.job — MultiwfnJob."""
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -17,6 +16,8 @@ def multiwfn(mock_executable: Path) -> Multiwfn:
 
 
 class TestJobInit:
+    """Tests for the __init__ method of MultiwfnJob, including edge cases."""
+
     def test_create_with_valid_file(
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
@@ -40,7 +41,9 @@ class TestJobInit:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None, multiwfn=multiwfn,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
         )
         assert job.commands == []
 
@@ -54,8 +57,10 @@ class TestJobInit:
     ) -> None:
         with pytest.raises(ValueError, match="positive"):
             MultiwfnJob(
-                input_file=mock_wfn_file, analysis=None,
-                multiwfn=multiwfn, timeout=-1,
+                input_file=mock_wfn_file,
+                analysis=None,
+                multiwfn=multiwfn,
+                timeout=-1,
             )
 
     def test_zero_timeout(
@@ -63,12 +68,16 @@ class TestJobInit:
     ) -> None:
         with pytest.raises(ValueError, match="positive"):
             MultiwfnJob(
-                input_file=mock_wfn_file, analysis=None,
-                multiwfn=multiwfn, timeout=0,
+                input_file=mock_wfn_file,
+                analysis=None,
+                multiwfn=multiwfn,
+                timeout=0,
             )
 
 
 class TestJobProperties:
+    """Tests for properties of MultiwfnJob."""
+
     def test_commands_from_menu(
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
@@ -85,7 +94,9 @@ class TestJobProperties:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None, multiwfn=multiwfn,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
         )
         cmds = job.commands
         cmds.append("junk")
@@ -95,7 +106,9 @@ class TestJobProperties:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None, multiwfn=multiwfn,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
         )
         assert job.stdout is None
         assert job.stderr is None
@@ -107,8 +120,10 @@ class TestJobProperties:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None,
-            multiwfn=multiwfn, timeout=120,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
+            timeout=120,
         )
         assert job.timeout == 120
         job.timeout = 300
@@ -118,18 +133,24 @@ class TestJobProperties:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None,
-            multiwfn=multiwfn, verbose=True,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
+            verbose=True,
         )
         assert job.verbose is True
 
 
 class TestJobAddCommands:
+    """Tests for the add_commands() method of MultiwfnJob."""
+
     def test_add_custom_commands(
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob(
-            input_file=mock_wfn_file, analysis=None, multiwfn=multiwfn,
+            input_file=mock_wfn_file,
+            analysis=None,
+            multiwfn=multiwfn,
         )
         job.add_commands(["7", "1", "1"])
         assert "7" in job.commands
@@ -148,9 +169,9 @@ class TestJobAddCommands:
 
 
 class TestJobFromFile:
-    def test_from_file(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    """Tests for the MultiwfnJob.from_file() factory method."""
+
+    def test_from_file(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob.from_file(
             input_file=mock_wfn_file,
             analysis=Menu.MAYER_BOND_ORDER,
@@ -163,15 +184,16 @@ class TestJobFromFile:
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
         job = MultiwfnJob.from_file(
-            input_file=mock_wfn_file, multiwfn=multiwfn,
+            input_file=mock_wfn_file,
+            multiwfn=multiwfn,
         )
         assert job.commands == []
 
 
 class TestJobStrRepr:
-    def test_str(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    """Tests for the __str__ and __repr__ methods of MultiwfnJob."""
+
+    def test_str(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob(
             input_file=mock_wfn_file,
             analysis=Menu.HIRSHFELD_CHARGE,
@@ -179,9 +201,7 @@ class TestJobStrRepr:
         )
         assert "mock.wfn" in str(job)
 
-    def test_repr(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_repr(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob(
             input_file=mock_wfn_file,
             analysis=Menu.HIRSHFELD_CHARGE,
