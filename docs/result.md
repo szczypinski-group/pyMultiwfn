@@ -2,4 +2,4 @@
 
 The core engine for building and running Multiwfn sequences.
 
-::: pymultiwfn.result
+::: pymultiwfn.analysis.result

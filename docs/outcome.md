@@ -2,4 +2,4 @@
 
 Calculation outcome processing
 
-::: pymultiwfn.outcome
+::: pymultiwfn.api.outcome
