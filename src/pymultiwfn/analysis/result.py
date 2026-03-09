@@ -3,14 +3,33 @@
 from dataclasses import dataclass
 from typing import Literal
 
+from pymultiwfn.analysis.parsers import ParserRoute
+from pymultiwfn.enums.menu import Menu
+
+
+@dataclass
+class ParsedMultiwfnResult:
+    """Base class for Multiwfn result types."""
+
+    pass
+
 
 @dataclass
 class MultiwfnResult:
     """Base class for Multiwfn result types."""
 
+    analysis: Menu
+    result: list[ParsedMultiwfnResult] = []
+
+    def parse(
+        self,
+        stdout: str,
+    ) -> None:
+        ParserRoute.ROUTE_TABLE[self.analysis](stdout)
+
 
 @dataclass
-class Charge(MultiwfnResult):
+class Charge(ParsedMultiwfnResult):
     """Result for atomic charge analysis."""
 
     atom_id: int
@@ -18,7 +37,7 @@ class Charge(MultiwfnResult):
 
 
 @dataclass
-class Dipole(MultiwfnResult):
+class Dipole(ParsedMultiwfnResult):
     """Result for dipole moment analysis."""
 
     x: float
@@ -36,7 +55,7 @@ class OrbitalContribution:
 
 
 @dataclass
-class OrbitalComponent(MultiwfnResult):
+class OrbitalComponent(ParsedMultiwfnResult):
     """Result for orbital composition analysis."""
 
     orbital_id: int
@@ -46,7 +65,7 @@ class OrbitalComponent(MultiwfnResult):
 
 
 @dataclass
-class BondOrder(MultiwfnResult):
+class BondOrder(ParsedMultiwfnResult):
     """Result for bond order analysis."""
 
     atom1_id: int
@@ -55,7 +74,7 @@ class BondOrder(MultiwfnResult):
 
 
 @dataclass
-class BondOrderDecomposition(MultiwfnResult):
+class BondOrderDecomposition(ParsedMultiwfnResult):
     """Result for bond order decomposition (per orbital) analysis."""
 
     orbital_id: int
@@ -63,7 +82,7 @@ class BondOrderDecomposition(MultiwfnResult):
 
 
 @dataclass
-class Valence(MultiwfnResult):
+class Valence(ParsedMultiwfnResult):
     """Result for valence analysis."""
 
     atom_id: int
@@ -72,7 +91,7 @@ class Valence(MultiwfnResult):
 
 
 @dataclass
-class MultiCenterBondOrder(MultiwfnResult):
+class MultiCenterBondOrder(ParsedMultiwfnResult):
     """Result for multi-center bond order analysis."""
 
     atom_ids: list[int]
@@ -80,7 +99,7 @@ class MultiCenterBondOrder(MultiwfnResult):
 
 
 @dataclass
-class OxidationState(MultiwfnResult):
+class OxidationState(ParsedMultiwfnResult):
     """Result for oxidation state analysis."""
 
     atom_id: int
@@ -102,7 +121,7 @@ class CriticalPoint:
 
 
 @dataclass
-class BondPath(MultiwfnResult):
+class BondPath(ParsedMultiwfnResult):
     """Result for bond path analysis."""
 
     atom1_id: int
@@ -112,7 +131,7 @@ class BondPath(MultiwfnResult):
 
 
 @dataclass
-class ProjectedDensityOfStates(MultiwfnResult):
+class ProjectedDensityOfStates(ParsedMultiwfnResult):
     """Result for projected density of states analysis."""
 
     orbital_id: int
@@ -120,7 +139,7 @@ class ProjectedDensityOfStates(MultiwfnResult):
 
 
 @dataclass
-class DensityOfStates(MultiwfnResult):
+class DensityOfStates(ParsedMultiwfnResult):
     """Result for density of states analysis."""
 
     energies_eV: list[float]  # noqa: N815
@@ -129,7 +148,7 @@ class DensityOfStates(MultiwfnResult):
 
 
 @dataclass
-class OrbitalEnergy(MultiwfnResult):
+class OrbitalEnergy(ParsedMultiwfnResult):
     """Result for orbital energy analysis."""
 
     index: int
@@ -138,7 +157,7 @@ class OrbitalEnergy(MultiwfnResult):
 
 
 @dataclass
-class Spectrum(MultiwfnResult):
+class Spectrum(ParsedMultiwfnResult):
     """Result for spectrum analysis."""
 
     frequencies: list[float] | None = None
@@ -149,7 +168,7 @@ class Spectrum(MultiwfnResult):
 
 
 @dataclass
-class Transition(MultiwfnResult):
+class Transition(ParsedMultiwfnResult):
     """Result for transition analysis."""
 
     state: int
@@ -160,7 +179,7 @@ class Transition(MultiwfnResult):
 
 
 @dataclass
-class Color(MultiwfnResult):
+class Color(ParsedMultiwfnResult):
     """Result for color prediction in CIE XYZ color space and RGB values."""
 
     X: float
@@ -172,7 +191,7 @@ class Color(MultiwfnResult):
 
 
 @dataclass
-class SurfaceAnalysis(MultiwfnResult):
+class SurfaceAnalysis(ParsedMultiwfnResult):
     """Result for surface analysis."""
 
     area: float | None = None
@@ -188,7 +207,7 @@ class SurfaceAnalysis(MultiwfnResult):
 
 
 @dataclass
-class SurfaceExtremum(MultiwfnResult):
+class SurfaceExtremum(ParsedMultiwfnResult):
     """Result for surface extrema."""
 
     type: Literal["min", "max"]
@@ -200,7 +219,7 @@ class SurfaceExtremum(MultiwfnResult):
 
 
 @dataclass
-class FuzzyAtomicProperty(MultiwfnResult):
+class FuzzyAtomicProperty(ParsedMultiwfnResult):
     """Result for atomic properties in fuzzy space."""
 
     atom_id: int
@@ -212,7 +231,7 @@ class FuzzyAtomicProperty(MultiwfnResult):
 
 
 @dataclass
-class DelocalizationIndex(MultiwfnResult):
+class DelocalizationIndex(ParsedMultiwfnResult):
     """Result for delocalization index."""
 
     atom1_id: int
@@ -221,7 +240,7 @@ class DelocalizationIndex(MultiwfnResult):
 
 
 @dataclass
-class Basin(MultiwfnResult):
+class Basin(ParsedMultiwfnResult):
     """Result for basin analysis."""
 
     basin_id: int
@@ -233,7 +252,7 @@ class Basin(MultiwfnResult):
 
 
 @dataclass
-class HoleElectron(MultiwfnResult):
+class HoleElectron(ParsedMultiwfnResult):
     """Result for hole-electron analysis."""
 
     hole_id: float
@@ -248,7 +267,7 @@ class HoleElectron(MultiwfnResult):
 
 
 @dataclass
-class ChargeTransferFragment(MultiwfnResult):
+class ChargeTransferFragment(ParsedMultiwfnResult):
     """Individual fragment contribution to charge transfer analysis."""
 
     fragment_id: int
@@ -257,7 +276,7 @@ class ChargeTransferFragment(MultiwfnResult):
 
 
 @dataclass
-class ChargeTransfer(MultiwfnResult):
+class ChargeTransfer(ParsedMultiwfnResult):
     """Result for charge transfer analysis."""
 
     distance: float | None
@@ -266,7 +285,7 @@ class ChargeTransfer(MultiwfnResult):
 
 
 @dataclass
-class DeltaR(MultiwfnResult):
+class DeltaR(ParsedMultiwfnResult):
     """Result for Delta_r index."""
 
     state_id: int
@@ -274,7 +293,7 @@ class DeltaR(MultiwfnResult):
 
 
 @dataclass
-class LambdaIndex(MultiwfnResult):
+class LambdaIndex(ParsedMultiwfnResult):
     """Result for Lambda index."""
 
     state_id: int
@@ -282,7 +301,7 @@ class LambdaIndex(MultiwfnResult):
 
 
 @dataclass
-class WeakInteraction(MultiwfnResult):
+class WeakInteraction(ParsedMultiwfnResult):
     """Result for weak interaction analysis."""
 
     delta_g_inter: float
@@ -292,7 +311,7 @@ class WeakInteraction(MultiwfnResult):
 
 
 @dataclass
-class EnergyDecompositionAnalysis(MultiwfnResult):
+class EnergyDecompositionAnalysis(ParsedMultiwfnResult):
     """Result for energy decomposition analysis."""
 
     electrostatic: float | None = None
@@ -304,7 +323,7 @@ class EnergyDecompositionAnalysis(MultiwfnResult):
 
 
 @dataclass
-class DispersionContribution(MultiwfnResult):
+class DispersionContribution(ParsedMultiwfnResult):
     """Result for dispersion contributions."""
 
     atom_id: int
@@ -312,7 +331,7 @@ class DispersionContribution(MultiwfnResult):
 
 
 @dataclass
-class Reactivity(MultiwfnResult):
+class Reactivity(ParsedMultiwfnResult):
     """Result for global reactivity indices."""
 
     chemical_potential: float | None = None
@@ -325,7 +344,7 @@ class Reactivity(MultiwfnResult):
 
 
 @dataclass
-class CondensedFukui(MultiwfnResult):
+class CondensedFukui(ParsedMultiwfnResult):
     """Result for condensed Fukui functions."""
 
     atom_id: int
@@ -335,7 +354,7 @@ class CondensedFukui(MultiwfnResult):
 
 
 @dataclass
-class DualDescriptor(MultiwfnResult):
+class DualDescriptor(ParsedMultiwfnResult):
     """Result for dual descriptor."""
 
     atom_id: int
@@ -343,7 +362,7 @@ class DualDescriptor(MultiwfnResult):
 
 
 @dataclass
-class PolarizabilityTensor(MultiwfnResult):
+class PolarizabilityTensor(ParsedMultiwfnResult):
     """Result for polarizability tensor."""
 
     alpha_xx: float
@@ -355,7 +374,7 @@ class PolarizabilityTensor(MultiwfnResult):
 
 
 @dataclass
-class Polarizability(MultiwfnResult):
+class Polarizability(ParsedMultiwfnResult):
     """Result for polarizability."""
 
     isotripic: float | None = None
@@ -366,7 +385,7 @@ class Polarizability(MultiwfnResult):
 
 
 @dataclass
-class AromaticityIndex(MultiwfnResult):
+class AromaticityIndex(ParsedMultiwfnResult):
     """Result for aromaticity indices (Menu 15)."""
 
     index_name: str
@@ -374,7 +393,7 @@ class AromaticityIndex(MultiwfnResult):
 
 
 @dataclass
-class Aromaticity(MultiwfnResult):
+class Aromaticity(ParsedMultiwfnResult):
     """Result for aromaticity analysis (Menu 25)."""
 
     NICS: float | None = None
@@ -389,7 +408,7 @@ class Aromaticity(MultiwfnResult):
 
 
 @dataclass
-class NICSScan(MultiwfnResult):
+class NICSScan(ParsedMultiwfnResult):
     """Result for Nucleus Independent Chemical Shift scan."""
 
     distances: list[float]
@@ -397,7 +416,7 @@ class NICSScan(MultiwfnResult):
 
 
 @dataclass
-class Orbital(MultiwfnResult):
+class Orbital(ParsedMultiwfnResult):
     """Result for orbital info."""
 
     orbital_id: int
@@ -408,7 +427,7 @@ class Orbital(MultiwfnResult):
 
 
 @dataclass
-class Cube(MultiwfnResult):
+class Cube(ParsedMultiwfnResult):
     """Result for cube operations."""
 
     file_name: str
@@ -423,7 +442,7 @@ class Cube(MultiwfnResult):
 
 
 @dataclass
-class BondLength(MultiwfnResult):
+class BondLength(ParsedMultiwfnResult):
     """Result for bond length analysis."""
 
     atom1_id: int
@@ -432,7 +451,7 @@ class BondLength(MultiwfnResult):
 
 
 @dataclass
-class BondAngle(MultiwfnResult):
+class BondAngle(ParsedMultiwfnResult):
     """Result for bond angle analysis."""
 
     atom1_id: int
@@ -442,7 +461,7 @@ class BondAngle(MultiwfnResult):
 
 
 @dataclass
-class DihedralAngle(MultiwfnResult):
+class DihedralAngle(ParsedMultiwfnResult):
     """Result for dihedral angle analysis."""
 
     atom1_id: int
@@ -453,7 +472,7 @@ class DihedralAngle(MultiwfnResult):
 
 
 @dataclass
-class DipoleMoment(MultiwfnResult):
+class DipoleMoment(ParsedMultiwfnResult):
     """Result for dipole moment analysis."""
 
     x: float
@@ -462,7 +481,7 @@ class DipoleMoment(MultiwfnResult):
 
 
 @dataclass
-class QuadrupoleMoment(MultiwfnResult):
+class QuadrupoleMoment(ParsedMultiwfnResult):
     """Result for quadrupole moment analysis."""
 
     xx: float | None
@@ -474,14 +493,14 @@ class QuadrupoleMoment(MultiwfnResult):
 
 
 @dataclass
-class MultipoleMoments(MultiwfnResult):
+class MultipoleMoments(ParsedMultiwfnResult):
     """Result for multipole moments."""
 
     moments: dict[str, float]
 
 
 @dataclass
-class CoordinationNumber(MultiwfnResult):
+class CoordinationNumber(ParsedMultiwfnResult):
     """Result for coordination numbers."""
 
     atom_id: int
@@ -489,7 +508,7 @@ class CoordinationNumber(MultiwfnResult):
 
 
 @dataclass
-class BLA_BOA(MultiwfnResult):  # noqa: N801
+class BLA_BOA(ParsedMultiwfnResult):  # noqa: N801
     """Result for BLA/BOA."""
 
     bla: float | None = None
@@ -497,7 +516,7 @@ class BLA_BOA(MultiwfnResult):  # noqa: N801
 
 
 @dataclass
-class LocalizationIndex(MultiwfnResult):
+class LocalizationIndex(ParsedMultiwfnResult):
     """Result for localization index."""
 
     atom_id: int

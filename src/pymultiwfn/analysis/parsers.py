@@ -38,6 +38,7 @@ from pymultiwfn.analysis.result import (
     HoleElectron,
     LambdaIndex,
     MultiCenterBondOrder,
+    MultiwfnResult,
     NICSScan,
     Orbital,
     OrbitalComponent,
@@ -55,6 +56,7 @@ from pymultiwfn.analysis.result import (
     Valence,
     WeakInteraction,
 )
+from pymultiwfn.enums.menu import Menu
 
 # Shared float pattern for all numeric parsing
 FLOAT_PATTERN = r"[-+]?(?:\d+\.\d*|\d*\.\d+|\d+)(?:[Ee][-+]?\d+)?"
@@ -71,7 +73,10 @@ class OutputParser:
 # =============================================================================
 
 
-class ChargeParser(OutputParser):
+class ChargeParser(
+    OutputParser,
+    MultiwfnResult,
+):
     """Parser for atomic charges.
 
     Handles output from all Menu 7 charge methods including Hirshfeld,
@@ -80,8 +85,13 @@ class ChargeParser(OutputParser):
     MBIS, and DDEC.
     """
 
+    def _parse(self, stdout: str) -> None:
+        self.result.extend(ChargeParser.parse_charges(stdout))
+        if (dipole := ChargeParser.parse_dipole(stdout)) is not None:
+            self.result.extend([dipole])
+
     @staticmethod
-    def parse(stdout: str) -> list[Charge]:
+    def parse_charges(stdout: str) -> list[Charge]:
         """Extract atomic charges from Multiwfn output.
 
         Parameters
@@ -1937,3 +1947,192 @@ class UtilityParser(OutputParser):
             boa = float(match[1])
 
         return BLA_BOA(bla=bla, boa=boa)
+
+
+class ParserRoute:
+    """Routing from Menu enums to OutputParser classes."""
+
+    ROUTE_TABLE = {
+        # Menu 7 — charges
+        Menu.HIRSHFELD_CHARGE: ChargeParser,
+        Menu.VDD_POPULATION: ChargeParser,
+        Menu.MULLIKEN_POPULATION: ChargeParser,
+        Menu.LOWDIN_POPULATION: ChargeParser,
+        Menu.SCPA_POPULATION: ChargeParser,
+        Menu.STOUT_POLITZER_POPULATION: ChargeParser,
+        Menu.BICKELHAUPT_POPULATION: ChargeParser,
+        Menu.BECKE_CHARGE: ChargeParser,
+        Menu.ADCH_CHARGE: ChargeParser,
+        Menu.CHELPG_CHARGE: ChargeParser,
+        Menu.MK_CHARGE: ChargeParser,
+        Menu.AIM_CHARGE: ChargeParser,
+        Menu.HIRSHFELD_I_CHARGE: ChargeParser,
+        Menu.CM5_CHARGE: ChargeParser,
+        Menu.EEM_CHARGE: ChargeParser,
+        Menu.RESP_CHARGE: ChargeParser,
+        Menu.GASTEIGER_CHARGE: ChargeParser,
+        Menu.MBIS_CHARGE: ChargeParser,
+        Menu.DDEC_CHARGE: ChargeParser,
+        # Menu 8 — orbital composition
+        Menu.ORBITAL_COMPOSITION_MULLIKEN: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_SCPA: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_MULLIKEN: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_STOUT: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_SCPA: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_NAO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_HIRSHFELD: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_BECKE: OrbitalCompositionParser,
+        Menu.LOBA_OXIDATION_STATE: OrbitalCompositionParser,
+        # Menu 9 — bond orders
+        Menu.MAYER_BOND_ORDER: BondOrderParser,
+        Menu.WIBERG_BOND_ORDER: BondOrderParser,
+        Menu.MULLIKEN_BOND_ORDER: BondOrderParser,
+        Menu.FUZZY_BOND_ORDER: BondOrderParser,
+        Menu.LAPLACIAN_BOND_ORDER: BondOrderParser,
+        Menu.IBSI_ANALYSIS: BondOrderParser,
+        Menu.MULTICENTER_BOND_ORDER: BondOrderParser,
+        Menu.MULTICENTER_BOND_ORDER_NAO: BondOrderParser,
+        Menu.MULLIKEN_BOND_ORDER_DECOMPOSE: BondOrderParser,
+        Menu.ORBITAL_PERTURBED_MAYER: BondOrderParser,
+        Menu.WIBERG_DECOMPOSITION: BondOrderParser,
+        Menu.AV1245_INDEX: FuzzySpaceParser,
+        # Menu 2 — topology
+        Menu.TOPOLOGY_SEARCH_CPS: CriticalPointParser,
+        Menu.TOPOLOGY_GENERATE_PATHS: CriticalPointParser,
+        Menu.TOPOLOGY_ANALYSIS_COMPLETE: CriticalPointParser,
+        Menu.TOPOLOGY_ESP_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_LOL_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_ELF_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_LAPLACIAN_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_BCP: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_RCP: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_CCP: CriticalPointParser,
+        # Menu 10 — density of states
+        Menu.PLOT_DOS: DOSParser,
+        Menu.PLOT_PDOS: DOSParser,
+        Menu.PLOT_OPDOS: DOSParser,
+        Menu.PLOT_LDOS: DOSParser,
+        Menu.PLOT_PHOTOELECTRON_SPECTRUM: DOSParser,
+        Menu.PLOT_COHP: DOSParser,
+        # Menu 11 — spectra
+        Menu.PLOT_IR_SPECTRUM: SpectrumParser,
+        Menu.PLOT_RAMAN_SPECTRUM: SpectrumParser,
+        Menu.PLOT_UV_VIS_SPECTRUM: SpectrumParser,
+        Menu.PLOT_ECD_SPECTRUM: SpectrumParser,
+        Menu.PLOT_VCD_SPECTRUM: SpectrumParser,
+        Menu.PLOT_ROA_SPECTRUM: SpectrumParser,
+        Menu.PLOT_NMR_SPECTRUM: SpectrumParser,
+        Menu.PLOT_FLUORESCENCE_SPECTRUM: SpectrumParser,
+        Menu.PLOT_PVS: SpectrumParser,
+        Menu.PREDICT_COLOR: SpectrumParser,
+        # Menu 12 — surface analysis
+        Menu.SURFACE_ANALYSIS_ESP: SurfaceParser,
+        Menu.SURFACE_ANALYSIS_ALIE: SurfaceParser,
+        Menu.SURFACE_AREA_VOLUME: SurfaceParser,
+        Menu.BECKE_SURFACE: SurfaceParser,
+        Menu.HIRSHFELD_SURFACE: SurfaceParser,
+        Menu.SURFACE_EXTREMA: SurfaceParser,
+        Menu.HIRSHFELD_SURFACE_FINGERPRINT: SurfaceParser,
+        # Menu 15 — fuzzy atomic space
+        Menu.FUZZY_INTEGRATE_PROPERTY: FuzzySpaceParser,
+        Menu.ATOMIC_DIPOLE_MOMENTS: FuzzySpaceParser,
+        Menu.ATOMIC_OVERLAP_MATRIX: FuzzySpaceParser,
+        Menu.ATOMIC_VOLUME_POLARIZABILITY: FuzzySpaceParser,
+        Menu.LOCALIZATION_DELOCALIZATION_INDEX: FuzzySpaceParser,
+        Menu.PDI_AROMATICITY: FuzzySpaceParser,
+        Menu.FLU_AROMATICITY: FuzzySpaceParser,
+        Menu.FLU_PI_AROMATICITY: FuzzySpaceParser,
+        Menu.MULTICENTER_DI: FuzzySpaceParser,
+        Menu.ITA_AROMATICITY: FuzzySpaceParser,
+        Menu.CONDENSED_LINEAR_RESPONSE: FuzzySpaceParser,
+        Menu.PARA_LINEAR_RESPONSE: FuzzySpaceParser,
+        Menu.IFDI_ANALYSIS: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_OVERLAP: FuzzySpaceParser,
+        # Menu 17 — basin analysis
+        Menu.BASIN_ANALYSIS_AIM: BasinParser,
+        Menu.BASIN_ANALYSIS_ELF: BasinParser,
+        Menu.BASIN_INTEGRATE_PROPERTY: BasinParser,
+        Menu.BASIN_ANALYSIS_ESP: BasinParser,
+        Menu.BASIN_ANALYSIS_LOL: BasinParser,
+        Menu.BASIN_ANALYSIS_LOL_ALPHA: BasinParser,
+        Menu.BASIN_ANALYSIS_CUSTOM: BasinParser,
+        # Menu 18 — excitation analysis
+        Menu.HOLE_ELECTRON_ANALYSIS: ExcitationParser,
+        Menu.CHARGE_TRANSFER_ANALYSIS: ExcitationParser,
+        Menu.DELTA_R_INDEX: ExcitationParser,
+        Menu.LAMBDA_INDEX: ExcitationParser,
+        Menu.IFCT_ANALYSIS: ExcitationParser,
+        Menu.CTS_ANALYSIS: ExcitationParser,
+        # Menu 20 — weak interactions
+        Menu.NCI_ANALYSIS: WeakInteractionParser,
+        Menu.NCI_PROMOLECULAR: WeakInteractionParser,
+        Menu.ANCI_ANALYSIS: WeakInteractionParser,
+        Menu.IRI_ANALYSIS: WeakInteractionParser,
+        Menu.DORI_ANALYSIS: WeakInteractionParser,
+        Menu.VDW_POTENTIAL: WeakInteractionParser,
+        Menu.IGM_ANALYSIS: WeakInteractionParser,
+        Menu.IGMH_ANALYSIS: WeakInteractionParser,
+        Menu.AIGM_ANALYSIS: WeakInteractionParser,
+        Menu.MIGM_ANALYSIS: WeakInteractionParser,
+        Menu.AMIGM_ANALYSIS: WeakInteractionParser,
+        # Menu 21 — EDA
+        Menu.EDA_FF: EDAParser,
+        Menu.EDA_SBL: EDAParser,
+        Menu.SOBEDA_ANALYSIS: EDAParser,
+        Menu.DISPERSION_ATOMIC_CONTRIBUTION: EDAParser,
+        # Menu 22 — CDFT
+        Menu.CDFT_ANALYSIS: CDFTParser,
+        Menu.FUKUI_FUNCTION: CDFTParser,
+        Menu.DUAL_DESCRIPTOR: CDFTParser,
+        Menu.CONDENSED_FUKUI: CDFTParser,
+        Menu.LOCAL_HARDNESS: CDFTParser,
+        Menu.LOCAL_IONIZATION_ENERGY: CDFTParser,
+        # Menu 24 — polarizability
+        Menu.PARSE_POLARIZABILITY: PolarizabilityParser,
+        Menu.SOS_POLARIZABILITY: PolarizabilityParser,
+        Menu.POLARIZABILITY_DENSITY: PolarizabilityParser,
+        Menu.UNIT_SPHERE_POLARIZABILITY: PolarizabilityParser,
+        # Menu 25 — aromaticity
+        Menu.AICD_ANALYSIS: AromaticityParser,
+        Menu.NICS_POINT: AromaticityParser,
+        Menu.ICSS_ANALYSIS: AromaticityParser,
+        Menu.NICS_SCAN: AromaticityParser,
+        Menu.BIRD_INDEX: AromaticityParser,
+        Menu.HOMA_INDEX: AromaticityParser,
+        Menu.HOMAC_HOMER: AromaticityParser,
+        Menu.STANGER_INDEX: AromaticityParser,
+        Menu.NICS_1D_SCAN: AromaticityParser,
+        Menu.NICS_2D_MAP: AromaticityParser,
+        # Menu 6 — wavefunction info
+        Menu.PRINT_ORBITAL_INFO: WavefunctionParser,
+        Menu.PRINT_GTF_INFO: WavefunctionParser,
+        Menu.PRINT_BASIS_INFO: WavefunctionParser,
+        # Menu 5 — cube generation (store metadata only, not the cube)
+        Menu.CUBE_DENSITY: CubeParser,
+        Menu.CUBE_SPIN_DENSITY: CubeParser,
+        Menu.CUBE_ELF: CubeParser,
+        Menu.CUBE_LOL: CubeParser,
+        Menu.CUBE_ESP: CubeParser,
+        Menu.CUBE_LAPLACIAN: CubeParser,
+        Menu.CUBE_GRADIENT_NORM: CubeParser,
+        Menu.CUBE_KINETIC_G: CubeParser,
+        Menu.CUBE_KINETIC_K: CubeParser,
+        Menu.CUBE_ALIE: CubeParser,
+        Menu.CUBE_RDG: CubeParser,
+        Menu.CUBE_SIGN_LAMBDA2_RHO: CubeParser,
+        Menu.CUBE_SOURCE_FUNCTION: CubeParser,
+        Menu.CUBE_ORBITAL_WAVEFUNCTION: CubeParser,
+        Menu.CUBE_FUKUI_MINUS: CubeParser,
+        Menu.CUBE_FUKUI_PLUS: CubeParser,
+        Menu.CUBE_DUAL_DESCRIPTOR: CubeParser,
+        Menu.CUBE_PROMOLECULAR_DENSITY: CubeParser,
+        Menu.CUBE_DEFORMATION_DENSITY: CubeParser,
+        Menu.CUBE_DENSITY_HIGH: CubeParser,
+        Menu.CUBE_ESP_HIGH: CubeParser,
+        Menu.CUBE_ELF_HIGH: CubeParser,
+        # Menu 100 — utilities
+        Menu.GEOMETRY_PROPERTIES: UtilityParser,
+        Menu.ELECTRIC_MULTIPOLE_MOMENTS: UtilityParser,
+        Menu.BLA_BOA_ANALYSIS: UtilityParser,
+    }
