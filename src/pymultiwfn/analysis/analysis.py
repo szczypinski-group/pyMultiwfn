@@ -1,5 +1,6 @@
 """Module to plan and execute Multiwfn analyses."""
 
+import logging
 from pathlib import Path
 
 from pymultiwfn.analysis.result import MultiwfnResult
@@ -10,6 +11,8 @@ from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.api.storage import ResultStore
 from pymultiwfn.enums.analyses import AnalysisClasses
 from pymultiwfn.enums.menu import Menu
+
+logger = logging.getLogger(__name__)
 
 
 class MultiwfnAnalysis:

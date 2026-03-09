@@ -33,6 +33,8 @@ verbose                    = 1
 ignore-setters             = true
 ignore-property-decorators = true
 ignore-magic               = true
+ignore-private             = true
+ignore-semiprivate         = true
 exclude                     = ["tests/**", "menu.py"]
 
 [tool.ruff]

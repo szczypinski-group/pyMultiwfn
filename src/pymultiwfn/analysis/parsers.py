@@ -1,4 +1,8 @@
-"""Output parsers for Multiwfn results."""
+"""Output parsers for Multiwfn results.
+
+ClaudeCode-extracted regex patterns from Multiwfn 3.8 manual (6 Jan 2026).
+
+"""
 
 import re
 from typing import Any
@@ -13,9 +17,6 @@ class OutputParser:
     pass
 
 
-# TODO(fs): maybe worth looking into making this code less long? I think i went
-# a bit overkill with all the different parsign methods and regex. Maybe some
-# of the methods can be combined?
 # =============================================================================
 # Menu 7: Population analysis & atomic charges
 # =============================================================================
@@ -36,13 +37,13 @@ class ChargeParser(OutputParser):
 
         Parameters
         ----------
-        stdout : str
+        stdout
             Multiwfn standard output
 
         Returns
         -------
-        dict[int, float]
-            Dictionary mapping atom indices to charges
+        Dictionary mapping atom indices to charges
+
         """
         charges: dict[int, float] = {}
 
@@ -140,9 +141,9 @@ class ChargeParser(OutputParser):
 
         Returns
         -------
-        dict[str, float] | None
-            Dictionary with 'x', 'y', 'z', 'total' dipole components
-            in Debye, or None if not found.
+        Dictionary with 'x', 'y', 'z', 'total' dipole components
+        in Debye, or None if not found.
+
         """
         pattern = (
             rf"Dipole moment.*?X=\s*({FLOAT_PATTERN})\s+"
@@ -178,9 +179,9 @@ class OrbitalCompositionParser(OutputParser):
 
         Returns
         -------
-        list[dict[str, Any]]
-            List of dicts with keys: 'orbital', 'energy', 'occupation',
-            'contributions' (dict mapping atom/fragment labels to percentages)
+        List of dicts with keys: 'orbital', 'energy', 'occupation',
+        'contributions' (dict mapping atom/fragment labels to percentages)
+
         """
         orbitals: list[dict[str, Any]] = []
 
@@ -224,8 +225,8 @@ class OrbitalCompositionParser(OutputParser):
 
         Returns
         -------
-        dict[int, int]
-            Mapping of atom index to formal oxidation state
+        Mapping of atom index to formal oxidation state.
+
         """
         pattern = (
             rf"Atom\s+(\d+)\s*\([A-Za-z]+\s*\).*?"
@@ -259,13 +260,13 @@ class BondOrderParser(OutputParser):
 
         Parameters
         ----------
-        stdout : str
+        stdout
             Multiwfn standard output
 
         Returns
         -------
-        dict[tuple[int, int], float]
-            Dictionary mapping atom pairs to bond orders
+        Dictionary mapping atom pairs to bond orders
+
         """
         bond_orders: dict[tuple[int, int], float] = {}
 
@@ -314,8 +315,8 @@ class BondOrderParser(OutputParser):
 
         Returns
         -------
-        dict[int, dict[str, float]]
-            Mapping of atom index to {'total_valence', 'free_valence'}
+        Mapping of atom index to {'total_valence', 'free_valence'}
+
         """
         valences: dict[int, dict[str, float]] = {}
 
@@ -340,15 +341,15 @@ class BondOrderParser(OutputParser):
         return valences
 
     @staticmethod
-    def parse_multicenter(stdout: str) -> list[dict[str, Any]]:
+    def parse_multicenter(stdout: str) -> list[dict[str, list[int] | float]]:
         """Extract multicenter bond order results.
 
         Returns
         -------
-        list[dict[str, Any]]
-            List of dicts with 'atoms' (list[int]) and 'bond_order' (float)
+        List of dicts with 'atoms' (list[int]) and 'bond_order' (float)
+
         """
-        results: list[dict[str, Any]] = []
+        results: list[dict[str, list[int] | float]] = []
         # "Multi-center bond order of atoms  1  2  3 :  0.12345"
         pattern = (
             rf"Multi-center bond order of atoms\s+([\d\s]+):\s+"
@@ -362,15 +363,15 @@ class BondOrderParser(OutputParser):
     @staticmethod
     def parse_decomposition(
         stdout: str,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, int | float]]:
         """Extract per-orbital bond order decomposition.
 
         Returns
         -------
-        list[dict[str, Any]]
-            List of dicts with 'orbital', 'contribution' keys
+        List of dicts with 'orbital', 'contribution' keys
+
         """
-        decomp: list[dict[str, Any]] = []
+        decomp: list[dict[str, int | float]] = []
         # "Orbital   5:   0.23456"
         pattern = rf"Orbital\s+(\d+)\s*:\s+({FLOAT_PATTERN})"
         decomp.extend(
@@ -420,7 +421,9 @@ class CriticalPointParser(OutputParser):
             List of dicts with 'index', 'type', 'cp_type', 'position',
             and optionally 'rho', 'laplacian', 'ellipticity'
         """
-        cps: list[dict[str, Any]] = []
+        cps: list[
+            dict[str, int | float | str | tuple[float, float, float] | None]
+        ] = []
 
         pattern = r"CP\s+(\d+)\s+\((\d+),([+-]?\d+)\)"
         pos_pattern = (
@@ -437,7 +440,9 @@ class CriticalPointParser(OutputParser):
                 cp_index = int(match[1])
                 cp_type = f"({match[2]},{match[3]})"
 
-                cp: dict[str, Any] = {
+                cp: dict[
+                    str, int | float | str | tuple[float, float, float] | None
+                ] = {
                     "index": cp_index,
                     "type": cp_type,
                     "cp_type": CriticalPointParser.CP_TYPE_NAMES.get(
@@ -499,7 +504,9 @@ class CriticalPointParser(OutputParser):
         return paths
 
     @staticmethod
-    def summary(cps: list[dict[str, Any]]) -> dict[str, int]:
+    def summary(
+        cps: list[dict[str, Any]],
+    ) -> dict[str, int]:
         """Count critical points by type.
 
         Returns
@@ -509,7 +516,7 @@ class CriticalPointParser(OutputParser):
         """
         counts: dict[str, int] = {}
         for cp in cps:
-            name = cp.get("cp_type", "unknown")
+            name: str = cp.get("cp_type", "unknown")
             counts[name] = counts.get(name, 0) + 1
         return counts
 
