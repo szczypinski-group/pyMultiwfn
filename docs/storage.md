@@ -2,4 +2,4 @@
 
 Core data storage functionalities
 
-::: pymultiwfn.storage
+::: pymultiwfn.api.storage

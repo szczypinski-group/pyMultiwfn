@@ -2,4 +2,4 @@
 
 Output parsers for Multiwfn results.
 
-::: pymultiwfn.parsers
+::: pymultiwfn.analysis.parsers
