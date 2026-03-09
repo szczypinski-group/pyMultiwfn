@@ -1,4 +1,4 @@
-# Convinience Functions (`outcome.py`)
+# Calculation Outcome (`outcome.py`)
 
 Calculation outcome processing
 
