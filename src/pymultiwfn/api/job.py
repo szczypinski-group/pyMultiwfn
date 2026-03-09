@@ -239,12 +239,12 @@ class MultiwfnJob:
             return None
 
     @property
-    def stdout(self) -> str | None:
+    def stdout(self) -> str:
         """Get the standard output from execution (read-only)."""
         if self._result is not None:
             return self._result.stdout
         else:
-            return None
+            return ""
 
     @property
     def return_code(self) -> int | None:
