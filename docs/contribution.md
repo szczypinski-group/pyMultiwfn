@@ -1,10 +1,10 @@
 # Developper Guide
 ## Adding a Function/Menu
 If you are adding a new function/menu sequence, we ask that you ensure the following:
-1. Add a new menu entry in enum/menu.py. This must be in the enum format and must return an array of strings as input and be added in the correct category of calculation. A short description of what the sequence performs should also be added.
-2. Include the new Menu enum to analysis
-3. Write/include a new parsing function in parsers.py if the Multiwfn output is non-standard.
-4. Ensure Menu <-> Parser mapping
+1. Add a new menu entry in enum/menu.py. This must be in the enum format and must return an array of strings as input and be added in the correct category of calculation. A short description of what the sequence performs should also be added.   
+2. Include the new Menu enum to analysis.   
+3. Write/include a new parsing function in parsers.py if the Multiwfn output is non-standard.   
+4. Ensure Menu <-> Parser mapping   
 
 ## Contributing
 We actively welcome contributions from the community. If you do decide to contribute please follow these rules:
