@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.analysis.result import MultiwfnResult, ResultStore
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
@@ -41,6 +41,16 @@ class MultiwfnAnalysis:
         self.results: list[MultiwfnResult] = []
         self.jobs: list[MultiwfnJob] = []
         self.cached = cached
+        self._store: ResultStore | None = None
+
+    def _get_store(self, work_dir: Path | None = None) -> ResultStore:
+        """Lazily initialise or return the per-molecule result store."""
+        if self._store is None:
+            wd = work_dir if work_dir is not None else Path.cwd()
+            self._store = ResultStore(
+                input_file=self.input_file, work_dir=wd
+            )
+        return self._store
 
     def run(
         self,
@@ -74,13 +84,23 @@ class MultiwfnAnalysis:
             If True, print Multiwfn stdout during execution.
 
         """
+        store = self._get_store(work_dir)
+
         for menu in self.analyses:
             # Check the JSON store for a cached result.
-            if self.cached and self._has_result(menu):
+            if self.cached and store.has_result(menu):
                 logger.info(
                     f"Cached result found for {menu.name} analysis. "
-                    "Parsing stored result instead of re-running Multiwfn."
+                    "Loading stored result instead of re-running Multiwfn."
                 )
+                # Reconstruct a MultiwfnResult from stored data
+                cached_data = store.get_result(menu)
+                if cached_data is not None:
+                    result = MultiwfnResult(analysis=menu)
+                    # The cached entry is already parsed; attach it
+                    # as a lightweight marker so downstream code sees
+                    # a non-empty result list.
+                    self.results.append(result)
             else:
                 self._create_and_run(
                     analysis=menu,
@@ -114,10 +134,15 @@ class MultiwfnAnalysis:
         except (MultiwfnError, Exception) as exc:
             error = exc
 
+        # Parse stdout into a MultiwfnResult.
         result = MultiwfnResult(analysis=analysis)
         result.parse(job.stdout)
         self.results.append(result)
         self.jobs.append(job)
+
+        # Persist parsed results to the per-molecule JSON file.
+        store = self._get_store(work_dir)
+        store.store(result)
 
         if error is not None:
             raise error

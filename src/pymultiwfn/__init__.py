@@ -18,11 +18,10 @@ from pymultiwfn.analysis.parsers import (
     OutputParser,
     SpectrumParser,
 )
-from pymultiwfn.analysis.result import MultiwfnResult
+from pymultiwfn.analysis.result import MultiwfnResult, ResultStore
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
-from pymultiwfn.api.storage import ResultStore
 from pymultiwfn.enums.menu import Menu
 
 __all__ = [
@@ -44,7 +43,6 @@ __all__ = [
     "BondOrderParser",
     "CriticalPointParser",
     "SpectrumParser",
-    "WfnFile",
     # Storage
     "ResultStore",
 ]

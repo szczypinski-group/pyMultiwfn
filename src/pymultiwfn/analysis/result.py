@@ -1,31 +1,36 @@
-"""Result container for Multiwfn job execution."""
+"""Result container for Multiwfn job execution.
 
-from dataclasses import dataclass
-from typing import Literal
+Provides the parsed-result dataclasses, the :class:`MultiwfnResult`
+container that accumulates parser output, and per-molecule JSON
+persistence (replacing the former ``storage.py``).
+"""
 
-from pymultiwfn.analysis.parsers import ParserRoute
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Literal
+
 from pymultiwfn.enums.menu import Menu
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Parsed result dataclasses
+# ═════════════════════════════════════════════════════════════════════════════
 
 
 @dataclass
 class ParsedMultiwfnResult:
-    """Base class for Multiwfn result types."""
+    """Base class for all Multiwfn parsed result types."""
 
-    pass
+    def to_dict(self) -> dict[str, Any]:
+        """Serialise to a plain dict (JSON-safe)."""
+        return asdict(self)
 
 
-@dataclass
-class MultiwfnResult:
-    """Base class for Multiwfn result types."""
-
-    analysis: Menu
-    result: list[ParsedMultiwfnResult] = []
-
-    def parse(
-        self,
-        stdout: str,
-    ) -> None:
-        ParserRoute.ROUTE_TABLE[self.analysis](stdout)
+# ── Menu 7: Charges ──────────────────────────────────────────────────────
 
 
 @dataclass
@@ -46,6 +51,9 @@ class Dipole(ParsedMultiwfnResult):
     total: float
 
 
+# ── Menu 8: Orbital composition ─────────────────────────────────────────
+
+
 @dataclass
 class OrbitalContribution:
     """Individual contribution to an orbital."""
@@ -61,7 +69,23 @@ class OrbitalComponent(ParsedMultiwfnResult):
     orbital_id: int
     occupation: float
     energy: float
-    contributions: list[OrbitalContribution]
+    contributions: list[OrbitalContribution] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        d = asdict(self)
+        d["contributions"] = [asdict(c) for c in self.contributions]
+        return d
+
+
+@dataclass
+class OxidationState(ParsedMultiwfnResult):
+    """Result for oxidation state analysis."""
+
+    atom_id: int
+    oxidation_state: int
+
+
+# ── Menu 9: Bond orders ─────────────────────────────────────────────────
 
 
 @dataclass
@@ -94,20 +118,15 @@ class Valence(ParsedMultiwfnResult):
 class MultiCenterBondOrder(ParsedMultiwfnResult):
     """Result for multi-center bond order analysis."""
 
-    atom_ids: list[int]
-    bond_order: float
+    atom_ids: list[int] = field(default_factory=list)
+    bond_order: float = 0.0
+
+
+# ── Menu 2: Topology ────────────────────────────────────────────────────
 
 
 @dataclass
-class OxidationState(ParsedMultiwfnResult):
-    """Result for oxidation state analysis."""
-
-    atom_id: int
-    oxidation_state: int
-
-
-@dataclass
-class CriticalPoint:
+class CriticalPoint(ParsedMultiwfnResult):
     """Individual critical point."""
 
     index: int
@@ -130,20 +149,15 @@ class BondPath(ParsedMultiwfnResult):
     path_length: float
 
 
-@dataclass
-class ProjectedDensityOfStates(ParsedMultiwfnResult):
-    """Result for projected density of states analysis."""
-
-    orbital_id: int
-    dos: float
+# ── Menu 10: Density of states ──────────────────────────────────────────
 
 
 @dataclass
 class DensityOfStates(ParsedMultiwfnResult):
     """Result for density of states analysis."""
 
-    energies_eV: list[float]  # noqa: N815
-    dos: list[float]
+    energies_eV: list[float] = field(default_factory=list)  # noqa: N815
+    dos: list[float] = field(default_factory=list)
     projected_dos: dict[str, list[float]] | None = None
 
 
@@ -154,6 +168,9 @@ class OrbitalEnergy(ParsedMultiwfnResult):
     index: int
     energy_eV: float  # noqa: N815
     occupation: float
+
+
+# ── Menu 11: Spectra ────────────────────────────────────────────────────
 
 
 @dataclass
@@ -190,6 +207,9 @@ class Color(ParsedMultiwfnResult):
     B: int
 
 
+# ── Menu 12: Surface analysis ───────────────────────────────────────────
+
+
 @dataclass
 class SurfaceAnalysis(ParsedMultiwfnResult):
     """Result for surface analysis."""
@@ -218,6 +238,9 @@ class SurfaceExtremum(ParsedMultiwfnResult):
     z: float
 
 
+# ── Menu 15: Fuzzy atomic space ─────────────────────────────────────────
+
+
 @dataclass
 class FuzzyAtomicProperty(ParsedMultiwfnResult):
     """Result for atomic properties in fuzzy space."""
@@ -228,6 +251,7 @@ class FuzzyAtomicProperty(ParsedMultiwfnResult):
     dipole_y: float | None = None
     dipole_z: float | None = None
     quadrupole: float | None = None
+    volume: float | None = None
 
 
 @dataclass
@@ -237,6 +261,17 @@ class DelocalizationIndex(ParsedMultiwfnResult):
     atom1_id: int
     atom2_id: int
     index: float
+
+
+@dataclass
+class AromaticityIndex(ParsedMultiwfnResult):
+    """Result for aromaticity indices (Menu 15)."""
+
+    index_name: str
+    value: float
+
+
+# ── Menu 17: Basin analysis ─────────────────────────────────────────────
 
 
 @dataclass
@@ -251,6 +286,9 @@ class Basin(ParsedMultiwfnResult):
     charge: float | None = None
 
 
+# ── Menu 18: Excitation analysis ────────────────────────────────────────
+
+
 @dataclass
 class HoleElectron(ParsedMultiwfnResult):
     """Result for hole-electron analysis."""
@@ -262,8 +300,8 @@ class HoleElectron(ParsedMultiwfnResult):
     hole_delocalisation_index: float
     Sr: float
     d_index: float
-    hole_centroid: tuple[float, float, float]
-    electron_centroid: tuple[float, float, float]
+    hole_centroid: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    electron_centroid: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
 @dataclass
@@ -279,9 +317,20 @@ class ChargeTransferFragment(ParsedMultiwfnResult):
 class ChargeTransfer(ParsedMultiwfnResult):
     """Result for charge transfer analysis."""
 
-    distance: float | None
-    transfer_amount: float | None
+    distance: float | None = None
+    transfer_amount: float | None = None
     fragments: list[ChargeTransferFragment] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "distance": self.distance,
+            "transfer_amount": self.transfer_amount,
+        }
+        if self.fragments is not None:
+            d["fragments"] = [asdict(f) for f in self.fragments]
+        else:
+            d["fragments"] = None
+        return d
 
 
 @dataclass
@@ -300,14 +349,20 @@ class LambdaIndex(ParsedMultiwfnResult):
     lambda_index: float
 
 
+# ── Menu 20: Weak interactions ──────────────────────────────────────────
+
+
 @dataclass
 class WeakInteraction(ParsedMultiwfnResult):
     """Result for weak interaction analysis."""
 
-    delta_g_inter: float
-    delta_g_intra: float
+    delta_g_inter: float = 0.0
+    delta_g_intra: float = 0.0
     isosurface_integral: float | None = None
     cube_names: list[str] | None = None
+
+
+# ── Menu 21: EDA ────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -319,6 +374,7 @@ class EnergyDecompositionAnalysis(ParsedMultiwfnResult):
     repulsion: float | None = None
     polarization: float | None = None
     dispersion: float | None = None
+    orbital_interaction: float | None = None
     total_interaction: float | None = None
 
 
@@ -328,6 +384,9 @@ class DispersionContribution(ParsedMultiwfnResult):
 
     atom_id: int
     contribution: float
+
+
+# ── Menu 22: CDFT ───────────────────────────────────────────────────────
 
 
 @dataclass
@@ -361,35 +420,46 @@ class DualDescriptor(ParsedMultiwfnResult):
     value: float
 
 
+# ── Menu 24: Polarizability ─────────────────────────────────────────────
+
+
 @dataclass
 class PolarizabilityTensor(ParsedMultiwfnResult):
     """Result for polarizability tensor."""
 
-    alpha_xx: float
-    alpha_xy: float
-    alpha_xz: float
-    alpha_yy: float
-    alpha_yz: float
-    alpha_zz: float
+    alpha_xx: float = 0.0
+    alpha_xy: float = 0.0
+    alpha_xz: float = 0.0
+    alpha_yy: float = 0.0
+    alpha_yz: float = 0.0
+    alpha_zz: float = 0.0
 
 
 @dataclass
 class Polarizability(ParsedMultiwfnResult):
     """Result for polarizability."""
 
-    isotripic: float | None = None
+    isotropic: float | None = None
     anisotropic: float | None = None
     beta_total: float | None = None
     gamma_total: float | None = None
     tensor: PolarizabilityTensor | None = None
 
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "isotropic": self.isotropic,
+            "anisotropic": self.anisotropic,
+            "beta_total": self.beta_total,
+            "gamma_total": self.gamma_total,
+        }
+        if self.tensor is not None:
+            d["tensor"] = asdict(self.tensor)
+        else:
+            d["tensor"] = None
+        return d
 
-@dataclass
-class AromaticityIndex(ParsedMultiwfnResult):
-    """Result for aromaticity indices (Menu 15)."""
 
-    index_name: str
-    value: float
+# ── Menu 25: Aromaticity ────────────────────────────────────────────────
 
 
 @dataclass
@@ -411,8 +481,11 @@ class Aromaticity(ParsedMultiwfnResult):
 class NICSScan(ParsedMultiwfnResult):
     """Result for Nucleus Independent Chemical Shift scan."""
 
-    distances: list[float]
-    values: list[float]
+    distances: list[float] = field(default_factory=list)
+    values: list[float] = field(default_factory=list)
+
+
+# ── Menu 6: Wavefunction ────────────────────────────────────────────────
 
 
 @dataclass
@@ -423,22 +496,28 @@ class Orbital(ParsedMultiwfnResult):
     energy_eV: float  # noqa: N815
     energy_au: float
     occupation: float
-    spin: Literal["alpha", "beta"] | None
+    spin: Literal["alpha", "beta"] | None = None
+
+
+# ── Menu 5: Cube ────────────────────────────────────────────────────────
 
 
 @dataclass
 class Cube(ParsedMultiwfnResult):
     """Result for cube operations."""
 
-    file_name: str
-    x_dim: int
-    y_dim: int
-    z_dim: int
+    file_name: str = ""
+    x_dim: int = 0
+    y_dim: int = 0
+    z_dim: int = 0
     min: float | None = None
     max: float | None = None
     mean: float | None = None
     integral: float | None = None
     std_dev: float | None = None
+
+
+# ── Menu 100/200/300: Utilities ──────────────────────────────────────────
 
 
 @dataclass
@@ -484,19 +563,19 @@ class DipoleMoment(ParsedMultiwfnResult):
 class QuadrupoleMoment(ParsedMultiwfnResult):
     """Result for quadrupole moment analysis."""
 
-    xx: float | None
-    xy: float | None
-    xz: float | None
-    yy: float | None
-    yz: float | None
-    zz: float | None
+    xx: float | None = None
+    xy: float | None = None
+    xz: float | None = None
+    yy: float | None = None
+    yz: float | None = None
+    zz: float | None = None
 
 
 @dataclass
 class MultipoleMoments(ParsedMultiwfnResult):
     """Result for multipole moments."""
 
-    moments: dict[str, float]
+    moments: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -521,3 +600,165 @@ class LocalizationIndex(ParsedMultiwfnResult):
 
     atom_id: int
     index: float
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# MultiwfnResult — container that accumulates parsed results per analysis
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class MultiwfnResult:
+    """Container for parsed Multiwfn analysis results.
+
+    Each instance is bound to a single :class:`Menu` analysis type.
+    After :meth:`parse` is called with raw stdout, the parsed
+    :class:`ParsedMultiwfnResult` objects are available in
+    :attr:`result`.
+
+    Parameters
+    ----------
+    analysis
+        The Menu enum member identifying this analysis.
+
+    """
+
+    def __init__(self, analysis: Menu) -> None:
+        self.analysis: Menu = analysis
+        self.result: list[ParsedMultiwfnResult] = []
+
+    def parse(self, stdout: str) -> None:
+        """Parse *stdout* using the router and store results.
+
+        Imports :class:`ParserRoute` lazily to avoid circular imports
+        (parsers.py imports dataclasses from this module).
+        """
+        from pymultiwfn.analysis.parsers import ParserRoute
+
+        parser_cls = ParserRoute.ROUTE_TABLE.get(self.analysis)
+        if parser_cls is None:
+            return
+
+        parsed = parser_cls.parse_for_result(self.analysis, stdout)
+        if parsed:
+            self.result.extend(parsed)
+
+    # ── serialisation ────────────────────────────────────────────────────
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialise the result list to a JSON-safe dict."""
+        return {
+            "analysis": self.analysis.name,
+            "results": [r.to_dict() for r in self.result],
+        }
+
+    def __repr__(self) -> str:
+        return (
+            f"MultiwfnResult(analysis={self.analysis.name!r}, "
+            f"n_results={len(self.result)})"
+        )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# ResultStore — per-molecule JSON persistence (replaces storage.py)
+# ═════════════════════════════════════════════════════════════════════════════
+
+
+class ResultStore:
+    """Per-molecule JSON result store.
+
+    Manages a ``<molecule>.json`` file that accumulates parsed results
+    keyed by analysis name.  The file is read on construction (if it
+    exists) and written back whenever a new result is stored.
+
+    Parameters
+    ----------
+    input_file
+        Path to the wavefunction input file.
+    work_dir
+        Directory in which to create the companion ``.json`` file.
+
+    """
+
+    def __init__(self, input_file: Path, work_dir: Path) -> None:
+        self._input_file = Path(input_file)
+        self._work_dir = Path(work_dir)
+        self._work_dir.mkdir(parents=True, exist_ok=True)
+
+        self._json_path = self._work_dir / f"{self._input_file.name}.json"
+        self._data: dict[str, Any] = self._load()
+
+    @property
+    def json_path(self) -> Path:
+        return self._json_path
+
+    @property
+    def data(self) -> dict[str, Any]:
+        """Return a *copy* of the stored data."""
+        return dict(self._data)
+
+    # ── persistence ──────────────────────────────────────────────────────
+
+    def _load(self) -> dict[str, Any]:
+        if self._json_path.exists():
+            with Path.open(self._json_path, encoding="utf-8") as f:
+                return json.load(f)
+        return {
+            "input_file": str(self._input_file),
+            "analyses": {},
+        }
+
+    def _save(self) -> None:
+        with Path.open(self._json_path, "w", encoding="utf-8") as f:
+            json.dump(self._data, f, indent=2, default=str)
+
+    # ── read / write ─────────────────────────────────────────────────────
+
+    def has_result(self, analysis: Menu) -> bool:
+        """Check whether a parsed result already exists for *analysis*."""
+        return analysis.name in self._data.get("analyses", {})
+
+    def get_result(self, analysis: Menu) -> dict[str, Any] | None:
+        """Retrieve a previously stored parsed result, or ``None``."""
+        return self._data.get("analyses", {}).get(analysis.name)
+
+    def store(self, mwfn_result: MultiwfnResult) -> None:
+        """Persist a :class:`MultiwfnResult` into the JSON file.
+
+        Parameters
+        ----------
+        mwfn_result
+            A fully parsed ``MultiwfnResult`` whose ``.result`` list
+            is non-empty.
+
+        """
+        if not mwfn_result.result:
+            return
+
+        entry: dict[str, Any] = {
+            "parsed": mwfn_result.to_dict(),
+            "timestamp": datetime.now().isoformat(),
+        }
+        self._data.setdefault("analyses", {})[
+            mwfn_result.analysis.name
+        ] = entry
+        self._save()
+
+    def store_from_stdout(
+        self,
+        analysis: Menu,
+        stdout: str,
+    ) -> MultiwfnResult | None:
+        """Parse *stdout*, persist, and return the :class:`MultiwfnResult`.
+
+        Convenience method combining :meth:`MultiwfnResult.parse` and
+        :meth:`store` in a single call.
+
+        Returns ``None`` if no parser is available or parsing yields no
+        results.
+        """
+        result = MultiwfnResult(analysis=analysis)
+        result.parse(stdout)
+        if not result.result:
+            return None
+        self.store(result)
+        return result

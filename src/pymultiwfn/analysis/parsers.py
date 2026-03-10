@@ -2,7 +2,14 @@
 
 ClaudeCode-extracted regex patterns from Multiwfn 3.8 manual (6 Jan 2026).
 
+Each parser class inherits from :class:`OutputParser` and exposes a
+:meth:`parse_for_result` classmethod that the :class:`MultiwfnResult`
+container calls.  ``parse_for_result`` dispatches to the appropriate
+static parsing helpers and returns a flat
+``list[ParsedMultiwfnResult]``.
 """
+
+from __future__ import annotations
 
 import re
 from typing import Any, Literal
@@ -38,13 +45,13 @@ from pymultiwfn.analysis.result import (
     HoleElectron,
     LambdaIndex,
     MultiCenterBondOrder,
-    MultiwfnResult,
     NICSScan,
     Orbital,
     OrbitalComponent,
     OrbitalContribution,
     OrbitalEnergy,
     OxidationState,
+    ParsedMultiwfnResult,
     Polarizability,
     PolarizabilityTensor,
     QuadrupoleMoment,
@@ -63,9 +70,59 @@ FLOAT_PATTERN = r"[-+]?(?:\d+\.\d*|\d*\.\d+|\d+)(?:[Ee][-+]?\d+)?"
 
 
 class OutputParser:
-    """Base class for output parsers."""
+    """Base class for output parsers.
 
-    pass
+    Subclasses must implement :meth:`parse_for_result` which receives
+    the :class:`Menu` enum and raw stdout, and returns a list of
+    :class:`ParsedMultiwfnResult` instances.
+    """
+
+    # Type alias for callables used in case maps.  Each callable
+    # accepts ``stdout`` and returns either a single result, a list of
+    # results, or ``None``.
+    _Parser = Any  # Callable[[str], ParsedMultiwfnResult | list | None]
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        """Dispatch to the appropriate static helpers and return results.
+
+        Subclasses override this to call their specific ``parse_*``
+        methods and return a flat list.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def _collect(
+        stdout: str,
+        parsers: list[Any],
+    ) -> list[ParsedMultiwfnResult]:
+        """Run *parsers* against *stdout* and flatten into a single list.
+
+        Each entry in *parsers* is a callable ``(str) -> T`` where *T*
+        may be:
+
+        * a single :class:`ParsedMultiwfnResult` — appended directly
+        * a ``list`` of results — extended into the output
+        * ``None`` — skipped
+
+        For dataclasses whose "empty" state is meaningful (e.g.
+        ``Spectrum`` with no frequencies), the caller should wrap the
+        parser in a lambda that returns ``None`` when empty.
+        """
+        results: list[ParsedMultiwfnResult] = []
+        for fn in parsers:
+            value = fn(stdout)
+            if value is None:
+                continue
+            if isinstance(value, list):
+                results.extend(value)
+            else:
+                results.append(value)
+        return results
 
 
 # =============================================================================
@@ -73,10 +130,7 @@ class OutputParser:
 # =============================================================================
 
 
-class ChargeParser(
-    OutputParser,
-    MultiwfnResult,
-):
+class ChargeParser(OutputParser):
     """Parser for atomic charges.
 
     Handles output from all Menu 7 charge methods including Hirshfeld,
@@ -85,26 +139,21 @@ class ChargeParser(
     MBIS, and DDEC.
     """
 
-    def _parse(self, stdout: str) -> None:
-        self.result.extend(ChargeParser.parse_charges(stdout))
-        if (dipole := ChargeParser.parse_dipole(stdout)) is not None:
-            self.result.extend([dipole])
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        results.extend(cls.parse_charges(stdout))
+        if (dipole := cls.parse_dipole(stdout)) is not None:
+            results.append(dipole)
+        return results
 
     @staticmethod
     def parse_charges(stdout: str) -> list[Charge]:
-        """Extract atomic charges from Multiwfn output.
-
-        Parameters
-        ----------
-        stdout
-            Multiwfn standard output
-
-        Returns
-        -------
-        ChargeResult
-            Result object containing list of charge objects
-
-        """
+        """Extract atomic charges from Multiwfn output."""
         charges: list[Charge] = []
 
         # Pattern 1: "Hirshfeld charge of atom     1(C ) is  0.03208687"
@@ -128,8 +177,6 @@ class ChargeParser(
             rf"Charge of atom\s+(\d+)\s*\([A-Za-z]+\s*\)\s*:\s+"
             rf"({FLOAT_PATTERN})"
         )
-        # Pattern 7: "Net charge:  0.0321" after atom header
-        # (some methods print atom header then net charge on next line)
 
         in_charge_section = False
         in_final_section = False
@@ -137,12 +184,10 @@ class ChargeParser(
         for line in stdout.split("\n"):
             line_lower = line.lower()
 
-            # Check for section markers
-            # TODO(fs): lots of if statements here, worth refactoring i think?
             if "final atomic charges" in line_lower:
                 in_final_section = True
                 in_charge_section = True
-                charges.clear()  # Prefer final charges
+                charges.clear()
                 continue
             elif "charge" in line_lower or "population" in line_lower:
                 in_charge_section = True
@@ -152,14 +197,12 @@ class ChargeParser(
                 charges.clear()
                 continue
 
-            # Try pattern 1 first (most specific - includes method name)
             if match := re.search(pattern1, line, re.IGNORECASE):
                 charges.append(
                     Charge(atom_id=int(match[1]), charge=float(match[2]))
                 )
                 continue
 
-            # Try pattern 5 (population format for Mulliken/Lowdin)
             if match := re.search(pattern5, line):
                 if in_charge_section:
                     charges.append(
@@ -167,7 +210,6 @@ class ChargeParser(
                     )
                 continue
 
-            # Try pattern 6 (generic charge format)
             if match := re.search(pattern6, line):
                 if in_charge_section:
                     charges.append(
@@ -175,7 +217,6 @@ class ChargeParser(
                     )
                 continue
 
-            # Try pattern 2 (Final atomic charges format)
             if match := re.search(pattern2, line):
                 if in_charge_section or in_final_section:
                     charges.append(
@@ -183,21 +224,18 @@ class ChargeParser(
                     )
                 continue
 
-            # Try pattern 3 (table format)
             if in_charge_section and (match := re.match(pattern3, line)):
                 charges.append(
                     Charge(atom_id=int(match[1]), charge=float(match[2]))
                 )
                 continue
 
-            # Try pattern 4 (column format)
             if in_charge_section and (match := re.match(pattern4, line)):
                 charges.append(
                     Charge(atom_id=int(match[1]), charge=float(match[2]))
                 )
                 continue
 
-            # End of section detection
             if (
                 in_final_section
                 and charges
@@ -209,14 +247,7 @@ class ChargeParser(
 
     @staticmethod
     def parse_dipole(stdout: str) -> Dipole | None:
-        """Extract molecular dipole moment from charge output.
-
-        Returns
-        -------
-        Dictionary with 'x', 'y', 'z', 'total' dipole components
-        in Debye, or None if not found.
-
-        """
+        """Extract molecular dipole moment from charge output."""
         pattern = (
             rf"Dipole moment.*?X=\s*({FLOAT_PATTERN})\s+"
             rf"Y=\s*({FLOAT_PATTERN})\s+Z=\s*({FLOAT_PATTERN})\s+"
@@ -238,35 +269,35 @@ class ChargeParser(
 
 
 class OrbitalCompositionParser(OutputParser):
-    """Parser for orbital composition analysis (Menu 8).
+    """Parser for orbital composition analysis (Menu 8)."""
 
-    Handles Mulliken, SCPA, Stout-Politzer, NAO, Hirshfeld, and Becke
-    orbital composition methods, as well as fragment composition and
-    LOBA oxidation state analysis.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.LOBA_OXIDATION_STATE: [cls.parse_oxidation_states],
+        }
+        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse(stdout: str) -> list[OrbitalComponent]:
-        """Extract orbital composition data.
-
-        Returns
-        -------
-        List of dicts with keys: 'orbital', 'energy', 'occupation',
-        'contributions' (dict mapping atom/fragment labels to percentages)
-
-        """
+        """Extract orbital composition data."""
         orbitals: list[OrbitalComponent] = []
 
-        # "Orbital    5  Occ= 2.000000  E= -0.72340 a.u."
         orb_pattern = (
             rf"Orbital\s+(\d+)\s+Occ=\s*({FLOAT_PATTERN})\s+"
             rf"E=\s*({FLOAT_PATTERN})"
         )
-        # "  C  1    s :   23.45%"  or  "  1(C )    45.23%"
         contrib_pattern = (
             rf"([A-Za-z]+)\s+(\d+)\s+.*?:\s+({FLOAT_PATTERN})\s*%"
         )
-        contrib_pattern2 = rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
+        contrib_pattern2 = (
+            rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
+        )
 
         current_orb: OrbitalComponent | None = None
         for line in stdout.split("\n"):
@@ -301,25 +332,18 @@ class OrbitalCompositionParser(OutputParser):
 
     @staticmethod
     def parse_oxidation_states(stdout: str) -> list[OxidationState]:
-        """Extract LOBA oxidation states.
-
-        Returns
-        -------
-        List of oxidation states for each atom.
-
-        """
+        """Extract LOBA oxidation states."""
         pattern = (
             rf"Atom\s+(\d+)\s*\([A-Za-z]+\s*\).*?"
             rf"oxidation state.*?({FLOAT_PATTERN})"
         )
-        states: list[OxidationState] = [
+        return [
             OxidationState(
                 atom_id=int(match[1]),
                 oxidation_state=int(round(float(match[2]))),
             )
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return states
 
 
 # =============================================================================
@@ -328,52 +352,42 @@ class OrbitalCompositionParser(OutputParser):
 
 
 class BondOrderParser(OutputParser):
-    """Parser for bond orders.
+    """Parser for bond orders."""
 
-    Handles Mayer, Wiberg, Mulliken, fuzzy, Laplacian, IBSI, and
-    multicenter bond orders, as well as AV1245 index and bond order
-    decompositions.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.MULTICENTER_BOND_ORDER:       [cls.parse_multicenter],
+            Menu.MULTICENTER_BOND_ORDER_NAO:   [cls.parse_multicenter],
+            Menu.MULLIKEN_BOND_ORDER_DECOMPOSE: [cls.parse_decomposition],
+            Menu.WIBERG_DECOMPOSITION:          [cls.parse_decomposition],
+        }
+        default = [cls.parse, cls.parse_valence]
+        parsers = _CASE_MAP.get(analysis, default)
+        return cls._collect(stdout, parsers)
 
     @staticmethod
-    def parse(
-        stdout: str,
-    ) -> list[BondOrder]:
-        """Extract bond orders from Multiwfn output.
-
-        Parameters
-        ----------
-        stdout
-            Multiwfn standard output
-
-        Returns
-        -------
-        List of bond orders
-
-        """
+    def parse(stdout: str) -> list[BondOrder]:
+        """Extract bond orders from Multiwfn output."""
         bond_orders: list[BondOrder] = []
 
-        # Pattern 1: "#    1:         1(C )    2(N )    1.95394965"
         pattern1 = (
             rf"#\s*\d+:\s+(\d+)\s*\([^)]+\)\s+(\d+)\s*\([^)]+\)\s+"
             rf"({FLOAT_PATTERN})"
         )
-
-        # Pattern 2: "1(C ) -    2(C ):  1.4523"
         pattern2 = (
             rf"(\d+)\s*\([^)]+\)\s*-\s*(\d+)\s*\([^)]+\)\s*:\s*"
             rf"({FLOAT_PATTERN})"
         )
-
-        # Pattern 3: Simple "1 - 2   1.4523"
         pattern3 = rf"^\s*(\d+)\s*-\s*(\d+)\s+({FLOAT_PATTERN})"
-
-        # Pattern 4: "   1    2    1.4523" (column format)
         pattern4 = rf"^\s*(\d+)\s+(\d+)\s+({FLOAT_PATTERN})\s*$"
 
         for line in stdout.split("\n"):
             match = None
-
             if (
                 (match := re.search(pattern1, line))
                 or (match := re.search(pattern2, line))
@@ -396,38 +410,32 @@ class BondOrderParser(OutputParser):
 
     @staticmethod
     def parse_valence(stdout: str) -> list[Valence]:
-        """Extract total valence and free valence for each atom.
-
-        Returns
-        -------
-        List of valence information for each atom
-
-        """
+        """Extract total valence and free valence for each atom."""
         valences: list[Valence] = []
 
-        # "Total valence of atom    1(C ):   3.9412"
         total_pattern = (
             rf"Total valence of atom\s+(\d+)\s*\([^)]+\)\s*:\s+"
             rf"({FLOAT_PATTERN})"
         )
-        # "Free valence of atom     1(C ):   0.0588"
         free_pattern = (
             rf"Free valence of atom\s+(\d+)\s*\([^)]+\)\s*:\s+"
             rf"({FLOAT_PATTERN})"
         )
 
         for match in re.finditer(total_pattern, stdout):
-            idx = int(match[1])
             valences.append(
                 Valence(
-                    atom_id=idx, type="total_valence", valence=float(match[2])
+                    atom_id=int(match[1]),
+                    type="total_valence",
+                    valence=float(match[2]),
                 )
             )
         for match in re.finditer(free_pattern, stdout):
-            idx = int(match[1])
             valences.append(
                 Valence(
-                    atom_id=idx, type="free_valence", valence=float(match[2])
+                    atom_id=int(match[1]),
+                    type="free_valence",
+                    valence=float(match[2]),
                 )
             )
 
@@ -435,15 +443,8 @@ class BondOrderParser(OutputParser):
 
     @staticmethod
     def parse_multicenter(stdout: str) -> list[MultiCenterBondOrder]:
-        """Extract multicenter bond order results.
-
-        Returns
-        -------
-        List of multicenter bond order results
-
-        """
+        """Extract multicenter bond order results."""
         results: list[MultiCenterBondOrder] = []
-        # "Multi-center bond order of atoms  1  2  3 :  0.12345"
         pattern = (
             rf"Multi-center bond order of atoms\s+([\d\s]+):\s+"
             rf"({FLOAT_PATTERN})"
@@ -458,27 +459,16 @@ class BondOrderParser(OutputParser):
         return results
 
     @staticmethod
-    def parse_decomposition(
-        stdout: str,
-    ) -> list[BondOrderDecomposition]:
-        """Extract per-orbital bond order decomposition.
-
-        Returns
-        -------
-        List of bond order decomposition results
-
-        """
-        decomp: list[BondOrderDecomposition] = []
-        # "Orbital   5:   0.23456"
+    def parse_decomposition(stdout: str) -> list[BondOrderDecomposition]:
+        """Extract per-orbital bond order decomposition."""
         pattern = rf"Orbital\s+(\d+)\s*:\s+({FLOAT_PATTERN})"
-        decomp.extend(
+        return [
             BondOrderDecomposition(
                 orbital_id=int(match[1]),
                 contribution=float(match[2]),
             )
             for match in re.finditer(pattern, stdout)
-        )
-        return decomp
+        ]
 
 
 # =============================================================================
@@ -487,12 +477,7 @@ class BondOrderParser(OutputParser):
 
 
 class CriticalPointParser(OutputParser):
-    """Parser for critical point information from topology analysis.
-
-    Handles output from TOPOLOGY_SEARCH_CPS, TOPOLOGY_GENERATE_PATHS,
-    TOPOLOGY_ANALYSIS_COMPLETE, and specialised topology analyses
-    (ESP, LOL, ELF, Laplacian, BCP/RCP/CCP searches).
-    """
+    """Parser for critical point information from topology analysis."""
 
     CP_TYPE_NAMES: dict[
         str, Literal["nuclear", "bond", "ring", "cage", "unknown"]
@@ -503,23 +488,20 @@ class CriticalPointParser(OutputParser):
         "(3,+3)": "cage",
     }
 
-    @staticmethod
-    def parse(
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
         stdout: str,
-    ) -> list[CriticalPoint]:
-        """Extract critical point information from topology analysis.
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        results.extend(cls.parse(stdout))
+        results.extend(cls.parse_bond_paths(stdout))
+        return results
 
-        Parameters
-        ----------
-        stdout : str
-            Multiwfn standard output
-
-        Returns
-        -------
-        list[dict[str, Any]]
-            List of dicts with 'index', 'type', 'cp_type', 'position',
-            and optionally 'rho', 'laplacian', 'ellipticity'
-        """
+    @staticmethod
+    def parse(stdout: str) -> list[CriticalPoint]:
+        """Extract critical point information from topology analysis."""
         cps: list[CriticalPoint] = []
 
         pattern = r"CP\s+(\d+)\s+\((\d+),([+-]?\d+)\)"
@@ -537,7 +519,11 @@ class CriticalPointParser(OutputParser):
                 cp_index = int(match[1])
                 cp_type = f"({match[2]},{match[3]})"
 
-                # Scan following lines for properties
+                position: tuple[float, float, float] | None = None
+                rho: float | None = None
+                lap: float | None = None
+                ell: float | None = None
+
                 for j in range(i, min(i + 10, len(lines))):
                     sub = lines[j]
                     if pos_match := re.search(pos_pattern, sub):
@@ -553,52 +539,41 @@ class CriticalPointParser(OutputParser):
                     if ell_match := re.search(ell_pattern, sub):
                         ell = float(ell_match[1])
 
-                    cp = CriticalPoint(
-                        index=cp_index,
-                        x=position[0],
-                        y=position[1],
-                        z=position[2],
-                        rho=rho if rho is not None else None,
-                        laplacian=lap if lap is not None else None,
-                        ellipticity=ell if ell is not None else None,
-                        type=CriticalPointParser.CP_TYPE_NAMES.get(
-                            cp_type, "unknown"
-                        ),
+                if position is not None:
+                    cps.append(
+                        CriticalPoint(
+                            index=cp_index,
+                            x=position[0],
+                            y=position[1],
+                            z=position[2],
+                            rho=rho,
+                            laplacian=lap,
+                            ellipticity=ell,
+                            type=CriticalPointParser.CP_TYPE_NAMES.get(
+                                cp_type, "unknown"
+                            ),
+                        )
                     )
-
-                cps.append(cp)
 
         return cps
 
     @staticmethod
-    def parse_bond_paths(
-        stdout: str,
-    ) -> list[BondPath]:
-        """Extract bond path information.
-
-        Returns
-        -------
-        list[BondPath]
-            List of BondPath instances
-        """
+    def parse_bond_paths(stdout: str) -> list[BondPath]:
+        """Extract bond path information."""
         paths: list[BondPath] = []
-        # Example:
-        # Bond path between atom  1(C ) and atom  2(N ), BCP  3, length  2.456
         pattern = (
             rf"Bond path between atom\s+(\d+).*?and atom\s+(\d+).*?"
             rf"BCP\s+(\d+).*?length\s+({FLOAT_PATTERN})"
         )
         for match in re.finditer(pattern, stdout, re.IGNORECASE):
-            if match is not None:
-                paths.append(
-                    BondPath(
-                        atom1_id=int(match[1]),
-                        atom2_id=int(match[2]),
-                        bcp_id=int(match[3]),
-                        path_length=float(match[4]),
-                    )
+            paths.append(
+                BondPath(
+                    atom1_id=int(match[1]),
+                    atom2_id=int(match[2]),
+                    bcp_id=int(match[3]),
+                    path_length=float(match[4]),
                 )
-
+            )
         return paths
 
 
@@ -608,25 +583,30 @@ class CriticalPointParser(OutputParser):
 
 
 class DOSParser(OutputParser):
-    """Parser for density of states output.
+    """Parser for density of states output."""
 
-    Handles TDOS, PDOS, OPDOS, LDOS, COHP, and photoelectron spectrum.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        dos = cls.parse(stdout)
+        if dos.energies_eV:
+            results.append(dos)
+        orb_energies = cls.parse_orbital_energies(stdout)
+        results.extend(orb_energies)
+        return results
 
     @staticmethod
     def parse(stdout: str) -> DensityOfStates:
-        """Extract DOS curve data.
+        """Extract DOS curve data."""
+        energies: list[float] = []
+        dos_vals: list[float] = []
+        pdos: dict[str, list[float]] = {}
 
-        Returns
-        -------
-        Density of states results object.
-
-        """
-        data: dict[str, list[float]] = {"energies": [], "dos": []}
-
-        # Two-column: "  -10.2345    0.5678"
         pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
-        # Multi-column for PDOS: " -10.2345  0.567  0.234  0.100"
         pattern_multi = rf"^\s+({FLOAT_PATTERN})((?:\s+{FLOAT_PATTERN})+)\s*$"
 
         in_data = False
@@ -640,34 +620,29 @@ class DOSParser(OutputParser):
             if match := re.match(pattern_multi, line):
                 energy = float(match[1])
                 vals = [float(v) for v in match[2].split()]
-                data["energies_eV"].append(energy)
+                energies.append(energy)
                 if vals:
-                    data["dos"].append(vals[0])
+                    dos_vals.append(vals[0])
                 for k, v in enumerate(vals[1:], start=1):
                     key = f"pdos_{k}"
-                    data.setdefault(key, []).append(v)
+                    pdos.setdefault(key, []).append(v)
             elif match := re.match(pattern2, line):
-                data["energies_eV"].append(float(match[1]))
-                data["dos"].append(float(match[2]))
+                energies.append(float(match[1]))
+                dos_vals.append(float(match[2]))
 
-        pdos = {k: v for k, v in data.items() if k.startswith("pdos_")}
         return DensityOfStates(
-            energies_eV=data["energies_eV"],
-            dos=data["dos"],
+            energies_eV=energies,
+            dos=dos_vals,
             projected_dos=pdos if pdos else None,
         )
 
     @staticmethod
     def parse_orbital_energies(stdout: str) -> list[OrbitalEnergy]:
-        """Extract orbital energies used in DOS.
-
-        Returns
-        -------
-        list[OrbitalEnergy]
-            List of orbital energy objects
-        """
-        pattern = rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
-        orbitals: list[OrbitalEnergy] = [
+        """Extract orbital energies used in DOS."""
+        pattern = (
+            rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
+        )
+        return [
             OrbitalEnergy(
                 index=int(match[1]),
                 energy_eV=float(match[2]),
@@ -675,7 +650,6 @@ class DOSParser(OutputParser):
             )
             for match in re.finditer(pattern, stdout)
         ]
-        return orbitals
 
 
 # =============================================================================
@@ -684,47 +658,46 @@ class DOSParser(OutputParser):
 
 
 class SpectrumParser(OutputParser):
-    """Parser for spectrum data.
+    """Parser for spectrum data."""
 
-    Handles IR, Raman, UV-Vis, ECD, VCD, ROA, NMR, fluorescence, PVS,
-    and colour prediction output.
-    """
+    @classmethod
+    def _parse_spectrum_or_none(cls, stdout: str) -> Spectrum | None:
+        """Return parsed spectrum only if it contains data."""
+        s = cls.parse(stdout)
+        return s if (s.frequencies or s.wavelengths or s.atom_indices) else None
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _BASE: list = [cls._parse_spectrum_or_none, cls.parse_transitions]
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.PREDICT_COLOR: [*_BASE, cls.parse_color],
+        }
+        parsers = _CASE_MAP.get(analysis, _BASE)
+        return cls._collect(stdout, parsers)
 
     @staticmethod
-    def parse(
-        stdout: str,
-    ) -> Spectrum:
-        """Extract spectrum data (frequencies/wavelengths, intensities).
-
-        Parameters
-        ----------
-        stdout : str
-            Multiwfn standard output
-
-        Returns
-        -------
-        Spectrum
-            Spectrum result object
-        """
+    def parse(stdout: str) -> Spectrum:
+        """Extract spectrum data (frequencies/wavelengths, intensities)."""
         spectrum: dict[str, list[float]] = {
             "frequencies": [],
             "intensities": [],
         }
 
-        # IR/Raman: "  1234.56 cm^-1  Intensity:  45.678"
         pattern1 = (
             rf"({FLOAT_PATTERN})\s+cm\^?-1.*?Intensity:\s+({FLOAT_PATTERN})"
         )
-        # UV-Vis/ECD: "  345.67 nm  f= 0.1234"
         pattern_uv = (
             rf"({FLOAT_PATTERN})\s+nm.*?(?:f=|Str[.=])\s*({FLOAT_PATTERN})"
         )
-        # NMR: "  Atom  1(C )  shift:  123.45 ppm"
-        pattern_nmr = rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
-        # Generic two-column
+        pattern_nmr = (
+            rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
+        )
         pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
 
-        # Try IR/Raman first
         for match in re.finditer(pattern1, stdout):
             spectrum["frequencies"].append(float(match[1]))
             spectrum["intensities"].append(float(match[2]))
@@ -735,7 +708,6 @@ class SpectrumParser(OutputParser):
                 intensities=spectrum["intensities"],
             )
 
-        # Try UV-Vis/ECD
         uv_data: dict[str, list[float]] = {
             "wavelengths": [],
             "intensities": [],
@@ -749,7 +721,6 @@ class SpectrumParser(OutputParser):
                 intensities=uv_data["intensities"],
             )
 
-        # Try NMR
         nmr_data: dict[str, list[float]] = {
             "atom_indices": [],
             "chemical_shifts": [],
@@ -763,7 +734,6 @@ class SpectrumParser(OutputParser):
                 chemical_shifts=nmr_data["chemical_shifts"],
             )
 
-        # Fallback: generic two-column
         for line in stdout.split("\n"):
             if match2 := re.match(pattern2, line):
                 spectrum["frequencies"].append(float(match2[1]))
@@ -776,15 +746,8 @@ class SpectrumParser(OutputParser):
 
     @staticmethod
     def parse_transitions(stdout: str) -> list[Transition]:
-        """Extract discrete transition data (excitation energies, strengths).
-
-        Returns
-        -------
-        list[Transition]
-            List of transition objects
-        """
+        """Extract discrete transition data."""
         transitions: list[Transition] = []
-        # "Excited state   1:  E= 3.4567 eV  lam= 358.7 nm  f= 0.0123"
         pattern = (
             rf"Excited state\s+(\d+).*?E=\s*({FLOAT_PATTERN})\s*eV.*?"
             rf"lam=\s*({FLOAT_PATTERN})\s*nm.*?"
@@ -796,7 +759,6 @@ class SpectrumParser(OutputParser):
         for i, line in enumerate(lines):
             if match := re.search(pattern, line):
                 rot_strength = None
-                # Check for rotatory strength on same or next line
                 combined = line
                 if i + 1 < len(lines):
                     combined += lines[i + 1]
@@ -815,13 +777,7 @@ class SpectrumParser(OutputParser):
 
     @staticmethod
     def parse_color(stdout: str) -> Color | None:
-        """Extract predicted colour from PREDICT_COLOR output.
-
-        Returns
-        -------
-        Color | None
-            Color result object or None
-        """
+        """Extract predicted colour from PREDICT_COLOR output."""
         result: dict[str, Any] = {}
         for pat_name, pat in [
             ("X", rf"X=\s*({FLOAT_PATTERN})"),
@@ -846,22 +802,23 @@ class SpectrumParser(OutputParser):
 
 
 class SurfaceParser(OutputParser):
-    """Parser for molecular surface analysis output.
+    """Parser for molecular surface analysis output."""
 
-    Handles ESP surface analysis, ALIE surface analysis, surface area/
-    volume, Becke surface, Hirshfeld surface, surface extrema, and
-    Hirshfeld surface fingerprint.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        surface = cls.parse(stdout)
+        results.append(surface)
+        results.extend(cls.parse_extrema(stdout))
+        return results
 
     @staticmethod
     def parse(stdout: str) -> SurfaceAnalysis:
-        """Extract surface analysis statistics.
-
-        Returns
-        -------
-        SurfaceAnalysis
-            Surface analysis result object
-        """
+        """Extract surface analysis statistics."""
         result: dict[str, Any] = {}
 
         patterns: dict[str, str] = {
@@ -891,15 +848,8 @@ class SurfaceParser(OutputParser):
 
     @staticmethod
     def parse_extrema(stdout: str) -> list[SurfaceExtremum]:
-        """Extract surface extrema (minima and maxima).
-
-        Returns
-        -------
-        list[SurfaceExtremum]
-            List of surface extremum objects
-        """
+        """Extract surface extrema (minima and maxima)."""
         extrema: list[SurfaceExtremum] = []
-        # "Local  minimum   1:   -45.678  at   1.234   2.345   3.456"
         pattern = (
             rf"Local\s+(min\w*|max\w*)\s+(\d+)\s*:\s+({FLOAT_PATTERN})"
             rf"\s+at\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+"
@@ -928,28 +878,27 @@ class SurfaceParser(OutputParser):
 
 
 class FuzzySpaceParser(OutputParser):
-    """Parser for fuzzy atomic space analysis output.
+    """Parser for fuzzy atomic space analysis output."""
 
-    Handles integration results, atomic dipole moments, AOM,
-    localization/delocalization indices, PDI, FLU, FLU-pi, MCI,
-    ITA, atomic volumes, and IFDI.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        results.extend(cls.parse_atomic_properties(stdout))
+        results.extend(cls.parse_delocalization_indices(stdout))
+        results.extend(cls.parse_aromaticity_index(stdout))
+        return results
 
     @staticmethod
     def parse_atomic_properties(
         stdout: str,
     ) -> list[FuzzyAtomicProperty]:
-        """Extract per-atom integrated properties.
-
-        Returns
-        -------
-        dict[int, dict[str, float]]
-            Mapping of atom index to property dict (e.g., 'population',
-            'dipole_x', 'dipole_y', 'dipole_z', 'quadrupole')
-        """
+        """Extract per-atom integrated properties."""
         atoms: dict[int, dict[str, float]] = {}
 
-        # "Atom   1(C ):  population=  5.9678  dipole=  0.1234"
         pop_pattern = (
             rf"Atom\s+(\d+)\s*\([^)]+\)\s*:?\s+(?:population|integral)"
             rf"[=:\s]+({FLOAT_PATTERN})"
@@ -958,7 +907,6 @@ class FuzzySpaceParser(OutputParser):
             idx = int(match[1])
             atoms.setdefault(idx, {})["population"] = float(match[2])
 
-        # "Atomic dipole of atom  1(C ):  X= 0.12  Y= 0.34  Z= 0.56"
         dip_pattern = (
             rf"Atomic dipole of atom\s+(\d+).*?"
             rf"X=\s*({FLOAT_PATTERN})\s+"
@@ -975,28 +923,21 @@ class FuzzySpaceParser(OutputParser):
                 }
             )
 
-        # Atomic volume: "Atom  1  volume:  23.456"
         vol_pattern = rf"Atom\s+(\d+).*?volume[=:\s]+({FLOAT_PATTERN})"
         for match in re.finditer(vol_pattern, stdout, re.IGNORECASE):
             idx = int(match[1])
             atoms.setdefault(idx, {})["volume"] = float(match[2])
 
-        properties = []
-        for atom_id, props in atoms.items():
-            properties.append(FuzzyAtomicProperty(atom_id=atom_id, **props))
-        return properties
+        return [
+            FuzzyAtomicProperty(atom_id=atom_id, **props)
+            for atom_id, props in atoms.items()
+        ]
 
     @staticmethod
     def parse_delocalization_indices(
         stdout: str,
     ) -> list[DelocalizationIndex]:
-        """Extract delocalization indices.
-
-        Returns
-        -------
-        list[DelocalizationIndex]
-            List of delocalization index objects
-        """
+        """Extract delocalization indices."""
         indices: list[DelocalizationIndex] = []
 
         di_pattern = (
@@ -1018,13 +959,7 @@ class FuzzySpaceParser(OutputParser):
 
     @staticmethod
     def parse_aromaticity_index(stdout: str) -> list[AromaticityIndex]:
-        """Extract aromaticity indices (PDI, FLU, FLU-pi, MCI, ITA).
-
-        Returns
-        -------
-        list[AromaticityIndex]
-            List of aromaticity index objects
-        """
+        """Extract aromaticity indices (PDI, FLU, FLU-pi, MCI, ITA)."""
         result: list[AromaticityIndex] = []
 
         index_patterns: dict[str, str] = {
@@ -1052,30 +987,30 @@ class FuzzySpaceParser(OutputParser):
 
 
 class BasinParser(OutputParser):
-    """Parser for basin analysis output.
+    """Parser for basin analysis output."""
 
-    Handles AIM, ELF, ESP, LOL, and custom basin analyses.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        results.extend(cls.parse(stdout))
+        results.extend(cls.parse_charges(stdout))
+        return results
 
     @staticmethod
     def parse(stdout: str) -> list[Basin]:
-        """Extract basin integration results.
-
-        Returns
-        -------
-        list[Basin]
-            Basin result objects with 'basin', 'population', and optionally
-            'attractor_atom' and 'attractor_element'.
-        """
+        """Extract basin integration results."""
         basins: list[Basin] = []
 
-        # "Basin   1  attractor at atom  3(O )  population:  9.2345"
         pattern = (
             rf"Basin\s+(\d+).*?(?:attractor.*?atom\s+(\d+)\s*\(([^)]+)\))?"
             rf".*?population[=:\s]+({FLOAT_PATTERN})"
         )
         for match in re.finditer(pattern, stdout, re.IGNORECASE):
-            basin: Basin = Basin(
+            basin = Basin(
                 basin_id=int(match[1]),
                 population=float(match[4]),
             )
@@ -1085,12 +1020,12 @@ class BasinParser(OutputParser):
             basins.append(basin)
 
         if not basins:
-            # Simpler format: "  1   C    6.0123   23.456"
             simple = rf"^\s*(\d+)\s+([A-Za-z]+)\s+({FLOAT_PATTERN})"
             in_basin = False
             for line in stdout.split("\n"):
                 if "basin" in line.lower() and (
-                    "population" in line.lower() or "integral" in line.lower()
+                    "population" in line.lower()
+                    or "integral" in line.lower()
                 ):
                     in_basin = True
                     continue
@@ -1107,24 +1042,14 @@ class BasinParser(OutputParser):
 
     @staticmethod
     def parse_charges(stdout: str) -> list[Charge]:
-        """Extract AIM/Bader charges from basin analysis.
-
-        Returns
-        -------
-        list[Charge]
-            List of charge objects
-        """
+        """Extract AIM/Bader charges from basin analysis."""
         pattern = (
             rf"(?:AIM|Bader)\s+charge.*?atom\s+(\d+).*?:\s+({FLOAT_PATTERN})"
         )
-        charges: list[Charge] = [
-            Charge(
-                atom_id=int(match[1]),
-                charge=float(match[2]),
-            )
+        return [
+            Charge(atom_id=int(match[1]), charge=float(match[2]))
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return charges
 
 
 # =============================================================================
@@ -1133,22 +1058,29 @@ class BasinParser(OutputParser):
 
 
 class ExcitationParser(OutputParser):
-    """Parser for electron excitation analysis output.
+    """Parser for electron excitation analysis output."""
 
-    Handles hole-electron analysis, transition density matrix,
-    charge transfer analysis, Delta_r index, NTOs, IFCT, Lambda
-    index, CTS, and conditional density.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _DEFAULT = [cls.parse_hole_electron, cls.parse_delta_r, cls.parse_lambda_index]
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.HOLE_ELECTRON_ANALYSIS:   [cls.parse_hole_electron],
+            Menu.CHARGE_TRANSFER_ANALYSIS: [cls.parse_charge_transfer],
+            Menu.IFCT_ANALYSIS:            [cls.parse_charge_transfer],
+            Menu.CTS_ANALYSIS:             [cls.parse_charge_transfer],
+            Menu.DELTA_R_INDEX:            [cls.parse_delta_r],
+            Menu.LAMBDA_INDEX:             [cls.parse_lambda_index],
+        }
+        parsers = _CASE_MAP.get(analysis, _DEFAULT)
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse_hole_electron(stdout: str) -> HoleElectron | None:
-        """Extract hole-electron analysis descriptors.
-
-        Returns
-        -------
-        HoleElectron | None
-            Hole-electron analysis result or None
-        """
+        """Extract hole-electron analysis descriptors."""
         result: dict[str, Any] = {}
 
         patterns: dict[str, str] = {
@@ -1165,7 +1097,6 @@ class ExcitationParser(OutputParser):
             if match := re.search(pat, stdout, re.IGNORECASE):
                 result[key] = float(match[1])
 
-        # Centroids
         centroid_pat = (
             rf"(hole|electron)\s+centroid.*?"
             rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
@@ -1179,7 +1110,8 @@ class ExcitationParser(OutputParser):
                 float(match[4]),
             )
 
-        if "hole_centroid" in centroids and "electron_centroid" in centroids:
+        required = {"H_index", "E_index", "t_index", "EDI", "HDI", "Sr", "D_index"}
+        if required.issubset(result) and "hole_centroid" in centroids and "electron_centroid" in centroids:
             return HoleElectron(
                 hole_id=result["H_index"],
                 electron_id=result["E_index"],
@@ -1195,13 +1127,10 @@ class ExcitationParser(OutputParser):
 
     @staticmethod
     def parse_charge_transfer(stdout: str) -> ChargeTransfer:
-        """Extract charge transfer analysis results.
+        """Extract charge transfer analysis results."""
+        ct_distance: float | None = None
+        ct_amount: float | None = None
 
-        Returns
-        -------
-        Charge transfer result data.
-
-        """
         ct_dist = rf"CT\s+distance[=:\s]+({FLOAT_PATTERN})"
         ct_amt = (
             rf"(?:transferred|CT)\s+(?:charge|amount)[=:\s]+({FLOAT_PATTERN})"
@@ -1213,11 +1142,10 @@ class ExcitationParser(OutputParser):
             ct_amount = float(match[1])
 
         result = ChargeTransfer(
-            distance=ct_distance if ct_distance is not None else None,
-            transfer_amount=ct_amount if ct_amount is not None else None,
+            distance=ct_distance,
+            transfer_amount=ct_amount,
         )
 
-        # Per-fragment: "Fragment 1:  hole= 0.85  electron= 0.15"
         frag_pattern = (
             rf"Fragment\s+(\d+).*?hole[=:\s]+({FLOAT_PATTERN})"
             rf".*?electron[=:\s]+({FLOAT_PATTERN})"
@@ -1239,41 +1167,27 @@ class ExcitationParser(OutputParser):
 
     @staticmethod
     def parse_delta_r(stdout: str) -> list[DeltaR]:
-        """Extract Delta_r index for each excited state.
-
-        Returns
-        -------
-        list[DeltaR]
-            List of DeltaR result objects
-        """
+        """Extract Delta_r index for each excited state."""
         pattern = (
             rf"(?:State|Excited state)\s+(\d+).*?"
             rf"Delta_?r[=:\s]+({FLOAT_PATTERN})"
         )
-        results: list[DeltaR] = [
+        return [
             DeltaR(state_id=int(match[1]), delta_r=float(match[2]))
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return results
 
     @staticmethod
     def parse_lambda_index(stdout: str) -> list[LambdaIndex]:
-        """Extract Lambda diagnostic for each excited state.
-
-        Returns
-        -------
-        list[LambdaIndex]
-            List of LambdaIndex result objects
-        """
+        """Extract Lambda diagnostic for each excited state."""
         pattern = (
             rf"(?:State|Excited state)\s+(\d+).*?"
             rf"Lambda[=:\s]+({FLOAT_PATTERN})"
         )
-        results: list[LambdaIndex] = [
+        return [
             LambdaIndex(state_id=int(match[1]), lambda_index=float(match[2]))
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return results
 
 
 # =============================================================================
@@ -1282,27 +1196,28 @@ class ExcitationParser(OutputParser):
 
 
 class WeakInteractionParser(OutputParser):
-    """Parser for weak interaction analysis output.
+    """Parser for weak interaction analysis output."""
 
-    Handles NCI, IRI, DORI, IGM, IGMH, and related analyses. These
-    methods primarily produce cube files; this parser extracts any
-    summary statistics printed to stdout.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        interaction = cls.parse(stdout)
+        if interaction is not None:
+            results.append(interaction)
+        return results
 
     @staticmethod
-    def parse(stdout: str) -> WeakInteraction:
-        """Extract summary statistics from weak interaction analysis.
-
-        Returns
-        -------
-        WeakInteraction
-            Weak interaction analysis result
-        """
-        result: dict[str, float] = {}
+    def parse(stdout: str) -> WeakInteraction | None:
+        """Extract summary statistics from weak interaction analysis."""
+        vals: dict[str, float] = {}
 
         patterns: dict[str, str] = {
-            "delta_g_inter": (rf"delta_?g_?inter.*?[=:\s]+({FLOAT_PATTERN})"),
-            "delta_g_intra": (rf"delta_?g_?intra.*?[=:\s]+({FLOAT_PATTERN})"),
+            "delta_g_inter": rf"delta_?g_?inter.*?[=:\s]+({FLOAT_PATTERN})",
+            "delta_g_intra": rf"delta_?g_?intra.*?[=:\s]+({FLOAT_PATTERN})",
             "isosurface_integral": (
                 rf"(?:Integral|integral).*?isosurface.*?[=:\s]+({FLOAT_PATTERN})"
             ),
@@ -1310,25 +1225,25 @@ class WeakInteractionParser(OutputParser):
 
         for key, pat in patterns.items():
             if match := re.search(pat, stdout, re.IGNORECASE):
-                result[key] = float(match[1])
+                vals[key] = float(match[1])
 
-        if result["delta_g_inter"] and result["delta_g_intra"] is not None:
-            interaction = WeakInteraction(
-                delta_g_inter=result["delta_g_inter"],
-                delta_g_intra=result["delta_g_intra"],
-            )
+        if "delta_g_inter" not in vals and "delta_g_intra" not in vals:
+            return None
 
-        if result["isosurface_integral"] is not None:
-            interaction.isosurface_integral = result["isosurface_integral"]
+        interaction = WeakInteraction(
+            delta_g_inter=vals.get("delta_g_inter", 0.0),
+            delta_g_intra=vals.get("delta_g_intra", 0.0),
+        )
 
-        # Cube files produced
-        cubes: list[str] = []
-        cubes.extend(
+        if "isosurface_integral" in vals:
+            interaction.isosurface_integral = vals["isosurface_integral"]
+
+        cubes: list[str] = [
             match[1]
             for match in re.finditer(
                 r"(\S+\.cube)\s+has been generated", stdout
             )
-        )
+        ]
         if cubes:
             interaction.cube_names = cubes
 
@@ -1341,24 +1256,27 @@ class WeakInteractionParser(OutputParser):
 
 
 class EDAParser(OutputParser):
-    """Parser for energy decomposition analysis output.
+    """Parser for energy decomposition analysis output."""
 
-    Handles EDA_FF, EDA_SBL, SOBEDA, and dispersion contributions.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.DISPERSION_ATOMIC_CONTRIBUTION: [cls.parse_dispersion_contributions],
+        }
+        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse(stdout: str) -> EnergyDecompositionAnalysis:
-        """Extract EDA energy components.
-
-        Returns
-        -------
-        EnergyDecompositionAnalysis
-            EDA analysis result
-        """
+        """Extract EDA energy components."""
         components: dict[str, float] = {}
 
         patterns: dict[str, str] = {
-            "electrostatic": (rf"[Ee]lectrostatic.*?[=:\s]+({FLOAT_PATTERN})"),
+            "electrostatic": rf"[Ee]lectrostatic.*?[=:\s]+({FLOAT_PATTERN})",
             "exchange": rf"[Ee]xchange.*?[=:\s]+({FLOAT_PATTERN})",
             "repulsion": (
                 rf"(?:[Rr]epulsion|Pauli).*?[=:\s]+({FLOAT_PATTERN})"
@@ -1385,23 +1303,16 @@ class EDAParser(OutputParser):
     def parse_dispersion_contributions(
         stdout: str,
     ) -> list[DispersionContribution]:
-        """Extract per-atom dispersion energy contributions.
-
-        Returns
-        -------
-        list[DispersionContribution]
-            List of dispersion contribution objects
-        """
+        """Extract per-atom dispersion energy contributions."""
         pattern = (
             rf"Atom\s+(\d+).*?(?:dispersion|D[34]).*?[=:\s]+({FLOAT_PATTERN})"
         )
-        contributions = [
+        return [
             DispersionContribution(
                 atom_id=int(match[1]), contribution=float(match[2])
             )
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return contributions
 
 
 # =============================================================================
@@ -1410,21 +1321,28 @@ class EDAParser(OutputParser):
 
 
 class CDFTParser(OutputParser):
-    """Parser for conceptual DFT output.
+    """Parser for conceptual DFT output."""
 
-    Handles global reactivity indices, Fukui functions, dual descriptor,
-    condensed Fukui, local hardness, and local ionisation energy.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.CDFT_ANALYSIS:        [cls.parse_global_indices, cls.parse_condensed_fukui, cls.parse_dual_descriptor],
+            Menu.LOCAL_HARDNESS:       [cls.parse_global_indices],
+            Menu.LOCAL_IONIZATION_ENERGY: [cls.parse_global_indices],
+            Menu.CONDENSED_FUKUI:      [cls.parse_condensed_fukui],
+            Menu.FUKUI_FUNCTION:       [cls.parse_condensed_fukui],
+            Menu.DUAL_DESCRIPTOR:      [cls.parse_dual_descriptor],
+        }
+        parsers = _CASE_MAP.get(analysis, [])
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse_global_indices(stdout: str) -> Reactivity:
-        """Extract global CDFT indices.
-
-        Returns
-        -------
-        ReactivityIndices
-            Reactivity indices result object
-        """
+        """Extract global CDFT indices."""
         indices: dict[str, float] = {}
 
         patterns: dict[str, str] = {
@@ -1447,7 +1365,7 @@ class CDFTParser(OutputParser):
             if match := re.search(pat, stdout, re.IGNORECASE):
                 indices[key] = float(match[1])
 
-        result = Reactivity(
+        return Reactivity(
             chemical_potential=indices.get("chemical_potential"),
             hardness=indices.get("hardness"),
             softness=indices.get("softness"),
@@ -1457,20 +1375,9 @@ class CDFTParser(OutputParser):
             electron_affinity=indices.get("EA"),
         )
 
-        return result
-
     @staticmethod
-    def parse_condensed_fukui(
-        stdout: str,
-    ) -> list[CondensedFukui]:
-        """Extract condensed Fukui function values per atom.
-
-        Returns
-        -------
-        list[CondensedFukui]
-            List of condensed Fukui result objects
-        """
-        # "Atom   1(C ):  f+= 0.1234  f-= 0.0567  f0= 0.0900"
+    def parse_condensed_fukui(stdout: str) -> list[CondensedFukui]:
+        """Extract condensed Fukui function values per atom."""
         pattern = (
             rf"Atom\s+(\d+)\s*\([^)]+\)\s*:?\s+"
             rf"f\+[=:\s]+({FLOAT_PATTERN})\s+"
@@ -1487,7 +1394,6 @@ class CDFTParser(OutputParser):
             for match in re.finditer(pattern, stdout)
         ]
         if not fukui_list:
-            # Try separate patterns
             atoms_dict: dict[int, dict[str, float]] = {}
             for label, key in [
                 (r"f\+", "fukui_plus"),
@@ -1508,25 +1414,16 @@ class CDFTParser(OutputParser):
         return fukui_list
 
     @staticmethod
-    def parse_dual_descriptor(
-        stdout: str,
-    ) -> list[DualDescriptor]:
-        """Extract condensed dual descriptor per atom.
-
-        Returns
-        -------
-        list[DualDescriptor]
-            List of dual descriptor result objects
-        """
+    def parse_dual_descriptor(stdout: str) -> list[DualDescriptor]:
+        """Extract condensed dual descriptor per atom."""
         pattern = (
             rf"Atom\s+(\d+)\s*\([^)]+\)\s*:?\s+"
             rf"(?:dual|Delta_?f|f\+\s*-\s*f-)[=:\s]+({FLOAT_PATTERN})"
         )
-        dd_list: list[DualDescriptor] = [
+        return [
             DualDescriptor(atom_id=int(match[1]), value=float(match[2]))
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
-        return dd_list
 
 
 # =============================================================================
@@ -1535,39 +1432,32 @@ class CDFTParser(OutputParser):
 
 
 class PolarizabilityParser(OutputParser):
-    """Parser for polarizability output.
+    """Parser for polarizability output."""
 
-    Handles parsed polarizability/hyperpolarizability tensors and SOS
-    results.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        return [cls.parse(stdout)]
 
     @staticmethod
     def parse(stdout: str) -> Polarizability:
-        """Extract polarizability tensor data.
-
-        Returns
-        -------
-        dict[str, Any]
-            Dictionary with 'alpha_iso', 'alpha_aniso', tensor
-            components ('alpha_xx', etc.), and optionally
-            'beta_total', 'gamma_total'
-        """
+        """Extract polarizability tensor data."""
         result = Polarizability()
 
-        # Isotropic polarizability
         iso_pat = (
             rf"[Ii]sotropic.*?(?:alpha|polarizability)"
             rf".*?[=:\s]+({FLOAT_PATTERN})"
         )
         if match := re.search(iso_pat, stdout):
-            result.isotripic = float(match[1])
+            result.isotropic = float(match[1])
 
-        # Anisotropy
         aniso_pat = rf"[Aa]nisotropy.*?[=:\s]+({FLOAT_PATTERN})"
         if match := re.search(aniso_pat, stdout):
             result.anisotropic = float(match[1])
 
-        # Hyperpolarizability
         beta_pat = rf"[Bb]eta.*?total[=:\s]+({FLOAT_PATTERN})"
         if match := re.search(beta_pat, stdout):
             result.beta_total = float(match[1])
@@ -1576,16 +1466,14 @@ class PolarizabilityParser(OutputParser):
         if match := re.search(gamma_pat, stdout):
             result.gamma_total = float(match[1])
 
-        # Tensor components
         components: dict[str, float] = {}
         for comp in ["xx", "xy", "xz", "yy", "yz", "zz"]:
             pat = rf"alpha[_\s]*{comp}[=:\s]+({FLOAT_PATTERN})"
             if match := re.search(pat, stdout, re.IGNORECASE):
                 components[f"alpha_{comp}"] = float(match[1])
 
-        # Build tensor if we have components
         if components:
-            tensor = PolarizabilityTensor(
+            result.tensor = PolarizabilityTensor(
                 alpha_xx=components.get("alpha_xx", 0.0),
                 alpha_xy=components.get("alpha_xy", 0.0),
                 alpha_xz=components.get("alpha_xz", 0.0),
@@ -1593,8 +1481,6 @@ class PolarizabilityParser(OutputParser):
                 alpha_yz=components.get("alpha_yz", 0.0),
                 alpha_zz=components.get("alpha_zz", 0.0),
             )
-
-            result.tensor = tensor
 
         return result
 
@@ -1605,20 +1491,30 @@ class PolarizabilityParser(OutputParser):
 
 
 class AromaticityParser(OutputParser):
-    """Parser for aromaticity analysis output.
+    """Parser for aromaticity analysis output."""
 
-    Handles NICS, ICSS, HOMA, HOMAC, HOMER, Bird, Stanger, and AICD.
-    """
+    @classmethod
+    def _parse_nics_scan_or_none(cls, stdout: str) -> NICSScan | None:
+        """Return parsed NICS scan only if it contains data."""
+        scan = cls.parse_nics_scan(stdout)
+        return scan if scan.distances else None
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.NICS_SCAN:    [cls.parse, cls._parse_nics_scan_or_none],
+            Menu.NICS_1D_SCAN: [cls.parse, cls._parse_nics_scan_or_none],
+        }
+        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse(stdout: str) -> Aromaticity:
-        """Extract aromaticity indices.
-
-        Returns
-        -------
-        Aromaticity
-            Aromaticity result object
-        """
+        """Extract aromaticity indices."""
         result = Aromaticity()
 
         patterns: dict[str, str] = {
@@ -1640,16 +1536,8 @@ class AromaticityParser(OutputParser):
         return result
 
     @staticmethod
-    def parse_nics_scan(
-        stdout: str,
-    ) -> NICSScan:
-        """Extract NICS scan profile data.
-
-        Returns
-        -------
-        NICS
-            NICS scan result object
-        """
+    def parse_nics_scan(stdout: str) -> NICSScan:
+        """Extract NICS scan profile data."""
         distances: list[float] = []
         values: list[float] = []
         pattern = rf"^\s*({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
@@ -1670,22 +1558,19 @@ class AromaticityParser(OutputParser):
 
 
 class WavefunctionParser(OutputParser):
-    """Parser for wavefunction check/modify output.
+    """Parser for wavefunction check/modify output."""
 
-    Handles orbital info, GTF info, basis info, density matrix,
-    and overlap matrix output.
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        return list(cls.parse_orbital_info(stdout))
 
     @staticmethod
     def parse_orbital_info(stdout: str) -> list[Orbital]:
-        """Extract orbital information.
-
-        Returns
-        -------
-        list[OrbitalInfo]
-            List of orbital info result objects.
-        """
-        # "   5   Alpha   Occ= 2.000000   E=  -0.72340 a.u.  -19.684 eV"
+        """Extract orbital information."""
         pattern = (
             rf"(\d+)\s+(Alpha|Beta)\s+Occ=\s*({FLOAT_PATTERN})\s+"
             rf"E=\s*({FLOAT_PATTERN})\s*a\.u\.\s+({FLOAT_PATTERN})\s*eV"
@@ -1693,23 +1578,21 @@ class WavefunctionParser(OutputParser):
         orbitals: list[Orbital] = []
 
         for match in re.finditer(pattern, stdout):
-            if match:
-                if match[2].lower() == "alpha":
-                    spin: Literal["alpha", "beta"] | None = "alpha"
-                elif match[2].lower() == "beta":
-                    spin = "beta"
-                else:
-                    spin = None
+            spin: Literal["alpha", "beta"] | None = None
+            if match[2].lower() == "alpha":
+                spin = "alpha"
+            elif match[2].lower() == "beta":
+                spin = "beta"
 
-                orbitals.append(
-                    Orbital(
-                        orbital_id=int(match[1]),
-                        spin=spin,
-                        occupation=float(match[3]),
-                        energy_au=float(match[4]),
-                        energy_eV=float(match[5]),
-                    )
+            orbitals.append(
+                Orbital(
+                    orbital_id=int(match[1]),
+                    spin=spin,
+                    occupation=float(match[3]),
+                    energy_au=float(match[4]),
+                    energy_eV=float(match[5]),
                 )
+            )
 
         return orbitals
 
@@ -1720,24 +1603,22 @@ class WavefunctionParser(OutputParser):
 
 
 class CubeParser(OutputParser):
-    """Parser for cube generation and grid processing output.
+    """Parser for cube generation and grid processing output."""
 
-    Extracts file paths and grid metadata from cube generation, and
-    statistics from grid processing operations.
-
-    """
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        cube = cls.parse(stdout)
+        if cube is not None:
+            return [cube]
+        return []
 
     @staticmethod
-    def parse(stdout: str) -> Cube:
-        """Extract cube file generation info and grid statistics.
-
-        Returns
-        -------
-        Cube
-            Cube operations result object
-
-        """
-        # Statistics patterns
+    def parse(stdout: str) -> Cube | None:
+        """Extract cube file generation info and grid statistics."""
         stat_patterns: dict[str, str] = {
             "min": rf"[Mm]inimum.*?[=:\s]+({FLOAT_PATTERN})",
             "max": rf"[Mm]aximum.*?[=:\s]+({FLOAT_PATTERN})",
@@ -1746,7 +1627,7 @@ class CubeParser(OutputParser):
             "std_dev": rf"[Ss]td.*?dev.*?[=:\s]+({FLOAT_PATTERN})",
         }
 
-        # Cube files generated
+        cube: Cube | None = None
         for fname in re.finditer(r"(\S+\.cube)\s+has been generated", stdout):
             grid_pat = r"Grid dimensions:\s*(\d+)\s*x\s*(\d+)\s*x\s*(\d+)"
             if grid := re.search(grid_pat, stdout):
@@ -1756,10 +1637,13 @@ class CubeParser(OutputParser):
                     y_dim=int(grid[2]),
                     z_dim=int(grid[3]),
                 )
+            else:
+                cube = Cube(file_name=fname[1])
 
-        for key, pat in stat_patterns.items():
-            if match := re.search(pat, stdout):
-                setattr(cube, key, float(match[1]))
+        if cube is not None:
+            for key, pat in stat_patterns.items():
+                if match := re.search(pat, stdout):
+                    setattr(cube, key, float(match[1]))
 
         return cube
 
@@ -1767,106 +1651,93 @@ class CubeParser(OutputParser):
 # =============================================================================
 # Menu 100/200/300: Utilities
 # =============================================================================
-class UtilityParser(OutputParser):
-    """Parser for utility function outputs.
 
-    Handles geometry properties, electric multipole moments, Hellmann-
-    Feynman forces, coordination numbers, BLA/BOA, and various other
-    utility results.
-    """
+
+class UtilityParser(OutputParser):
+    """Parser for utility function outputs."""
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        _CASE_MAP: dict[Menu, list] = {
+            Menu.GEOMETRY_PROPERTIES: [
+                cls.parse_bond_lengths,
+                cls.parse_bond_angles,
+                cls.parse_dihedral_angles,
+            ],
+            Menu.ELECTRIC_MULTIPOLE_MOMENTS: [
+                cls.parse_dipole_moments,
+                cls.parse_quadrupole_moments,
+            ],
+            Menu.BLA_BOA_ANALYSIS: [cls.parse_bla_boa],
+        }
+        default = [
+            cls.parse_bond_lengths,
+            cls.parse_bond_angles,
+            cls.parse_dihedral_angles,
+            cls.parse_dipole_moments,
+            cls.parse_coordination_numbers,
+        ]
+        parsers = _CASE_MAP.get(analysis, default)
+        return cls._collect(stdout, parsers)
 
     @staticmethod
     def parse_bond_lengths(stdout: str) -> list[BondLength]:
-        """Extract bond length information.
-
-        Returns
-        -------
-        list[BondLength]
-            Geometry result object with bond lengths, angles, and dihedrals
-        """
-        bond_lengths: list[BondLength] = []
-        # "Bond length between atom  1(C ) and  2(N ):  1.3456 Angstrom"
+        """Extract bond length information."""
         bl_pattern = (
             rf"Bond length.*?atom\s+(\d+).*?(?:and|atom)\s+(\d+).*?:\s+"
             rf"({FLOAT_PATTERN})"
         )
-        for match in re.finditer(bl_pattern, stdout, re.IGNORECASE):
-            bond_lengths.append(
-                BondLength(
-                    atom1_id=int(match[1]),
-                    atom2_id=int(match[2]),
-                    length=float(match[3]),
-                )
+        return [
+            BondLength(
+                atom1_id=int(match[1]),
+                atom2_id=int(match[2]),
+                length=float(match[3]),
             )
-        return bond_lengths
+            for match in re.finditer(bl_pattern, stdout, re.IGNORECASE)
+        ]
 
     @staticmethod
     def parse_bond_angles(stdout: str) -> list[BondAngle]:
-        """Extract bond angle information.
-
-        Returns
-        -------
-        list[BondAngle]
-            List of bond angle result objects.
-
-        """
-        bond_angles: list[BondAngle] = []
-
-        # "Angle  1-2-3 :  120.345 degree"
+        """Extract bond angle information."""
         ang_pattern = (
             rf"[Aa]ngle\s+(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*:\s+"
             rf"({FLOAT_PATTERN})"
         )
-        for match in re.finditer(ang_pattern, stdout):
-            bond_angles.append(
-                BondAngle(
-                    atom1_id=int(match[1]),
-                    atom2_id=int(match[2]),
-                    atom3_id=int(match[3]),
-                    angle=float(match[4]),
-                )
+        return [
+            BondAngle(
+                atom1_id=int(match[1]),
+                atom2_id=int(match[2]),
+                atom3_id=int(match[3]),
+                angle=float(match[4]),
             )
-
-        return bond_angles
+            for match in re.finditer(ang_pattern, stdout)
+        ]
 
     @staticmethod
     def parse_dihedral_angles(stdout: str) -> list[DihedralAngle]:
-        """Extract dihedral angle information.
-
-        Returns
-        -------
-        list[DihedralAngle]
-            List of dihedral angle result objects.
-
-        """
-        dihedrals: list[DihedralAngle] = []
-        # "Dihedral  1-2-3-4 :  -45.678 degree"
+        """Extract dihedral angle information."""
         dih_pattern = (
             rf"[Dd]ihedral\s+(\d+)\s*-\s*(\d+)\s*-\s*(\d+)\s*-\s*(\d+)"
             rf"\s*:\s+({FLOAT_PATTERN})"
         )
-        for match in re.finditer(dih_pattern, stdout):
-            dihedrals.append(
-                DihedralAngle(
-                    atom1_id=int(match[1]),
-                    atom2_id=int(match[2]),
-                    atom3_id=int(match[3]),
-                    atom4_id=int(match[4]),
-                    angle=float(match[5]),
-                )
+        return [
+            DihedralAngle(
+                atom1_id=int(match[1]),
+                atom2_id=int(match[2]),
+                atom3_id=int(match[3]),
+                atom4_id=int(match[4]),
+                angle=float(match[5]),
             )
-
-        return dihedrals
+            for match in re.finditer(dih_pattern, stdout)
+        ]
 
     @staticmethod
     def parse_dipole_moments(stdout: str) -> DipoleMoment | None:
-        """Extract electric dipole moment.
-
-        Returns
-        -------
-        DipoleMoment
-            Dipole moment result object with x, y, z components and total
-        """
+        """Extract electric dipole moment."""
         dip_pat = (
             rf"[Dd]ipole.*?X[=:\s]+({FLOAT_PATTERN})\s+"
             rf"Y[=:\s]+({FLOAT_PATTERN})\s+Z[=:\s]+({FLOAT_PATTERN})"
@@ -1877,45 +1748,33 @@ class UtilityParser(OutputParser):
                 y=float(match[2]),
                 z=float(match[3]),
             )
-
         return None
 
     @staticmethod
     def parse_quadrupole_moments(stdout: str) -> QuadrupoleMoment | None:
-        """Extract electric quadrupole moment.
-
-        Returns
-        -------
-        QuadrupoleMoment
-            Quadrupole moment result object.
-        """
+        """Extract electric quadrupole moment."""
         moments: dict[str, float] = {}
-        quad_components = ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]
-        for comp in quad_components:
+        for comp in ["XX", "XY", "XZ", "YY", "YZ", "ZZ"]:
             pat = rf"[Qq]uadrupole.*?{comp}[=:\s]+({FLOAT_PATTERN})"
             if m := re.search(pat, stdout):
-                moments[f"quadrupole_{comp}"] = float(m[1])
+                moments[comp] = float(m[1])
 
-        return QuadrupoleMoment(
-            xx=moments.get("quadrupole_XX"),
-            xy=moments.get("quadrupole_XY"),
-            xz=moments.get("quadrupole_XZ"),
-            yy=moments.get("quadrupole_YY"),
-            yz=moments.get("quadrupole_YZ"),
-            zz=moments.get("quadrupole_ZZ"),
-        )
+        if moments:
+            return QuadrupoleMoment(
+                xx=moments.get("XX"),
+                xy=moments.get("XY"),
+                xz=moments.get("XZ"),
+                yy=moments.get("YY"),
+                yz=moments.get("YZ"),
+                zz=moments.get("ZZ"),
+            )
+        return None
 
     @staticmethod
     def parse_coordination_numbers(
         stdout: str,
     ) -> list[CoordinationNumber]:
-        """Extract atomic coordination numbers.
-
-        Returns
-        -------
-        list[CoordinationNumber]
-            List of coordination number result objects
-        """
+        """Extract atomic coordination numbers."""
         pattern = rf"Atom\s+(\d+).*?coordination.*?[=:\s]+({FLOAT_PATTERN})"
         return [
             CoordinationNumber(
@@ -1927,14 +1786,7 @@ class UtilityParser(OutputParser):
 
     @staticmethod
     def parse_bla_boa(stdout: str) -> BLA_BOA:
-        """Extract Bond length alternation and bond order alternation.
-
-        Returns
-        -------
-        BLA_BOA
-            Bond length alternation and bond order alternation values
-
-        """
+        """Extract Bond length alternation and bond order alternation."""
         bla = None
         boa = None
 
@@ -1949,10 +1801,15 @@ class UtilityParser(OutputParser):
         return BLA_BOA(bla=bla, boa=boa)
 
 
+# =============================================================================
+# Parser routing table
+# =============================================================================
+
+
 class ParserRoute:
     """Routing from Menu enums to OutputParser classes."""
 
-    ROUTE_TABLE = {
+    ROUTE_TABLE: dict[Menu, type[OutputParser]] = {
         # Menu 7 — charges
         Menu.HIRSHFELD_CHARGE: ChargeParser,
         Menu.VDD_POPULATION: ChargeParser,
@@ -2108,7 +1965,7 @@ class ParserRoute:
         Menu.PRINT_ORBITAL_INFO: WavefunctionParser,
         Menu.PRINT_GTF_INFO: WavefunctionParser,
         Menu.PRINT_BASIS_INFO: WavefunctionParser,
-        # Menu 5 — cube generation (store metadata only, not the cube)
+        # Menu 5 — cube generation
         Menu.CUBE_DENSITY: CubeParser,
         Menu.CUBE_SPIN_DENSITY: CubeParser,
         Menu.CUBE_ELF: CubeParser,
