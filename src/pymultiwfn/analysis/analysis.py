@@ -32,6 +32,7 @@ class MultiwfnAnalysis:
         input_file: str | Path,
         analyses: Menu | list[Menu] | AnalysisClasses | None = None,
         cached: bool = True,
+        json_path: Path | None = None,
     ) -> None:
         self.input_file: Path = Path(input_file)
 
@@ -41,14 +42,42 @@ class MultiwfnAnalysis:
         self.results: list[MultiwfnResult] = []
         self.jobs: list[MultiwfnJob] = []
         self.cached = cached
+        self._json_path: Path | None = (
+            Path(json_path) if json_path is not None else None
+        )
         self._store: ResultStore | None = None
+
+    @property
+    def json_path(self) -> Path | None:
+        """Path to the JSON output file, or ``None`` to disable.
+
+        When set to a :class:`~pathlib.Path`, every completed analysis
+        is persisted to that file.  When ``None`` (the default),
+        results are still cached in memory and retrievable via the
+        internal store, but no file is created on disk.
+
+        Setting this from ``None`` to a ``Path`` after results have
+        already been collected will immediately flush all cached data
+        to that file.
+        """
+        return self._json_path
+
+    @json_path.setter
+    def json_path(self, value: Path | None) -> None:
+        self._json_path = Path(value) if value is not None else None
+        # Propagate to an already-initialised store so that subsequent
+        # (or deferred) writes respect the new setting immediately.
+        if self._store is not None:
+            self._store.json_path = self._json_path
 
     def _get_store(self, work_dir: Path | None = None) -> ResultStore:
         """Lazily initialise or return the per-molecule result store."""
         if self._store is None:
             wd = work_dir if work_dir is not None else Path.cwd()
             self._store = ResultStore(
-                input_file=self.input_file, work_dir=wd
+                input_file=self.input_file,
+                work_dir=wd,
+                json_path=self._json_path,
             )
         return self._store
 

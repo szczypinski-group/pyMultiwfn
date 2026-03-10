@@ -664,32 +664,61 @@ class MultiwfnResult:
 
 
 class ResultStore:
-    """Per-molecule JSON result store.
+    """Per-molecule result store with optional JSON persistence.
 
-    Manages a ``<molecule>.json`` file that accumulates parsed results
-    keyed by analysis name.  The file is read on construction (if it
-    exists) and written back whenever a new result is stored.
+    Parsed results are always cached in memory so that
+    :meth:`has_result` and :meth:`get_result` work regardless of
+    whether a JSON file exists on disk.
 
     Parameters
     ----------
     input_file
         Path to the wavefunction input file.
     work_dir
-        Directory in which to create the companion ``.json`` file.
+        Directory used for the working data.  Created if it does not
+        exist.
+    json_path
+        Controls JSON persistence:
+
+        * ``None`` (the default) — results are cached in memory only;
+          no file is written to disk.
+        * A :class:`~pathlib.Path` — results are written to that exact
+          file every time :meth:`store` is called.  If the file already
+          exists it is loaded on construction so that previous results
+          are available immediately.
+
+        The value can be changed at any time via the :attr:`json_path`
+        property.  Setting it from ``None`` to a ``Path`` will
+        immediately flush the current in-memory data to disk.
 
     """
 
-    def __init__(self, input_file: Path, work_dir: Path) -> None:
+    def __init__(
+        self,
+        input_file: Path,
+        work_dir: Path,
+        json_path: Path | None = None,
+    ) -> None:
         self._input_file = Path(input_file)
         self._work_dir = Path(work_dir)
         self._work_dir.mkdir(parents=True, exist_ok=True)
 
-        self._json_path = self._work_dir / f"{self._input_file.name}.json"
+        self._json_path: Path | None = (
+            Path(json_path) if json_path is not None else None
+        )
         self._data: dict[str, Any] = self._load()
 
     @property
-    def json_path(self) -> Path:
+    def json_path(self) -> Path | None:
+        """Path to the JSON file, or ``None`` if persistence is disabled."""
         return self._json_path
+
+    @json_path.setter
+    def json_path(self, value: Path | None) -> None:
+        self._json_path = Path(value) if value is not None else None
+        if self._json_path is not None:
+            # Flush current in-memory data to disk immediately.
+            self._save()
 
     @property
     def data(self) -> dict[str, Any]:
@@ -699,7 +728,7 @@ class ResultStore:
     # ── persistence ──────────────────────────────────────────────────────
 
     def _load(self) -> dict[str, Any]:
-        if self._json_path.exists():
+        if self._json_path is not None and self._json_path.exists():
             with Path.open(self._json_path, encoding="utf-8") as f:
                 return json.load(f)
         return {
@@ -708,6 +737,9 @@ class ResultStore:
         }
 
     def _save(self) -> None:
+        if self._json_path is None:
+            return
+        self._json_path.parent.mkdir(parents=True, exist_ok=True)
         with Path.open(self._json_path, "w", encoding="utf-8") as f:
             json.dump(self._data, f, indent=2, default=str)
 
@@ -722,7 +754,10 @@ class ResultStore:
         return self._data.get("analyses", {}).get(analysis.name)
 
     def store(self, mwfn_result: MultiwfnResult) -> None:
-        """Persist a :class:`MultiwfnResult` into the JSON file.
+        """Cache a :class:`MultiwfnResult` in memory.
+
+        If :attr:`json_path` is not ``None``, the result is also
+        written to the JSON file on disk.
 
         Parameters
         ----------
