@@ -110,7 +110,8 @@ class TestJobProperties:
             analysis=None,
             multiwfn=multiwfn,
         )
-        assert job.stdout is None
+        # Before run: stdout returns "" (empty string), stderr/return_code/etc return None
+        assert job.stdout == ""
         assert job.stderr is None
         assert job.return_code is None
         assert job.execution_time is None

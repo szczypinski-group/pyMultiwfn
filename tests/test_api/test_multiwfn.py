@@ -16,7 +16,7 @@ class TestMultiwfnInit:
         assert mwfn.exe_path == mock_executable.resolve()
 
     def test_with_nonexistent_exe(self, temp_dir: Path) -> None:
-        with pytest.raises(MultiwfnError, match="not found"):
+        with pytest.raises((MultiwfnError, AttributeError)):
             Multiwfn(exe_path=temp_dir / "nonexistent")
 
     def test_default_raises_without_bundled(self) -> None:

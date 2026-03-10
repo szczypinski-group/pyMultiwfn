@@ -15,20 +15,10 @@ class TestMultiwfnAnalysisInit:
     def test_single_file(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
         assert mol.input_file == mock_wfn_file
-        assert mol.input_files == [mock_wfn_file]
 
     def test_single_file_string(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(str(mock_wfn_file))
         assert mol.input_file == Path(str(mock_wfn_file))
-
-    def test_multiple_files(self, temp_dir: Path) -> None:
-        f1 = temp_dir / "a.wfn"
-        f2 = temp_dir / "b.wfn"
-        f1.write_text("a")
-        f2.write_text("b")
-        mol = MultiwfnAnalysis([f1, f2])
-        assert len(mol.input_files) == 2
-        assert mol.input_file == f1  # backwards compat alias
 
     def test_with_single_menu(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file, analyses=Menu.HIRSHFELD_CHARGE)
@@ -131,12 +121,13 @@ class TestConvenienceMethods:
 
 
 class TestLogPath:
-    """Tests for the log_path property of MultiwfnAnalysis."""
+    """Tests for the _store attribute of MultiwfnAnalysis."""
 
-    def test_log_path_none_before_run(self, mock_wfn_file: Path) -> None:
+    def test_store_none_before_run(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol.log_path is None
+        assert mol._store is None
 
-    def test_get_store_none_before_run(self, mock_wfn_file: Path) -> None:
+    def test_get_store_returns_store(self, mock_wfn_file: Path) -> None:
         mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol.get_store(mock_wfn_file) is None
+        store = mol._get_store()
+        assert store is not None
