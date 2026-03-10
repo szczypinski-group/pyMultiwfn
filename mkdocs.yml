@@ -24,10 +24,18 @@ plugins:
 
 nav:
   - Home: index.md
+  - Use Cases: use_cases.md
+  - Contribution Guidelines: contribution.md
   - API Reference:
-    - Configuration: config.md
-    - Job Execution: job.md
-    - Results: result.md
-    - Parsers: parsers.md
-    - Analysis: analysis.md
-    - Menu Sequences: menu.md
+    - Analysis:
+      - Parsers: parsers.md
+      - Results: result.md
+      - Analysis: analysis.md
+    - Core Api Functions:
+      - Job Execution: job.md
+      - Exceptions: exceptions.md
+      - Multiwfn Configuration: multiwfn.md
+      - Calculation Outcome: outcome.md
+    - Enums:
+      - Analysis Classes: analyses.md
+      - Menu Sequen`ces: menu.md
