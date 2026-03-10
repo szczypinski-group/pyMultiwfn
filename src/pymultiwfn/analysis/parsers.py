@@ -138,9 +138,9 @@ class ViewStructureParser(OutputParser):
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
         results: list[ParsedMultiwfnResult] = []
-        cube = cls.parse_cube(stdout)
-        if cube is not None:
-            results.append(cube)
+        orbital = cls.parse_orbital(stdout)
+        if orbital is not None:
+            results.append(orbital)
         return results
 
     @staticmethod

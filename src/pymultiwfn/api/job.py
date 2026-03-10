@@ -233,34 +233,22 @@ class MultiwfnJob:
     @property
     def stderr(self) -> str | None:
         """Get the standard error from execution (read-only)."""
-        if self._result is not None:
-            return self._result.stderr
-        else:
-            return None
+        return self._result.stderr if self._result is not None else None
 
     @property
     def stdout(self) -> str:
         """Get the standard output from execution (read-only)."""
-        if self._result is not None:
-            return self._result.stdout
-        else:
-            return ""
+        return self._result.stdout if self._result is not None else ""
 
     @property
     def return_code(self) -> int | None:
         """Get the return code from execution (read-only)."""
-        if self._result is not None:
-            return self._result.return_code
-        else:
-            return None
+        return self._result.return_code if self._result is not None else None
 
     @property
     def execution_time(self) -> float | None:
         """Get the execution time (read-only)."""
-        if self._result is not None:
-            return self._result.execution_time
-        else:
-            return None
+        return self._result.execution_time if self._result is not None else None
 
     @property
     def success(self) -> bool | None:

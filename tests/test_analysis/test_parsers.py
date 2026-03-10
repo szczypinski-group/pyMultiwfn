@@ -48,12 +48,10 @@ class TestChargeParser:
         assert charge_map[2] == pytest.approx(0.1234)
 
     def test_parse_pattern2_after_section_header(self) -> None:
-        # Pattern1 ("charge of atom...is...") lines always contain "charge"
-        # which triggers the section-header branch and `continue`, so they
-        # are never parsed by pattern1.  Pattern2 ("Atom  1(C):  0.032")
-        # lines also contain no section-header keyword and are parsed when
-        # in_charge_section is True.
-        output = "Some charge header\nAtom    1(C ):     0.03208687\n"
+        output = (
+            "Some charge header\n"
+            "Atom    1(C ):     0.03208687\n"
+        )
         charges = ChargeParser.parse_charges(output)
         charge_map = {c.atom_id: c.charge for c in charges}
         assert charge_map[1] == pytest.approx(0.03208687)
@@ -122,12 +120,8 @@ class TestBondOrderParser:
         )
         v = BondOrderParser.parse_valence(output)
         # v is a list of Valence dataclasses
-        total_vals = [
-            x for x in v if x.type == "total_valence" and x.atom_id == 1
-        ]
-        free_vals = [
-            x for x in v if x.type == "free_valence" and x.atom_id == 1
-        ]
+        total_vals = [x for x in v if x.type == "total_valence" and x.atom_id == 1]
+        free_vals = [x for x in v if x.type == "free_valence" and x.atom_id == 1]
         assert total_vals[0].valence == pytest.approx(3.9412)
         assert free_vals[0].valence == pytest.approx(0.0588)
 
@@ -174,17 +168,13 @@ class TestCriticalPointParser:
         assert paths[0].path_length == pytest.approx(2.456)
 
     def test_summary(self) -> None:
-        # CriticalPointParser does not have a summary classmethod;
-        # test counting logic manually
         from pymultiwfn.analysis.result import CriticalPoint
-
         cps = [
             CriticalPoint(index=1, x=0, y=0, z=0, type="bond"),
             CriticalPoint(index=2, x=0, y=0, z=0, type="bond"),
             CriticalPoint(index=3, x=0, y=0, z=0, type="ring"),
         ]
         from collections import Counter
-
         counts = dict(Counter(cp.type for cp in cps))
         assert counts == {"bond": 2, "ring": 1}
 
@@ -463,8 +453,8 @@ class TestAromaticityParser:
     def test_parse(self) -> None:
         output = "NICS(0):  -8.12340\nHOMA:   0.98760\n"
         r = AromaticityParser.parse(output)
-        assert pytest.approx(-8.1234) == r.NICS
-        assert pytest.approx(0.9876) == r.HOMA
+        assert r.NICS == pytest.approx(-8.1234)
+        assert r.HOMA == pytest.approx(0.9876)
 
     def test_nics_scan(self) -> None:
         output = "NICS scan data\n  0.0000   -8.1234\n  1.0000  -10.5678\n"
@@ -525,7 +515,6 @@ class TestUtilityParser:
         # UtilityParser doesn't have parse_generated_files;
         # test via CubeParser which handles "has been generated" patterns
         import re
-
         output = (
             "density.cube has been generated\nnew.wfn has been generated\n"
         )
