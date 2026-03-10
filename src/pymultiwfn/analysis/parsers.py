@@ -124,6 +124,40 @@ class OutputParser:
                 results.append(value)
         return results
 
+#==============================================================================
+# Menu 0: View structure
+#==============================================================================
+
+class ViewStructureParser(OutputParser):
+    """Parser for Menu 0: View structure output."""
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        results: list[ParsedMultiwfnResult] = []
+        cube = cls.parse_cube(stdout)
+        if cube is not None:
+            results.append(cube)
+        return results
+
+    @staticmethod
+    def parse_orbital(stdout: str) -> Orbital | None:
+        """Extract orbital information from view structure output."""
+        pattern = (
+            rf"Orbital\s+(\d+)\s+Occ=\s*({FLOAT_PATTERN})\s+"
+            rf"E=\s*({FLOAT_PATTERN})\s+Symmetry=\s*(\S+)"
+        )
+        if match := re.search(pattern, stdout):
+            return Orbital(
+                orbital_id=int(match[1]),
+                occupation=float(match[2]),
+                energy=float(match[3]),
+                symmetry=match[4],
+            )
+        return None
 
 # =============================================================================
 # Menu 7: Population analysis & atomic charges
@@ -192,11 +226,6 @@ class ChargeParser(OutputParser):
             elif "charge" in line_lower or "population" in line_lower:
                 in_charge_section = True
                 continue
-            elif "summary of" in line_lower and "charge" in line_lower:
-                in_charge_section = True
-                charges.clear()
-                continue
-
             if match := re.search(pattern1, line, re.IGNORECASE):
                 charges.append(
                     Charge(atom_id=int(match[1]), charge=float(match[2]))
@@ -411,8 +440,6 @@ class BondOrderParser(OutputParser):
     @staticmethod
     def parse_valence(stdout: str) -> list[Valence]:
         """Extract total valence and free valence for each atom."""
-        valences: list[Valence] = []
-
         total_pattern = (
             rf"Total valence of atom\s+(\d+)\s*\([^)]+\)\s*:\s+"
             rf"({FLOAT_PATTERN})"
@@ -422,23 +449,22 @@ class BondOrderParser(OutputParser):
             rf"({FLOAT_PATTERN})"
         )
 
-        for match in re.finditer(total_pattern, stdout):
-            valences.append(
-                Valence(
-                    atom_id=int(match[1]),
-                    type="total_valence",
-                    valence=float(match[2]),
-                )
+        valences: list[Valence] = [
+            Valence(
+                atom_id=int(match[1]),
+                type="total_valence",
+                valence=float(match[2]),
             )
-        for match in re.finditer(free_pattern, stdout):
-            valences.append(
-                Valence(
-                    atom_id=int(match[1]),
-                    type="free_valence",
-                    valence=float(match[2]),
-                )
+            for match in re.finditer(total_pattern, stdout)
+        ]
+        valences.extend(
+            Valence(
+                atom_id=int(match[1]),
+                type="free_valence",
+                valence=float(match[2]),
             )
-
+            for match in re.finditer(free_pattern, stdout)
+        )
         return valences
 
     @staticmethod
@@ -560,20 +586,19 @@ class CriticalPointParser(OutputParser):
     @staticmethod
     def parse_bond_paths(stdout: str) -> list[BondPath]:
         """Extract bond path information."""
-        paths: list[BondPath] = []
         pattern = (
             rf"Bond path between atom\s+(\d+).*?and atom\s+(\d+).*?"
             rf"BCP\s+(\d+).*?length\s+({FLOAT_PATTERN})"
         )
-        for match in re.finditer(pattern, stdout, re.IGNORECASE):
-            paths.append(
-                BondPath(
-                    atom1_id=int(match[1]),
-                    atom2_id=int(match[2]),
-                    bcp_id=int(match[3]),
-                    path_length=float(match[4]),
-                )
+        paths: list[BondPath] = [
+            BondPath(
+                atom1_id=int(match[1]),
+                atom2_id=int(match[2]),
+                bcp_id=int(match[3]),
+                path_length=float(match[4]),
             )
+            for match in re.finditer(pattern, stdout, re.IGNORECASE)
+        ]
         return paths
 
 
@@ -791,9 +816,7 @@ class SpectrumParser(OutputParser):
                 result[pat_name] = (
                     int(m[1]) if pat_name in ("R", "G", "B") else float(m[1])
                 )
-        if result:
-            return Color(**result)
-        return None
+        return Color(**result) if result else None
 
 
 # =============================================================================
@@ -1151,15 +1174,14 @@ class ExcitationParser(OutputParser):
             rf".*?electron[=:\s]+({FLOAT_PATTERN})"
         )
         fragments: list[ChargeTransferFragment] = []
-        for match in re.finditer(frag_pattern, stdout, re.IGNORECASE):
-            fragments.append(
-                ChargeTransferFragment(
-                    fragment_id=int(match[1]),
-                    hole_contribution=float(match[2]),
-                    electron_contribution=float(match[3]),
-                )
+        fragments.extend(
+            ChargeTransferFragment(
+                fragment_id=int(match[1]),
+                hole_contribution=float(match[2]),
+                electron_contribution=float(match[3]),
             )
-
+            for match in re.finditer(frag_pattern, stdout, re.IGNORECASE)
+        )
         if fragments:
             result.fragments = fragments
 
@@ -1238,13 +1260,10 @@ class WeakInteractionParser(OutputParser):
         if "isosurface_integral" in vals:
             interaction.isosurface_integral = vals["isosurface_integral"]
 
-        cubes: list[str] = [
+        if cubes := [
             match[1]
-            for match in re.finditer(
-                r"(\S+\.cube)\s+has been generated", stdout
-            )
-        ]
-        if cubes:
+            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+        ]:
             interaction.cube_names = cubes
 
         return interaction
@@ -1612,9 +1631,7 @@ class CubeParser(OutputParser):
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
         cube = cls.parse(stdout)
-        if cube is not None:
-            return [cube]
-        return []
+        return [cube] if cube is not None else []
 
     @staticmethod
     def parse(stdout: str) -> Cube | None:
@@ -1628,8 +1645,8 @@ class CubeParser(OutputParser):
         }
 
         cube: Cube | None = None
+        grid_pat = r"Grid dimensions:\s*(\d+)\s*x\s*(\d+)\s*x\s*(\d+)"
         for fname in re.finditer(r"(\S+\.cube)\s+has been generated", stdout):
-            grid_pat = r"Grid dimensions:\s*(\d+)\s*x\s*(\d+)\s*x\s*(\d+)"
             if grid := re.search(grid_pat, stdout):
                 cube = Cube(
                     file_name=fname[1],
@@ -1810,6 +1827,8 @@ class ParserRoute:
     """Routing from Menu enums to OutputParser classes."""
 
     ROUTE_TABLE: dict[Menu, type[OutputParser]] = {
+        # menu 0 - View Structure
+        Menu.VIEW_STRUCTURE: ViewStructureParser,
         # Menu 7 — charges
         Menu.HIRSHFELD_CHARGE: ChargeParser,
         Menu.VDD_POPULATION: ChargeParser,

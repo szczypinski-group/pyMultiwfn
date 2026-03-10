@@ -32,6 +32,15 @@ class ParsedMultiwfnResult:
 
 # ── Menu 7: Charges ──────────────────────────────────────────────────────
 
+@dataclass
+class Orbital(ParsedMultiwfnResult):
+    """Individual orbital contribution to charge analysis."""
+
+    orbital_id: int
+    occupation: float
+    energy: float
+    symmetry: str
+
 
 @dataclass
 class Charge(ParsedMultiwfnResult):
