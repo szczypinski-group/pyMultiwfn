@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "pymultiwfn"
-version = "0.5.2"
+version = "0.5.3"
 description = "Python interface and automation toolkit for Multiwfn"
 requires-python = ">=3.12"
 authors = [

@@ -6,6 +6,7 @@ rather than the details of a specific job/analysis (e.g., timeout and parsing).
 """
 
 import platform
+from importlib.resources import files
 from pathlib import Path
 
 from pymultiwfn.api.exceptions import MultiwfnError
@@ -43,10 +44,10 @@ class Multiwfn:
             )
 
         if platform.system() == "Windows":
-            bin_path = Path(__package__).resolve().parent / "bin/Multifwn.exe"
+            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multifwn.exe"))
 
         elif platform.system() == "Linux":
-            bin_path = Path(__package__).resolve().parent / "bin/Multifwn"
+            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multifwn"))
 
         else:
             raise MultiwfnError(
