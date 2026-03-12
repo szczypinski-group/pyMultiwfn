@@ -1,13 +1,9 @@
-# pymultiwfn — Use Case Guide
+# What pymultiwfn does
 
-## What pymultiwfn does
-
-pymultiwfn automates the Multiwfn wavefunction analysis program. Multiwfn is an
-interactive command-line tool that expects keystroke sequences typed into menus
-and submenus. pymultiwfn translates analysis requests into those keystroke
-sequences, feeds them to the Multiwfn executable via stdin, captures stdout, and
-parses the text output into structured Python objects. Parsed results are
-persisted to a per-molecule JSON file so that identical analyses are not re-run.
+`pymultiwfn` automates the **Multiwfn** wavefunction analysis program.
+Multiwfn is an interactive command-line tool that expects keystroke sequences typed into menus and submenus.
+`pymultiwfn` translates analysis requests into those keystroke sequences, feeds them to the Multiwfn executable via stdin, captures stdout, and parses the text output into structured Python objects.
+Parsed results are persisted to a per-molecule `JSON` file so that identical analyses are not re-run.
 
 
 ## Class map
@@ -119,17 +115,9 @@ file passed as a positional argument. Stdout and stderr are captured in a
 a `MultiwfnResult` bound to the same `Menu` and calls its `parse(stdout)`
 method. Inside `parse`:
 
-   - `ParserRoute.ROUTE_TABLE` is consulted to find the correct `OutputParser`
-     subclass for this `Menu` member. For example, every charge-related `Menu`
-     maps to `ChargeParser`, every bond-order `Menu` maps to
-     `BondOrderParser`, and so on.
-   - The subclass's `parse_for_result(analysis, stdout)` classmethod is called.
-     This method consults an internal `case_map` dictionary to decide which
-     static regex-based helper methods apply to the specific `Menu` variant,
-     then calls `_collect()` to run them all and flatten the results into a
-     single list.
-   - The returned `list[ParsedMultiwfnResult]` is stored in
-     `MultiwfnResult.result`.
+- `ParserRoute.ROUTE_TABLE` is consulted to find the correct `OutputParser` subclass for this `Menu` member. For example, every charge-related `Menu` maps to `ChargeParser`, every bond-order `Menu` maps to `BondOrderParser`, and so on.
+- The subclass's `parse_for_result(analysis, stdout)` classmethod is called. This method consults an internal `case_map` dictionary to decide which static regex-based helper methods apply to the specific `Menu` variant, then calls `_collect()` to run them all and flatten the results into a single list.
+- The returned `list[ParsedMultiwfnResult]` is stored in `MultiwfnResult.result`.
 
 **5. Persist to JSON.** The `MultiwfnResult` is handed to
 `ResultStore.store()`, which calls `to_dict()` on the result (serialising each
@@ -206,7 +194,6 @@ runs: `parse()` extracts pairwise bond orders, then `parse_valence()` extracts
 total and free valences. When `Menu.MULTICENTER_BOND_ORDER` arrives, only
 `parse_multicenter()` runs.
 
-
 ## The JSON store
 
 `ResultStore` creates a file named `<input_file>.json` in the working
@@ -239,123 +226,3 @@ Each key under `"analyses"` is the `Menu` member name. The `"parsed"` value is
 the output of `MultiwfnResult.to_dict()`. The file is rewritten on every new
 analysis. On the next run, `has_result()` checks whether a key exists and
 skips re-execution if `cached=True` (the default).
-
-
-## Usage examples
-
-### Run a single analysis
-
-```python
-from pathlib import Path
-from pymultiwfn import MultiwfnAnalysis, Multiwfn, Menu
-
-mwfn = Multiwfn(exe_path=Path("/opt/multiwfn/Multiwfn"))
-
-analysis = MultiwfnAnalysis("benzene.wfn", analyses=Menu.HIRSHFELD_CHARGE)
-analysis.run(multiwfn=mwfn, work_dir=Path("./output"))
-
-result = analysis.results[0]          # MultiwfnResult for HIRSHFELD_CHARGE
-for item in result.result:
-    print(item)                        # Charge(...) and Dipole(...) objects
-```
-
-### Queue several analyses
-
-```python
-analysis = MultiwfnAnalysis("benzene.wfn")
-analysis.add_menu(Menu.HIRSHFELD_CHARGE)
-analysis.add_menu(Menu.MAYER_BOND_ORDER)
-analysis.add_menu(Menu.TOPOLOGY_SEARCH_CPS)
-analysis.run(multiwfn=mwfn, timeout=120, work_dir=Path("./output"))
-
-# results[0] → charges,  results[1] → bond orders,  results[2] → critical points
-```
-
-### Queue an entire category
-
-```python
-from pymultiwfn.enums.analyses import AnalysisClasses
-
-analysis = MultiwfnAnalysis("benzene.wfn")
-analysis.add_menu(AnalysisClasses.CHARGES)   # queues all 19 charge methods
-analysis.run(multiwfn=mwfn, work_dir=Path("./output"))
-```
-
-### Filter results by type
-
-```python
-from pymultiwfn.analysis.result import Charge, Dipole
-
-for r in analysis.results:
-    charges = [x for x in r.result if isinstance(x, Charge)]
-    dipoles = [x for x in r.result if isinstance(x, Dipole)]
-```
-
-### Re-run with caching
-
-```python
-# Second run loads from benzene.wfn.json instead of re-executing Multiwfn.
-analysis2 = MultiwfnAnalysis("benzene.wfn", analyses=Menu.HIRSHFELD_CHARGE)
-analysis2.run(multiwfn=mwfn, work_dir=Path("./output"))
-# No subprocess launched — result loaded from cache.
-```
-
-### Disable caching
-
-```python
-analysis = MultiwfnAnalysis("benzene.wfn", analyses=Menu.HIRSHFELD_CHARGE, cached=False)
-analysis.run(multiwfn=mwfn, work_dir=Path("./output"))
-# Always re-runs Multiwfn, even if the JSON file has a stored result.
-```
-
-### Use ResultStore directly
-
-```python
-from pymultiwfn.analysis.result import ResultStore, MultiwfnResult
-
-store = ResultStore(input_file=Path("benzene.wfn"), work_dir=Path("./output"))
-
-# Parse raw stdout from some other source and persist it:
-result = store.store_from_stdout(Menu.MAYER_BOND_ORDER, raw_stdout_string)
-
-# Check what is stored:
-print(store.has_result(Menu.MAYER_BOND_ORDER))  # True
-print(store.get_result(Menu.MAYER_BOND_ORDER))  # dict with "parsed" and "timestamp"
-```
-
-### Use MultiwfnJob directly
-
-`MultiwfnJob` is the low-level class that actually calls the Multiwfn binary.
-`MultiwfnAnalysis` creates jobs internally, but you can use `MultiwfnJob` on
-its own if you need manual control over the command sequence or want to skip
-the analysis/caching layer entirely.
-
-```python
-from pymultiwfn import MultiwfnJob, Multiwfn, Menu
-from pymultiwfn.analysis.result import MultiwfnResult
-
-job = MultiwfnJob(
-    input_file="benzene.wfn",
-    analysis=Menu.HIRSHFELD_CHARGE,
-    multiwfn=Multiwfn(exe_path=Path("/opt/multiwfn/Multiwfn")),
-    timeout=60,
-)
-job = job.run()
-
-print(job.stdout[:200])     # raw Multiwfn output
-print(job.success)          # True if no error indicators in stderr
-
-# Parse manually:
-result = MultiwfnResult(analysis=Menu.HIRSHFELD_CHARGE)
-result.parse(job.stdout)
-print(result.result)        # [Charge(...), Charge(...), Dipole(...)]
-```
-
-### Search for a Menu member
-
-```python
-from pymultiwfn import Menu
-
-matches = Menu.search("HIRSHFELD")
-# [Menu.HIRSHFELD_CHARGE, Menu.HIRSHFELD_I_CHARGE, Menu.HIRSHFELD_SURFACE, ...]
-```

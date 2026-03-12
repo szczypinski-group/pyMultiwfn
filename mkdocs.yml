@@ -1,16 +1,64 @@
 site_name: pyMultiwfn Documentation
+site_description: >-
+  pyMultiwfn is a Python wrapper to automate Multiwfn analysis program.
 site_url: https://szczypinski-group.github.io/pyMultiwfn/
 repo_url: https://github.com/szczypinski-group/pyMultiwfn
 edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Szczypiński Research Group
+
+nav:
+  - Home: index.md
+  - Getting started: quickstart.md
+  - Description: description.md
+  - Contribution Guidelines: contribution.md
+  - API Reference:
+    - Analysis:
+      - Parsers: api/analysis/parsers.md
+      - Results: api/analysis/result.md
+      - Analysis: api/analysis/analysis.md
+    - Core API:
+      - Job Execution: api/core/job.md
+      - Exceptions: api/core/exceptions.md
+      - Multiwfn Configuration: api/core/multiwfn.md
+      - Calculation Outcome: api/core/outcome.md
+    - Enums:
+      - Analysis Classes: api/enums/analyses.md
+      - Menu Sequen`ces: api/enums/menu.md
 
 theme:
   name: material
+  font:
+    text: Lato
+  icon:
+    repo: fontawesome/brands/github
   palette:
-    primary: indigo
-    accent: indigo
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
   features:
-    - navigation.tabs
     - content.code.copy
+    - content.code.annotate
+    - content.tooltips
+    - navigation.footer
+    # - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
+    - navigation.path
+    # - navigation.expand
+    - content.action.edit
 
 plugins:
   - search
@@ -22,20 +70,22 @@ plugins:
             show_root_heading: true
             show_source: true
 
-nav:
-  - Home: index.md
-  - Use Cases: use_case.md
-  - Contribution Guidelines: contribution.md
-  - API Reference:
-    - Analysis:
-      - Parsers: parsers.md
-      - Results: result.md
-      - Analysis: analysis.md
-    - Core Api Functions:
-      - Job Execution: job.md
-      - Exceptions: exceptions.md
-      - Multiwfn Configuration: multiwfn.md
-      - Calculation Outcome: outcome.md
-    - Enums:
-      - Analysis Classes: analyses.md
-      - Menu Sequen`ces: menu.md
+markdown_extensions:
+  - md_in_html
+  - admonition
+  - toc:
+      permalink: true
+  - attr_list
+
+extra:
+  metadata:
+    hide:
+      - navigation
+      - toc
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/szczypinski-group
+      name: Szczypiński Group on GitHub
+    - icon: fontawesome/solid/globe
+      link: https://durham.ac.uk/staff/filip-t-szczypinski/
+      name: Filip's Durham profile

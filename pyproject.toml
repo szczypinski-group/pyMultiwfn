@@ -39,6 +39,9 @@ dev = [
     "pytest-cov>=7.0.0",
     "ruff>=0.14.2",
     "ipython>=9.11.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.5",
+    "mkdocstrings[python]>=1.0.3",
 ]
 
 [tool.hatch.build.targets.sdist]
