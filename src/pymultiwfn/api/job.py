@@ -1,11 +1,8 @@
 """Job management for Multiwfn execution."""
 
 import subprocess
-import tempfile
 import time
-from datetime import datetime
 from pathlib import Path
-from uuid import uuid4
 
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.multiwfn import Multiwfn
@@ -89,9 +86,7 @@ class MultiwfnJob:
         self._timeout = self._validate_timeout(timeout)
 
         if work_dir is None:
-            today_str = datetime.today().strftime("%Y-%m-%d")
-            today_str += f"_{uuid4()}"
-            work_dir = Path.cwd() / f"{today_str}"
+            work_dir = Path.cwd()
 
         self._work_dir = work_dir.resolve()
         self._verbose = verbose
@@ -301,68 +296,47 @@ class MultiwfnJob:
 
         """
         # Ensure we start with a newline for Multiwfn input
-        commands = ["0", ""] + self._commands
+        commands = [
+            "0",
+            "",
+        ] + self._commands
         if commands[-1] != "q":
             commands.append("q")
 
-        if not self.work_dir.exists():
-            self.work_dir.mkdir(parents=True, exist_ok=True)
+        start_time = time.time()
 
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            newline="\n",
-            encoding="utf-8",
-            delete=True,
-            suffix=".inp",
-            dir=self.work_dir,
-        ) as batch_file:
-            batch_file.write("\n".join(commands) + "\n")
-
-            start_time = time.time()
-
-            proc = subprocess.Popen(
+        try:
+            proc = subprocess.run(
                 [str(self.multiwfn.exe_path), str(self.input_file)],
-                stdin=batch_file,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                input="\n".join(commands),
+                capture_output=True,
                 text=True,
                 cwd=self.work_dir,
+                timeout=self.timeout,
             )
 
-            try:
-                stdout, stderr = proc.communicate(timeout=self.timeout)
-                return_code = proc.returncode
+        except subprocess.TimeoutExpired as e:
+            raise MultiwfnError(
+                "Multiwfn execution timed out after "
+                f"{self._timeout}s. "
+                "Consider increasing timeout or using "
+                "setting to None."
+            ) from e
 
-            except subprocess.TimeoutExpired as err:
-                proc.kill()
-                stdout, stderr = proc.communicate()
-                raise MultiwfnError(
-                    "Multiwfn execution timed out after "
-                    f"{self._timeout}s. "
-                    "Consider increasing timeout or using "
-                    "TimeoutConfig for complex analyses."
-                ) from err
+        execution_time = time.time() - start_time
 
-            execution_time = time.time() - start_time
+        if self.verbose:
+            print(proc.stdout)
 
-            # Decode bytes to string
-            if isinstance(stdout, bytes):
-                stdout = stdout.decode("utf-8", errors="replace")
-            if isinstance(stderr, bytes):
-                stderr = stderr.decode("utf-8", errors="replace")
+        result = MultiwfnJobOutcome(
+            stderr=proc.stderr,
+            stdout=proc.stdout,
+            return_code=proc.returncode,
+            execution_time=execution_time,
+        )
 
-            if self.verbose:
-                print(stdout)
-
-            result = MultiwfnJobOutcome(
-                stderr=stderr,
-                stdout=stdout,
-                return_code=return_code,
-                execution_time=execution_time,
-            )
-
-            self._result = result
-            self._executed = True
+        self._result = result
+        self._executed = True
 
         return self
 
