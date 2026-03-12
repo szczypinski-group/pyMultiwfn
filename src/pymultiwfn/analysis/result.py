@@ -15,7 +15,6 @@ from typing import Any, Literal
 
 from pymultiwfn.enums.menu import Menu
 
-
 # ═════════════════════════════════════════════════════════════════════════════
 # Parsed result dataclasses
 # ═════════════════════════════════════════════════════════════════════════════
@@ -31,15 +30,6 @@ class ParsedMultiwfnResult:
 
 
 # ── Menu 7: Charges ──────────────────────────────────────────────────────
-
-@dataclass
-class Orbital(ParsedMultiwfnResult):
-    """Individual orbital contribution to charge analysis."""
-
-    orbital_id: int
-    occupation: float
-    energy: float
-    symmetry: str
 
 
 @dataclass
@@ -782,9 +772,9 @@ class ResultStore:
             "parsed": mwfn_result.to_dict(),
             "timestamp": datetime.now().isoformat(),
         }
-        self._data.setdefault("analyses", {})[
-            mwfn_result.analysis.name
-        ] = entry
+        self._data.setdefault("analyses", {})[mwfn_result.analysis.name] = (
+            entry
+        )
         self._save()
 
     def store_from_stdout(

@@ -124,9 +124,10 @@ class OutputParser:
                 results.append(value)
         return results
 
-# #==============================================================================
+
+# #===========================================================================
 # # Menu 0: View structure
-# #==============================================================================
+# #===========================================================================
 
 # class ViewStructureParser(OutputParser):
 #     """Parser for Menu 0: View structure output."""
@@ -306,10 +307,10 @@ class OrbitalCompositionParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
+        case_map: dict[Menu, list] = {
             Menu.LOBA_OXIDATION_STATE: [cls.parse_oxidation_states],
         }
-        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        parsers = case_map.get(analysis, [cls.parse])
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -324,9 +325,7 @@ class OrbitalCompositionParser(OutputParser):
         contrib_pattern = (
             rf"([A-Za-z]+)\s+(\d+)\s+.*?:\s+({FLOAT_PATTERN})\s*%"
         )
-        contrib_pattern2 = (
-            rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
-        )
+        contrib_pattern2 = rf"(\d+)\s*\([A-Za-z]+\s*\)\s+({FLOAT_PATTERN})\s*%"
 
         current_orb: OrbitalComponent | None = None
         for line in stdout.split("\n"):
@@ -389,14 +388,14 @@ class BondOrderParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.MULTICENTER_BOND_ORDER:       [cls.parse_multicenter],
-            Menu.MULTICENTER_BOND_ORDER_NAO:   [cls.parse_multicenter],
+        case_map: dict[Menu, list] = {
+            Menu.MULTICENTER_BOND_ORDER: [cls.parse_multicenter],
+            Menu.MULTICENTER_BOND_ORDER_NAO: [cls.parse_multicenter],
             Menu.MULLIKEN_BOND_ORDER_DECOMPOSE: [cls.parse_decomposition],
-            Menu.WIBERG_DECOMPOSITION:          [cls.parse_decomposition],
+            Menu.WIBERG_DECOMPOSITION: [cls.parse_decomposition],
         }
         default = [cls.parse, cls.parse_valence]
-        parsers = _CASE_MAP.get(analysis, default)
+        parsers = case_map.get(analysis, default)
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -664,9 +663,7 @@ class DOSParser(OutputParser):
     @staticmethod
     def parse_orbital_energies(stdout: str) -> list[OrbitalEnergy]:
         """Extract orbital energies used in DOS."""
-        pattern = (
-            rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
-        )
+        pattern = rf"(\d+)\s+({FLOAT_PATTERN})\s+eV\s+Occ=\s*({FLOAT_PATTERN})"
         return [
             OrbitalEnergy(
                 index=int(match[1]),
@@ -689,7 +686,9 @@ class SpectrumParser(OutputParser):
     def _parse_spectrum_or_none(cls, stdout: str) -> Spectrum | None:
         """Return parsed spectrum only if it contains data."""
         s = cls.parse(stdout)
-        return s if (s.frequencies or s.wavelengths or s.atom_indices) else None
+        return (
+            s if (s.frequencies or s.wavelengths or s.atom_indices) else None
+        )
 
     @classmethod
     def parse_for_result(
@@ -697,11 +696,11 @@ class SpectrumParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _BASE: list = [cls._parse_spectrum_or_none, cls.parse_transitions]
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.PREDICT_COLOR: [*_BASE, cls.parse_color],
+        base: list = [cls._parse_spectrum_or_none, cls.parse_transitions]
+        case_map: dict[Menu, list] = {
+            Menu.PREDICT_COLOR: [*base, cls.parse_color],
         }
-        parsers = _CASE_MAP.get(analysis, _BASE)
+        parsers = case_map.get(analysis, base)
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -718,9 +717,7 @@ class SpectrumParser(OutputParser):
         pattern_uv = (
             rf"({FLOAT_PATTERN})\s+nm.*?(?:f=|Str[.=])\s*({FLOAT_PATTERN})"
         )
-        pattern_nmr = (
-            rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
-        )
+        pattern_nmr = rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
         pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
 
         for match in re.finditer(pattern1, stdout):
@@ -1047,8 +1044,7 @@ class BasinParser(OutputParser):
             in_basin = False
             for line in stdout.split("\n"):
                 if "basin" in line.lower() and (
-                    "population" in line.lower()
-                    or "integral" in line.lower()
+                    "population" in line.lower() or "integral" in line.lower()
                 ):
                     in_basin = True
                     continue
@@ -1089,16 +1085,20 @@ class ExcitationParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _DEFAULT = [cls.parse_hole_electron, cls.parse_delta_r, cls.parse_lambda_index]
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.HOLE_ELECTRON_ANALYSIS:   [cls.parse_hole_electron],
+        default = [
+            cls.parse_hole_electron,
+            cls.parse_delta_r,
+            cls.parse_lambda_index,
+        ]
+        case_map: dict[Menu, list] = {
+            Menu.HOLE_ELECTRON_ANALYSIS: [cls.parse_hole_electron],
             Menu.CHARGE_TRANSFER_ANALYSIS: [cls.parse_charge_transfer],
-            Menu.IFCT_ANALYSIS:            [cls.parse_charge_transfer],
-            Menu.CTS_ANALYSIS:             [cls.parse_charge_transfer],
-            Menu.DELTA_R_INDEX:            [cls.parse_delta_r],
-            Menu.LAMBDA_INDEX:             [cls.parse_lambda_index],
+            Menu.IFCT_ANALYSIS: [cls.parse_charge_transfer],
+            Menu.CTS_ANALYSIS: [cls.parse_charge_transfer],
+            Menu.DELTA_R_INDEX: [cls.parse_delta_r],
+            Menu.LAMBDA_INDEX: [cls.parse_lambda_index],
         }
-        parsers = _CASE_MAP.get(analysis, _DEFAULT)
+        parsers = case_map.get(analysis, default)
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -1133,8 +1133,20 @@ class ExcitationParser(OutputParser):
                 float(match[4]),
             )
 
-        required = {"H_index", "E_index", "t_index", "EDI", "HDI", "Sr", "D_index"}
-        if required.issubset(result) and "hole_centroid" in centroids and "electron_centroid" in centroids:
+        required = {
+            "H_index",
+            "E_index",
+            "t_index",
+            "EDI",
+            "HDI",
+            "Sr",
+            "D_index",
+        }
+        if (
+            required.issubset(result)
+            and "hole_centroid" in centroids
+            and "electron_centroid" in centroids
+        ):
             return HoleElectron(
                 hole_id=result["H_index"],
                 electron_id=result["E_index"],
@@ -1262,7 +1274,9 @@ class WeakInteractionParser(OutputParser):
 
         if cubes := [
             match[1]
-            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+            for match in re.finditer(
+                r"(\S+\.cube)\s+has been generated", stdout
+            )
         ]:
             interaction.cube_names = cubes
 
@@ -1283,10 +1297,12 @@ class EDAParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.DISPERSION_ATOMIC_CONTRIBUTION: [cls.parse_dispersion_contributions],
+        case_map: dict[Menu, list] = {
+            Menu.DISPERSION_ATOMIC_CONTRIBUTION: [
+                cls.parse_dispersion_contributions
+            ],
         }
-        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        parsers = case_map.get(analysis, [cls.parse])
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -1348,15 +1364,19 @@ class CDFTParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.CDFT_ANALYSIS:        [cls.parse_global_indices, cls.parse_condensed_fukui, cls.parse_dual_descriptor],
-            Menu.LOCAL_HARDNESS:       [cls.parse_global_indices],
+        case_map: dict[Menu, list] = {
+            Menu.CDFT_ANALYSIS: [
+                cls.parse_global_indices,
+                cls.parse_condensed_fukui,
+                cls.parse_dual_descriptor,
+            ],
+            Menu.LOCAL_HARDNESS: [cls.parse_global_indices],
             Menu.LOCAL_IONIZATION_ENERGY: [cls.parse_global_indices],
-            Menu.CONDENSED_FUKUI:      [cls.parse_condensed_fukui],
-            Menu.FUKUI_FUNCTION:       [cls.parse_condensed_fukui],
-            Menu.DUAL_DESCRIPTOR:      [cls.parse_dual_descriptor],
+            Menu.CONDENSED_FUKUI: [cls.parse_condensed_fukui],
+            Menu.FUKUI_FUNCTION: [cls.parse_condensed_fukui],
+            Menu.DUAL_DESCRIPTOR: [cls.parse_dual_descriptor],
         }
-        parsers = _CASE_MAP.get(analysis, [])
+        parsers = case_map.get(analysis, [])
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -1524,11 +1544,11 @@ class AromaticityParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
-            Menu.NICS_SCAN:    [cls.parse, cls._parse_nics_scan_or_none],
+        case_map: dict[Menu, list] = {
+            Menu.NICS_SCAN: [cls.parse, cls._parse_nics_scan_or_none],
             Menu.NICS_1D_SCAN: [cls.parse, cls._parse_nics_scan_or_none],
         }
-        parsers = _CASE_MAP.get(analysis, [cls.parse])
+        parsers = case_map.get(analysis, [cls.parse])
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -1679,7 +1699,7 @@ class UtilityParser(OutputParser):
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        _CASE_MAP: dict[Menu, list] = {
+        case_map: dict[Menu, list] = {
             Menu.GEOMETRY_PROPERTIES: [
                 cls.parse_bond_lengths,
                 cls.parse_bond_angles,
@@ -1698,7 +1718,7 @@ class UtilityParser(OutputParser):
             cls.parse_dipole_moments,
             cls.parse_coordination_numbers,
         ]
-        parsers = _CASE_MAP.get(analysis, default)
+        parsers = case_map.get(analysis, default)
         return cls._collect(stdout, parsers)
 
     @staticmethod
@@ -1828,7 +1848,7 @@ class ParserRoute:
 
     ROUTE_TABLE: dict[Menu, type[OutputParser]] = {
         # menu 0 - View Structure
-        #Menu.VIEW_STRUCTURE: ViewStructureParser,
+        # Menu.VIEW_STRUCTURE: ViewStructureParser,
         # Menu 7 — charges
         Menu.HIRSHFELD_CHARGE: ChargeParser,
         Menu.VDD_POPULATION: ChargeParser,

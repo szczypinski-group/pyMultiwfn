@@ -248,7 +248,9 @@ class MultiwfnJob:
     @property
     def execution_time(self) -> float | None:
         """Get the execution time (read-only)."""
-        return self._result.execution_time if self._result is not None else None
+        return (
+            self._result.execution_time if self._result is not None else None
+        )
 
     @property
     def success(self) -> bool | None:

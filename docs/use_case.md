@@ -57,7 +57,7 @@ persisted to a per-molecule JSON file so that identical analyses are not re-run.
 │  Base class. Each subclass (ChargeParser, BondOrderParser, etc.) │
 │  owns a parse_for_result(analysis, stdout) classmethod.          │
 │                                                                  │
-│  parse_for_result consults an internal _CASE_MAP dict keyed by   │
+│  parse_for_result consults an internal case_map dict keyed by    │
 │  Menu to decide which static parsing methods to call, then       │
 │  flattens the results through _collect().                        │
 │                                                                  │
@@ -124,7 +124,7 @@ method. Inside `parse`:
      maps to `ChargeParser`, every bond-order `Menu` maps to
      `BondOrderParser`, and so on.
    - The subclass's `parse_for_result(analysis, stdout)` classmethod is called.
-     This method consults an internal `_CASE_MAP` dictionary to decide which
+     This method consults an internal `case_map` dictionary to decide which
      static regex-based helper methods apply to the specific `Menu` variant,
      then calls `_collect()` to run them all and flatten the results into a
      single list.
@@ -182,7 +182,7 @@ works in two layers:
 every supported `Menu` member to the `OutputParser` subclass responsible for
 it. `MultiwfnResult.parse()` does a single lookup here.
 
-**Layer 2 — `_CASE_MAP` inside `parse_for_result`.** Each subclass defines a
+**Layer 2 — `case_map` inside `parse_for_result`.** Each subclass defines a
 dictionary mapping specific `Menu` members to lists of parsing callables. If
 the `Menu` is found in the map, only those callables run. Otherwise a default
 list runs. The shared `_collect(stdout, parsers)` method iterates the list,
@@ -192,7 +192,7 @@ values are skipped, single objects are appended, and lists are extended.
 Example from `BondOrderParser`:
 
 ```python
-_CASE_MAP = {
+case_map = {
     Menu.MULTICENTER_BOND_ORDER:        [cls.parse_multicenter],
     Menu.MULTICENTER_BOND_ORDER_NAO:    [cls.parse_multicenter],
     Menu.MULLIKEN_BOND_ORDER_DECOMPOSE: [cls.parse_decomposition],
@@ -201,7 +201,7 @@ _CASE_MAP = {
 default = [cls.parse, cls.parse_valence]
 ```
 
-When `Menu.MAYER_BOND_ORDER` arrives, it is not in `_CASE_MAP`, so the default
+When `Menu.MAYER_BOND_ORDER` arrives, it is not in `case_map`, so the default
 runs: `parse()` extracts pairwise bond orders, then `parse_valence()` extracts
 total and free valences. When `Menu.MULTICENTER_BOND_ORDER` arrives, only
 `parse_multicenter()` runs.

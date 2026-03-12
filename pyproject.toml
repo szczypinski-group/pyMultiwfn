@@ -18,6 +18,18 @@ dependencies = [
     "matplotlib>=3.10.8",
 ]
 
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+]
+
+[project.urls]
+Homepage = "https://szczypinski-group.github.io/pyMultiwfn/"
+Documentation = "https://szczypinski-group.github.io/pyMultiwfn/"
+Repository = "http://github.com/szczypinski-group/pyMultiwfn/"
+Issues = "https://github.com/szczypinski-group/pyMultiwfn/issues"
+
 [dependency-groups]
 dev = [
     "pre-commit>=4.3.0",
