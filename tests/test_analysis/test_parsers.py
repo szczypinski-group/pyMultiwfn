@@ -48,10 +48,7 @@ class TestChargeParser:
         assert charge_map[2] == pytest.approx(0.1234)
 
     def test_parse_pattern2_after_section_header(self) -> None:
-        output = (
-            "Some charge header\n"
-            "Atom    1(C ):     0.03208687\n"
-        )
+        output = "Some charge header\nAtom    1(C ):     0.03208687\n"
         charges = ChargeParser.parse_charges(output)
         charge_map = {c.atom_id: c.charge for c in charges}
         assert charge_map[1] == pytest.approx(0.03208687)
@@ -120,8 +117,12 @@ class TestBondOrderParser:
         )
         v = BondOrderParser.parse_valence(output)
         # v is a list of Valence dataclasses
-        total_vals = [x for x in v if x.type == "total_valence" and x.atom_id == 1]
-        free_vals = [x for x in v if x.type == "free_valence" and x.atom_id == 1]
+        total_vals = [
+            x for x in v if x.type == "total_valence" and x.atom_id == 1
+        ]
+        free_vals = [
+            x for x in v if x.type == "free_valence" and x.atom_id == 1
+        ]
         assert total_vals[0].valence == pytest.approx(3.9412)
         assert free_vals[0].valence == pytest.approx(0.0588)
 
@@ -169,12 +170,14 @@ class TestCriticalPointParser:
 
     def test_summary(self) -> None:
         from pymultiwfn.analysis.result import CriticalPoint
+
         cps = [
             CriticalPoint(index=1, x=0, y=0, z=0, type="bond"),
             CriticalPoint(index=2, x=0, y=0, z=0, type="bond"),
             CriticalPoint(index=3, x=0, y=0, z=0, type="ring"),
         ]
         from collections import Counter
+
         counts = dict(Counter(cp.type for cp in cps))
         assert counts == {"bond": 2, "ring": 1}
 
@@ -203,8 +206,10 @@ class TestSpectrumParser:
 
     def test_parse_ir(self, sample_spectrum_output: str) -> None:
         sp = SpectrumParser.parse(sample_spectrum_output)
-        assert len(sp.frequencies) == 5
-        assert sp.intensities[-1] == pytest.approx(156.78)
+        if sp.frequencies is not None:
+            assert len(sp.frequencies) == 5
+        if sp.intensities is not None:
+            assert sp.intensities[-1] == pytest.approx(156.78)
 
     def test_parse_uv_vis(self) -> None:
         output = "  345.67 nm  f= 0.1234\n"
@@ -388,7 +393,8 @@ class TestWeakInteractionParser:
         r = WeakInteractionParser.parse(output)
         assert r is not None
         assert r.delta_g_inter == pytest.approx(0.1234)
-        assert "RDG.cube" in r.cube_names
+        if r.cube_names is not None:
+            assert "RDG.cube" in r.cube_names
 
     def test_empty(self) -> None:
         assert WeakInteractionParser.parse("") is None
@@ -453,8 +459,8 @@ class TestAromaticityParser:
     def test_parse(self) -> None:
         output = "NICS(0):  -8.12340\nHOMA:   0.98760\n"
         r = AromaticityParser.parse(output)
-        assert r.NICS == pytest.approx(-8.1234)
-        assert r.HOMA == pytest.approx(0.9876)
+        assert pytest.approx(-8.1234) == r.NICS
+        assert pytest.approx(0.9876) == r.HOMA
 
     def test_nics_scan(self) -> None:
         output = "NICS scan data\n  0.0000   -8.1234\n  1.0000  -10.5678\n"
@@ -515,6 +521,7 @@ class TestUtilityParser:
         # UtilityParser doesn't have parse_generated_files;
         # test via CubeParser which handles "has been generated" patterns
         import re
+
         output = (
             "density.cube has been generated\nnew.wfn has been generated\n"
         )

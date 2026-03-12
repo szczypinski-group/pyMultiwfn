@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "pymultiwfn"
-version = "0.5.1"
+version = "0.5.2"
 description = "Python interface and automation toolkit for Multiwfn"
 requires-python = ">=3.12"
 authors = [
@@ -17,6 +17,18 @@ license = "MPL-2.0"
 dependencies = [
     "matplotlib>=3.10.8",
 ]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+]
+
+[project.urls]
+Homepage = "https://szczypinski-group.github.io/pyMultiwfn/"
+Documentation = "https://szczypinski-group.github.io/pyMultiwfn/"
+Repository = "http://github.com/szczypinski-group/pyMultiwfn/"
+Issues = "https://github.com/szczypinski-group/pyMultiwfn/issues"
 
 [dependency-groups]
 dev = [
