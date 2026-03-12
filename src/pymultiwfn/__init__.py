@@ -8,7 +8,7 @@ Usage
 >>> result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
 """
 
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 
 from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.parsers import (
