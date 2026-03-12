@@ -1,4 +1,4 @@
-# Developper Guide
+# Developer Guide
 
 We actively welcome contributions from the community.
 If you do decide to contribute please follow the guidelines below.
