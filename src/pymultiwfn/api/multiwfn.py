@@ -44,10 +44,10 @@ class Multiwfn:
             )
 
         if platform.system() == "Windows":
-            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multifwn.exe"))
+            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multiwfn.exe"))
 
         elif platform.system() == "Linux":
-            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multifwn"))
+            bin_path = Path(str(files("pymultiwfn") / "bin" / "Multiwfn"))
 
         else:
             raise MultiwfnError(

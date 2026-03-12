@@ -312,7 +312,7 @@ class MultiwfnJob:
             mode="w",
             newline="\n",
             encoding="utf-8",
-            delete=False,
+            delete=True,
             suffix=".inp",
             dir=self.work_dir,
         ) as batch_file:
@@ -364,7 +364,7 @@ class MultiwfnJob:
             self._result = result
             self._executed = True
 
-            return self
+        return self
 
     def __str__(self) -> str:
         return f"MultiwfnJob on {self._input_file.name}."
