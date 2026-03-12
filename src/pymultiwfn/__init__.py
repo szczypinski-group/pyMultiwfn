@@ -8,7 +8,7 @@ Usage
 >>> result = mol.run(pymultiwfn.Menu.HIRSHFELD_CHARGE)
 """
 
-__version__ = "0.5.4"
+from importlib.metadata import version
 
 from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.parsers import (
@@ -24,6 +24,7 @@ from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.menu import Menu
 
+__version__ = version("pymultiwfn")
 __all__ = [
     # Version
     "__version__",
