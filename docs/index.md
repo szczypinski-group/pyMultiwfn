@@ -25,74 +25,18 @@ If it is not specified, the bundled version is used.
 
 
 ```python
-from pathlib import Path
 from pymultiwfn import MultiwfnAnalysis, Menu
-
-mwfn = Multiwfn(exe_path=Path("/opt/multiwfn/Multiwfn"))
 
 analysis = MultiwfnAnalysis("benzene.wfn", analyses=[
     Menu.HIRSHFELD_CHARGE,
     Menu.MAYER_BOND_ORDER,
 ])
-analysis.run(work_dir=Path("./output"))
 
-print(analysis.results)
+analysis.run()
+print(analysis.results[0].to_dict())
 ```
 
 The `MultiwfnResult` dataclasses hold different types of parsed results, which can easily be serialised into JSON.
-
-## Contributing
-
-We actively welcome contributions from the community.
-If you do decide to contribute please follow the guidelines below.
-When using our code for other projects, please respect the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
-In particular:
-
-- You must provide the original/modified files licensed under MPL, alongside a list of changes from the original files.
-- If using for closed source development, you must probide original source code of the files ("file-based copyleft") under MPL alongside your software.
-
-
-### Development
-
-Make sure you have `uv` [installed](https://docs.astral.sh/uv/getting-started/installation/) on your system.
-Then any `uv` command should create a fully functional local environment:
-
-```
-git clone git@github.com:szczypinski-group/pyMultiwfn.git
-cd pyMultiwfn
-uv sync
-uvx pre-commit install
-```
-
-### Linting
-
-Default linting settings and formatting settings (using [`ruff`](https://docs.astral.sh/ruff/)) have been created within `pyproject.toml` and will
-be applied if the optional dependencies have been installed.
-
-### Unit testing
-
-We try to include positive and negative unit tests for each new function.
-Ensure the tests pass before submitting a pull request:
-
-```
-uv run pytest
-```
-
-### Code standards
-
-1. Use explicit imports wherever possible.
-2. For class and function definition/calls, split arguments into multiple lines.
-3. Always call functions with keyword arguments.
-
-### Conventional commits
-
-We try to follow the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
-In particular, please link to the issue that your commits are related to:
-
-> docs: update use cases in README.md
->
-> The use cases now follow the new code structure. Related to #24.
-> Also included more detailed contribution guidelines.
 
 ## Contact
 

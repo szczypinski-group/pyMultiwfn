@@ -1,10 +1,8 @@
 # pyMultiwfn
 
-A Python wrapper for automating [Multiwfn](http://sobereva.com/multiwfn/) batch calculations.
+A Python wrapper for automating [Multiwfn 3.8 (07/01/2026)](http://sobereva.com/multiwfn/) batch calculations.
 This project is currently in progress and is regularly maintained.
 Documentation for `pymultiwfn` can be found [here](https://szczypinski-group.github.io/pyMultiwfn/).
-
-All functions from the newest update are implemented with descriptive comments(multiwfn 3.8, 07/01/2026).
 
 ## Installation
 
@@ -25,18 +23,15 @@ If it is not specified, the bundled version is used.
 
 
 ```python
-from pathlib import Path
 from pymultiwfn import MultiwfnAnalysis, Menu
-
-mwfn = Multiwfn(exe_path=Path("/opt/multiwfn/Multiwfn"))
 
 analysis = MultiwfnAnalysis("benzene.wfn", analyses=[
     Menu.HIRSHFELD_CHARGE,
     Menu.MAYER_BOND_ORDER,
 ])
-analysis.run(work_dir=Path("./output"))
 
-print(analysis.results)
+analysis.run()
+print(analysis.results[0].to_dict())
 ```
 
 The `MultiwfnResult` dataclasses hold different types of parsed results, which can easily be serialised into JSON.

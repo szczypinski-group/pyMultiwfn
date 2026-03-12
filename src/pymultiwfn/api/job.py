@@ -303,6 +303,8 @@ class MultiwfnJob:
         if commands[-1] != "q":
             commands.append("q")
 
+        self.work_dir.mkdir(parents=True, exist_ok=True)
+
         start_time = time.time()
 
         try:
