@@ -2,7 +2,7 @@
 
 A Python wrapper for automating [Multiwfn](http://sobereva.com/multiwfn/) batch calculations.
 This project is currently in progress and is regularly maintained.
-Information in the README might be inaccurate.
+Documentation for `pymultiwfn` can be found [here](https://szczypinski-group.github.io/pyMultiwfn/).
 
 All functions from the newest update are implemented with descriptive comments(multiwfn 3.8, 07/01/2026).
 
