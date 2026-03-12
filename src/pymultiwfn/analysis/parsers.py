@@ -124,40 +124,40 @@ class OutputParser:
                 results.append(value)
         return results
 
-#==============================================================================
-# Menu 0: View structure
-#==============================================================================
+# #==============================================================================
+# # Menu 0: View structure
+# #==============================================================================
 
-class ViewStructureParser(OutputParser):
-    """Parser for Menu 0: View structure output."""
+# class ViewStructureParser(OutputParser):
+#     """Parser for Menu 0: View structure output."""
 
-    @classmethod
-    def parse_for_result(
-        cls,
-        analysis: Menu,
-        stdout: str,
-    ) -> list[ParsedMultiwfnResult]:
-        results: list[ParsedMultiwfnResult] = []
-        orbital = cls.parse_orbital(stdout)
-        if orbital is not None:
-            results.append(orbital)
-        return results
+#     @classmethod
+#     def parse_for_result(
+#         cls,
+#         analysis: Menu,
+#         stdout: str,
+#     ) -> list[ParsedMultiwfnResult]:
+#         results: list[ParsedMultiwfnResult] = []
+#         orbital = cls.parse_orbital(stdout)
+#         if orbital is not None:
+#             results.append(orbital)
+#         return results
 
-    @staticmethod
-    def parse_orbital(stdout: str) -> Orbital | None:
-        """Extract orbital information from view structure output."""
-        pattern = (
-            rf"Orbital\s+(\d+)\s+Occ=\s*({FLOAT_PATTERN})\s+"
-            rf"E=\s*({FLOAT_PATTERN})\s+Symmetry=\s*(\S+)"
-        )
-        if match := re.search(pattern, stdout):
-            return Orbital(
-                orbital_id=int(match[1]),
-                occupation=float(match[2]),
-                energy=float(match[3]),
-                symmetry=match[4],
-            )
-        return None
+#     @staticmethod
+#     def parse_orbital(stdout: str) -> Orbital | None:
+#         """Extract orbital information from view structure output."""
+#         pattern = (
+#             rf"Orbital\s+(\d+)\s+Occ=\s*({FLOAT_PATTERN})\s+"
+#             rf"E=\s*({FLOAT_PATTERN})\s+Symmetry=\s*(\S+)"
+#         )
+#         if match := re.search(pattern, stdout):
+#             return Orbital(
+#                 orbital_id=int(match[1]),
+#                 occupation=float(match[2]),
+#                 energy=float(match[3]),
+#                 symmetry=match[4],
+#             )
+#         return None
 
 # =============================================================================
 # Menu 7: Population analysis & atomic charges
@@ -1828,7 +1828,7 @@ class ParserRoute:
 
     ROUTE_TABLE: dict[Menu, type[OutputParser]] = {
         # menu 0 - View Structure
-        Menu.VIEW_STRUCTURE: ViewStructureParser,
+        #Menu.VIEW_STRUCTURE: ViewStructureParser,
         # Menu 7 — charges
         Menu.HIRSHFELD_CHARGE: ChargeParser,
         Menu.VDD_POPULATION: ChargeParser,
