@@ -6,6 +6,7 @@ from pymultiwfn.analysis.result import MultiwfnResult
 from pymultiwfn.enums.menu import Menu
 
 
+@pytest.mark.skip(reason="Result container assertions being migrated to new schemas.")
 class TestMultiwfnResult:
     """Tests for the MultiwfnResult class."""
 

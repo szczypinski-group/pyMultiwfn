@@ -2,7 +2,7 @@
 
 import pytest
 
-from pymultiwfn.api.exceptions import MultiwfnError
+from pymultiwfn.api.exceptions import InvalidInputFileError, MultiwfnError
 
 
 class TestMultiwfnError:
@@ -20,3 +20,18 @@ class TestMultiwfnError:
             raise MultiwfnError("caught")
         except MultiwfnError as e:
             assert str(e) == "caught"
+
+
+class TestInvalidInputFileError:
+    """Tests for the InvalidInputFileError exception class."""
+
+    def test_is_multiwfn_error(self) -> None:
+        assert issubclass(InvalidInputFileError, MultiwfnError)
+
+    def test_message_contains_context(self) -> None:
+        with pytest.raises(InvalidInputFileError, match="Unsupported"):
+            raise InvalidInputFileError(
+                input_path="bad.txt",
+                extension=".txt",
+                supported_extensions=(".wfn", ".fchk"),
+            )

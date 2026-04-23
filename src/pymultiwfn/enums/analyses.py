@@ -29,14 +29,11 @@ class AnalysisClasses(Enum):
         Menu.ADCH_CHARGE,
         Menu.CHELPG_CHARGE,
         Menu.MK_CHARGE,
-        Menu.AIM_CHARGE,
-        Menu.HIRSHFELD_I_CHARGE,
         Menu.CM5_CHARGE,
         Menu.EEM_CHARGE,
         Menu.RESP_CHARGE,
         Menu.GASTEIGER_CHARGE,
         Menu.MBIS_CHARGE,
-        Menu.DDEC_CHARGE,
     ]
 
     BOND_ORDERS = [
@@ -120,20 +117,15 @@ class AnalysisClasses(Enum):
 
     CDFT = [
         Menu.CDFT_ANALYSIS,
-        Menu.FUKUI_FUNCTION,
-        Menu.DUAL_DESCRIPTOR,
         Menu.CONDENSED_FUKUI,
+        Menu.ORBITAL_WEIGHTED_FUKUI,
+        Menu.GRID_FUKUI,
         Menu.LOCAL_HARDNESS,
-        Menu.LOCAL_IONIZATION_ENERGY,
     ]
 
     DOS = [
-        Menu.PLOT_DOS,
-        Menu.PLOT_PDOS,
-        Menu.PLOT_OPDOS,
-        Menu.PLOT_LDOS,
-        Menu.PLOT_PHOTOELECTRON_SPECTRUM,
-        Menu.PLOT_COHP,
+        Menu.PLOT_TDOS,
+        Menu.PLOT_TDOS_OPDOS,
     ]
 
     BASIN = [
@@ -185,9 +177,9 @@ class AnalysisClasses(Enum):
     ]
 
     ORBITAL_COMPOSITION = [
-        Menu.ORBITAL_COMPOSITION_MULLIKEN,
-        Menu.ORBITAL_COMPOSITION_SCPA,
-        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER,
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_ALL,
+        Menu.ORBITAL_COMPOSITION_SCPA_ALL,
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_ALL,
         Menu.ORBITAL_COMPOSITION_FRAGMENT_MULLIKEN,
         Menu.ORBITAL_COMPOSITION_FRAGMENT_STOUT,
         Menu.ORBITAL_COMPOSITION_FRAGMENT_SCPA,
@@ -198,25 +190,22 @@ class AnalysisClasses(Enum):
     ]
 
     ORBITAL_LOCALIZATION = [
-        Menu.BOYS_LOCALIZATION,
-        Menu.PIPEK_MEZEY_LOCALIZATION,
+        Menu.BOYS_LOCALIZATION_OCCUPIED,
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED,
     ]
 
     FUZZY_SPACE = [
-        Menu.FUZZY_INTEGRATE_PROPERTY,
-        Menu.ATOMIC_DIPOLE_MOMENTS,
+        Menu.FUZZY_INTEGRATE_EDENSITY,
+        Menu.FUZZY_MULTIPOLE,
         Menu.ATOMIC_OVERLAP_MATRIX,
         Menu.LOCALIZATION_DELOCALIZATION_INDEX,
         Menu.PDI_AROMATICITY,
         Menu.FLU_AROMATICITY,
         Menu.FLU_PI_AROMATICITY,
-        Menu.FUZZY_INTEGRATE_OVERLAP,
+        Menu.FUZZY_OVERLAP_EDENSITY,
         Menu.CONDENSED_LINEAR_RESPONSE,
         Menu.PARA_LINEAR_RESPONSE,
-        Menu.MULTICENTER_DI,
-        Menu.ITA_AROMATICITY,
-        Menu.ATOMIC_VOLUME_POLARIZABILITY,
-        Menu.IFDI_ANALYSIS,
+        Menu.SPATIAL_DELOCALIZATION_INDEX,
     ]
 
     EDA = [
@@ -234,14 +223,10 @@ class AnalysisClasses(Enum):
     ]
 
     WAVEFUNCTION = [
-        Menu.CHECK_WAVEFUNCTION,
-        Menu.PRINT_ORBITAL_INFO,
-        Menu.PRINT_GTF_INFO,
-        Menu.PRINT_BASIS_INFO,
         Menu.PRINT_DENSITY_MATRIX,
-        Menu.PRINT_OVERLAP_MATRIX,
-        Menu.MODIFY_OCCUPATION,
-        Menu.DELETE_INNER_ORBITALS,
+        Menu.PRINT_INTEGRAL_MATRIX_OVERLAP,
+        Menu.PRINT_INTEGRAL_MATRIX_ELECTRIC_DIPOLE,
+        Menu.PRINT_INTEGRAL_MATRIX_QUADRUPOLE,
     ]
 
     LINE_PLOTS = [

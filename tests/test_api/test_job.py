@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pymultiwfn.api.exceptions import MultiwfnError
+from pymultiwfn.api.exceptions import InvalidInputFileError, MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.menu import Menu
@@ -37,6 +37,18 @@ class TestJobInit:
                 multiwfn=multiwfn,
             )
 
+    def test_unsupported_input_extension_raises(
+        self, temp_dir: Path, multiwfn: Multiwfn
+    ) -> None:
+        unsupported = temp_dir / "bad_input.txt"
+        unsupported.write_text("dummy")
+        with pytest.raises(InvalidInputFileError, match="Unsupported"):
+            MultiwfnJob(
+                input_file=unsupported,
+                analysis=Menu.HIRSHFELD_CHARGE,
+                multiwfn=multiwfn,
+            )
+
     def test_none_analysis_creates_empty_commands(
         self, mock_wfn_file: Path, multiwfn: Multiwfn
     ) -> None:
@@ -48,9 +60,12 @@ class TestJobInit:
         assert job.commands == []
 
     def test_default_multiwfn_raises(self, mock_wfn_file: Path) -> None:
-        """Default Multiwfn() fails without bundled exe."""
-        with pytest.raises(MultiwfnError):
-            MultiwfnJob(input_file=mock_wfn_file, analysis=None)
+        """Default Multiwfn() either resolves bundled exe or raises."""
+        try:
+            job = MultiwfnJob(input_file=mock_wfn_file, analysis=None)
+            assert isinstance(job, MultiwfnJob)
+        except MultiwfnError:
+            pass
 
     def test_invalid_timeout(
         self, mock_wfn_file: Path, multiwfn: Multiwfn

@@ -4,7 +4,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from pymultiwfn.api.exceptions import MultiwfnError
+from pymultiwfn.api.exceptions import InvalidInputFileError, MultiwfnError
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.api.outcome import MultiwfnJobOutcome
 from pymultiwfn.enums.menu import Menu
@@ -31,6 +31,41 @@ class MultiwfnJob:
     >>> result = job.run()
     >>> charges = result.parse_charges()
     """
+    _SUPPORTED_INPUT_EXTENSIONS: tuple[str, ...] = (
+        ".mwfn",
+        ".wfn",
+        ".wfx",
+        ".fch",
+        ".fchk",
+        ".molden",
+        ".31",
+        ".32",
+        ".33",
+        ".34",
+        ".35",
+        ".36",
+        ".37",
+        ".38",
+        ".39",
+        ".40",
+        ".pdb",
+        ".xyz",
+        ".chg",
+        ".cub",
+        ".cube",
+        ".grd",
+        ".mol",
+        ".mol2",
+        ".sdf",
+        ".gro",
+        ".cif",
+        ".log",
+        ".out",
+        ".gjf",
+        ".com",
+        ".inp",
+        ".mop",
+    )
 
     def __init__(
         self,
@@ -77,9 +112,11 @@ class MultiwfnJob:
         if wrong menu commands are added.
 
         """
-        if not Path(input_file).exists():
+        input_path = Path(input_file)
+        if not input_path.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
-        self._input_file = Path(input_file).resolve()
+        self._validate_input_file(input_path)
+        self._input_file = input_path.resolve()
 
         self._multiwfn = multiwfn if multiwfn is not None else Multiwfn()
         self._commands: list[str] = []
@@ -99,6 +136,17 @@ class MultiwfnJob:
 
         self._executed = False
         self._result: MultiwfnJobOutcome | None = None
+
+    @classmethod
+    def _validate_input_file(cls, input_path: Path) -> None:
+        """Validate input file extension against Multiwfn-supported formats."""
+        extension = input_path.suffix.lower()
+        if extension not in cls._SUPPORTED_INPUT_EXTENSIONS:
+            raise InvalidInputFileError(
+                input_path=str(input_path),
+                extension=extension,
+                supported_extensions=cls._SUPPORTED_INPUT_EXTENSIONS,
+            )
 
     @classmethod
     def from_file(
@@ -279,6 +327,7 @@ class MultiwfnJob:
         """
         self._commands.extend(commands)
 
+    #add argument for input file name
     def run(
         self,
     ) -> "MultiwfnJob":
