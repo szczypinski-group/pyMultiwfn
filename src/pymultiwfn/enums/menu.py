@@ -107,12 +107,6 @@ class Menu(Enum):
     # Search ALL critical points of rho starting from every nuclear position;
     # finds NCPs, BCPs, RCPs, and CCPs in one pass
     TOPOLOGY_SEARCH_CPS = ("2", "2", "-1")
-    # Trace gradient bond paths linking (3,-3) to (3,-1) CPs after a CP search
-    # has been completed - DEPRECATED
-    TOPOLOGY_GENERATE_PATHS = ("2", "3")
-    # Generate interbasin surfaces (IBS) that partition space into AIM atomic
-    # basins centred on each (3,-3) CP
-    TOPOLOGY_INTERBASIN_SURFACES = ("2", "4")
     # Full AIM workflow in one sequence: search all CPs, generate bond paths,
     # then generate interbasin surfaces
     TOPOLOGY_ANALYSIS_COMPLETE = ("2", "2", "-1", "3", "4")
@@ -873,7 +867,6 @@ class Menu(Enum):
     BASIN_DELTAG_HIRSHFELD = ("17", "1", "23", "n")
     BASIN_IRI = ("17", "1", "24", "n")
 
-    #FINISH
 
     # AIM basin analysis: attractors are nuclei; integrates rho in each QTAIM
     # atomic basin to yield Bader/AIM charges, atomic multipoles, LI, and DI
@@ -988,6 +981,8 @@ class Menu(Enum):
     # statistically over time
     #INTERACTIVE - REQUIRES USER INPUT
     ANCI_ANALYSIS = ("20", "3","2","1","2")
+
+    #INTERACTIVE - REQUIRES USER INPUT
     # Independent Gradient Model (IGM): decomposes the density gradient into
     # intra- and inter-fragment parts; isolates and visualises inter-fragment
     # non-covalent interactions

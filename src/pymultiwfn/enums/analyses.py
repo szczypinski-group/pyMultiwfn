@@ -64,8 +64,6 @@ class AnalysisClasses(Enum):
         Menu.TOPOLOGY_CP_PATHS_3MINUS3_3MINUS1,
         Menu.TOPOLOGY_CP_PATHS_3PLUS1_3PLUS3,
         Menu.TOPOLOGY_SEARCH_CPS,
-        Menu.TOPOLOGY_GENERATE_PATHS,
-        Menu.TOPOLOGY_INTERBASIN_SURFACES,
         Menu.TOPOLOGY_ANALYSIS_COMPLETE,
         Menu.TOPOLOGY_ESP_ANALYSIS,
         Menu.TOPOLOGY_LOL_ANALYSIS,
@@ -298,7 +296,6 @@ class AnalysisClasses(Enum):
         Menu.FUZZY_INTEGRATE_IRI,
         Menu.FUZZY_MULTIPOLE,
         Menu.FUZZY_OVERLAP_EDENSITY,
-        Menu.FUZZY_OVERLAP_NORM_RHO,
         Menu.FUZZY_OVERLAP_LAPLACIAN,
         Menu.FUZZY_OVERLAP_ORB_WFN_HOMO,
         Menu.FUZZY_OVERLAP_ORB_WFN_LUMO,
@@ -361,7 +358,6 @@ class AnalysisClasses(Enum):
         Menu.PRINT_INTEGRAL_MATRIX_EKINETIC,
         Menu.PRINT_INTEGRAL_MATRIX_OCTOPOLE,
         Menu.PRINT_INTEGRAL_MATRIX_HEXADECAPOLE,
-        Menu.PRINT_ORBITAL_INFO,
         Menu.NATURAL_ORBITALS,
     ]
 
@@ -506,7 +502,6 @@ class AnalysisClasses(Enum):
         Menu.FRAGMENT_GUESS_INPUT,
         Menu.COMBINE_FRAGMENTS,
         Menu.GENERATE_FOCK_MATRIX,
-        Menu.GENERATE_CP2K_INPUT,
         Menu.ELECTRON_TRANSPORT_ROUTE,
         Menu.INTERMOLECULAR_OVERLAP,
         Menu.ADNDP_ANALYSIS,

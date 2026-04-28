@@ -1223,7 +1223,7 @@ class TestParserRoute:
 
     def test_topology_menus_route_to_critical_point_parser(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
-        assert ParserRoute.ROUTE_TABLE.get(Menu.TOPOLOGY_SEARCH_CPS) is CriticalPointParser
+        assert ParserRoute.ROUTE_TABLE.get(Menu.TOPOLOGY_VISUALISE_CPS) is CriticalPointParser
 
     def test_unregistered_menu_returns_none(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
