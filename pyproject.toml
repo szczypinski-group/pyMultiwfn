@@ -88,3 +88,17 @@ lint.ignore = [
 
 [tool.mypy]
 exclude = "tests/"
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["pymultiwfn"]
+omit = [
+    "tests/*",
+    "**/__init__.py",
+    "setup.py",
+]
+
+[tool.coverage.report]
+skip_covered = true
