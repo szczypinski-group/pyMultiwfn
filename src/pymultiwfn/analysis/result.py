@@ -50,13 +50,13 @@ class HOMOLUMOGap(ParsedMultiwfnResult):
 
     homo_index: int
     homo_energy_au: float
-    homo_energy_eV: float
+    homo_energy_eV: float  # noqa: N815
     lumo_index: int
     lumo_energy_au: float
-    lumo_energy_eV: float
+    lumo_energy_eV: float  # noqa: N815
     gap_au: float
-    gap_eV: float
-    gap_kJ_mol: float
+    gap_eV: float  # noqa: N815
+    gap_kJ_mol: float  # noqa: N815
 
 
 # ── Menu 2: Topology ────────────────────────────────────────────────────
@@ -281,11 +281,11 @@ class Dipole(ParsedMultiwfnResult):
 # ── Menu 8: Orbital composition ─────────────────────────────────────────
 @dataclass
 class OrbitalBasisComposition(ParsedMultiwfnResult):
-    """Per-basis-function contribution to an orbital (Mulliken/SCPA/Stout-Politzer).
+    """Per-basis-function contribution to an orbital.
 
     Each orbital that has detailed composition output produces one
     of these containers.  The ``method`` field distinguishes which
-    decomposition scheme was used.
+    decomposition scheme was used (Mulliken/SCPA/Stout-Politzer).
     """
 
     method: str
@@ -489,7 +489,7 @@ class DOSMetadata(ParsedMultiwfnResult):
 class DensityOfStates(ParsedMultiwfnResult):
     """Discrete DOS/PDOS arrays sampled on an energy grid."""
 
-    energies_eV: list[float] = field(default_factory=list)
+    energies_eV: list[float] = field(default_factory=list)  # noqa: N815
     dos: list[float] = field(default_factory=list)
     projected_dos: dict[str, list[float]] | None = None
 
@@ -499,7 +499,7 @@ class OrbitalEnergy(ParsedMultiwfnResult):
     """Orbital energy and occupation entry."""
 
     index: int
-    energy_eV: float
+    energy_eV: float  # noqa: N815
     occupation: float
 
 
@@ -554,7 +554,7 @@ class Orbital(ParsedMultiwfnResult):
 
     orbital_id: int
     energy_au: float
-    energy_eV: float
+    energy_eV: float  # noqa: N815
     occupation: float | None = None
     spin: Literal["alpha", "beta"] | None = None
 
@@ -608,7 +608,7 @@ class SurfaceExtremum(ParsedMultiwfnResult):
     type: Literal["min", "max"]
     index: int
     value_au: float
-    value_eV: float
+    value_eV: float  # noqa: N815
     value_kcal_mol: float
     x_angstrom: float
     y_angstrom: float
@@ -667,7 +667,7 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     sigma2_tot_times_nu_kcal_mol2: float | None = None
     pi_au: float | None = None
     pi_kcal_mol: float | None = None
-    mpi_eV: float | None = None
+    mpi_eV: float | None = None  # noqa: N815
     mpi_kcal_mol: float | None = None
 
     # Polar surface area
@@ -1164,7 +1164,7 @@ class Reactivity(ParsedMultiwfnResult):
     """Result for global reactivity indices."""
 
     chemical_potential: float | None = None
-    chemical_potential_eV: float | None = None
+    chemical_potential_eV: float | None = None  # noqa: N815
     hardness: float | None = None
     softness: float | None = None
     electrophilicity: float | None = None
@@ -1172,11 +1172,11 @@ class Reactivity(ParsedMultiwfnResult):
     ionization_potential: float | None = None
     electron_affinity: float | None = None
     homo_energy_au: float | None = None
-    homo_energy_eV: float | None = None
+    homo_energy_eV: float | None = None  # noqa: N815
     lumo_energy_au: float | None = None
-    lumo_energy_eV: float | None = None
+    lumo_energy_eV: float | None = None  # noqa: N815
     delta_parameter_au: float | None = None
-    delta_parameter_eV: float | None = None
+    delta_parameter_eV: float | None = None  # noqa: N815
 
 
 # ── Condensed Fukui ──────────────────────────────────────────────────
@@ -1277,7 +1277,7 @@ class OrbitalWeightEntry:
     orbital_id: int
     orbital_label: str
     weight_pct: float
-    e_diff_eV: float
+    e_diff_eV: float  # noqa: N815
 
 
 @dataclass
