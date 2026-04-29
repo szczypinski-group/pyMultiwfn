@@ -6,44 +6,20 @@ from pathlib import Path
 import pytest
 
 from pymultiwfn.analysis.result import (
-    Aromaticity,
-    BLA_BOA,
-    BondAngle,
-    BondLength,
     BondOrder,
     BondOrderSet,
     Charge,
     ChargeSet,
-    Color,
-    CondensedFukui,
     CriticalPoint,
     Cube,
-    DensityOfStates,
-    DihedralAngle,
-    Dipole,
-    DualDescriptor,
-    EnergyDecompositionAnalysis,
     GridExtremum,
-    HoleElectron,
     MultiwfnResult,
-    NICSScan,
-    Orbital,
-    OrbitalEnergy,
-    ParsedMultiwfnResult,
-    Polarizability,
-    PolarizabilityTensor,
     Reactivity,
     ResultStore,
     Spectrum,
-    SpectrumCurveExtrema,
-    SpectrumExtremum,
     SurfaceAnalysisResult,
     SurfaceGeometry,
-    SurfaceStatistics,
     TopologyPath,
-    Transition,
-    Valence,
-    WeakInteraction,
 )
 from pymultiwfn.enums.menu import Menu
 
@@ -113,8 +89,13 @@ class TestCriticalPoint:
 
     def test_create_nuclear(self) -> None:
         cp = CriticalPoint(
-            index=1, x=0.0, y=0.0, z=0.0,
-            type="nuclear", nucleus_atom_id=1, nucleus_element="C",
+            index=1,
+            x=0.0,
+            y=0.0,
+            z=0.0,
+            type="nuclear",
+            nucleus_atom_id=1,
+            nucleus_element="C",
         )
         assert cp.type == "nuclear"
         assert cp.nucleus_atom_id == 1
@@ -148,8 +129,12 @@ class TestCube:
     def test_create_with_extrema(self) -> None:
         cube = Cube(
             file_name="test.cube",
-            minimum=GridExtremum(value=0.001, x_bohr=1.0, y_bohr=2.0, z_bohr=3.0),
-            maximum=GridExtremum(value=0.999, x_bohr=4.0, y_bohr=5.0, z_bohr=6.0),
+            minimum=GridExtremum(
+                value=0.001, x_bohr=1.0, y_bohr=2.0, z_bohr=3.0
+            ),
+            maximum=GridExtremum(
+                value=0.999, x_bohr=4.0, y_bohr=5.0, z_bohr=6.0
+            ),
         )
         assert cube.minimum.value == pytest.approx(0.001)
         assert cube.maximum.value == pytest.approx(0.999)
@@ -374,15 +359,23 @@ class TestResultStore:
 
     def test_load_existing_json(self, temp_dir: Path) -> None:
         jp = temp_dir / "existing.json"
-        jp.write_text(json.dumps({
-            "input_file": "test.wfn",
-            "analyses": {
-                "HIRSHFELD_CHARGE": {
-                    "parsed": {"analysis": "HIRSHFELD_CHARGE", "results": []},
-                    "timestamp": "2025-01-01T00:00:00",
+        jp.write_text(
+            json.dumps(
+                {
+                    "input_file": "test.wfn",
+                    "analyses": {
+                        "HIRSHFELD_CHARGE": {
+                            "parsed": {
+                                "analysis": "HIRSHFELD_CHARGE",
+                                "results": [],
+                            },
+                            "timestamp": "2025-01-01T00:00:00",
+                        }
+                    },
                 }
-            },
-        }), encoding="utf-8")
+            ),
+            encoding="utf-8",
+        )
 
         store = ResultStore(
             input_file=Path("test.wfn"),

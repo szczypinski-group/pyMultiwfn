@@ -28,7 +28,9 @@ class ParsedMultiwfnResult:
         """Serialise to a plain dict (JSON-safe)."""
         return asdict(self)
 
+
 # ── Menu 0: View structure ──────────────────────────────────────────────
+
 
 @dataclass
 class AtomInfo(ParsedMultiwfnResult):
@@ -58,6 +60,7 @@ class HOMOLUMOGap(ParsedMultiwfnResult):
 
 
 # ── Menu 2: Topology ────────────────────────────────────────────────────
+
 
 @dataclass
 class CriticalPoint(ParsedMultiwfnResult):
@@ -112,7 +115,9 @@ class PoincareHopfCounts(ParsedMultiwfnResult):
     cage: int = 0
     satisfied: bool = False
 
+
 # ── Menu 5: Cube ────────────────────────────────────────────────────────
+
 
 @dataclass
 class GridExtremum:
@@ -147,6 +152,7 @@ class Cube(ParsedMultiwfnResult):
     integral_total: float | None = None
     integral_positive: float | None = None
     integral_negative: float | None = None
+
 
 # ── Menu 6: Wavefunction ────────────────────────────────────────────────
 @dataclass
@@ -209,21 +215,22 @@ class ExportedMatrix(ParsedMultiwfnResult):
     file_name: str = ""
     label: str = ""
 
+
 # ── Menu 7: Charges ──────────────────────────────────────────────────────
 
- 
+
 @dataclass
 class Charge(ParsedMultiwfnResult):
     """Single atomic charge entry."""
- 
+
     atom_id: int
     charge: float
- 
- 
+
+
 @dataclass
 class ChargeSet(ParsedMultiwfnResult):
     """A complete set of atomic charges from one method.
- 
+
     Parameters
     ----------
     method
@@ -246,12 +253,12 @@ class ChargeSet(ParsedMultiwfnResult):
     total_charge
         Sum of all charges, if reported in the output.
     """
- 
+
     method: str
     stage: str | None = None
     charges: list[Charge] = field(default_factory=list)
     total_charge: float | None = None
- 
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "method": self.method,
@@ -259,17 +266,17 @@ class ChargeSet(ParsedMultiwfnResult):
             "charges": [asdict(c) for c in self.charges],
             "total_charge": self.total_charge,
         }
- 
- 
+
+
 @dataclass
 class Dipole(ParsedMultiwfnResult):
     """Result for dipole moment analysis."""
- 
+
     x: float
     y: float
     z: float
     total: float
- 
+
 
 # ── Menu 8: Orbital composition ─────────────────────────────────────────
 @dataclass
@@ -288,22 +295,16 @@ class OrbitalBasisComposition(ParsedMultiwfnResult):
     orbital_type: str = ""
 
     # Per-basis contributions
-    basis_contributions: list[OrbitalBasisEntry] = field(
-        default_factory=list
-    )
+    basis_contributions: list[OrbitalBasisEntry] = field(default_factory=list)
 
     # Per-shell contributions
-    shell_contributions: list[OrbitalShellEntry] = field(
-        default_factory=list
-    )
+    shell_contributions: list[OrbitalShellEntry] = field(default_factory=list)
 
     # Per-shell-type (angular momentum) contributions
     shell_type_composition: OrbitalShellTypeComposition | None = None
 
     # Per-atom contributions
-    atom_contributions: list[OrbitalAtomEntry] = field(
-        default_factory=list
-    )
+    atom_contributions: list[OrbitalAtomEntry] = field(default_factory=list)
 
     # Summary
     delocalization_index: float | None = None
@@ -369,9 +370,7 @@ class OrbitalAtomComposition(ParsedMultiwfnResult):
     occupation: float
     orbital_type: str = ""
 
-    atom_contributions: list[OrbitalAtomEntry] = field(
-        default_factory=list
-    )
+    atom_contributions: list[OrbitalAtomEntry] = field(default_factory=list)
     delocalization_index: float | None = None
     sum_before_normalization: float | None = None
 
@@ -381,19 +380,20 @@ OrbitalComponent = OrbitalBasisComposition
 
 # ── Menu 9: Bond orders ─────────────────────────────────────────────────
 
+
 @dataclass
 class BondOrder(ParsedMultiwfnResult):
     """Single bond order entry between two atoms."""
- 
+
     atom1_id: int
     atom2_id: int
     bond_order: float
- 
- 
+
+
 @dataclass
 class BondOrderSet(ParsedMultiwfnResult):
     """A complete set of bond orders from one method.
- 
+
     Parameters
     ----------
     method
@@ -405,66 +405,65 @@ class BondOrderSet(ParsedMultiwfnResult):
     bond_orders
         Per-pair bond orders.
     """
- 
+
     method: str
     threshold: float | None = None
     bond_orders: list[BondOrder] = field(default_factory=list)
- 
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "method": self.method,
             "threshold": self.threshold,
             "bond_orders": [asdict(b) for b in self.bond_orders],
         }
- 
- 
+
+
 @dataclass
 class BondOrderDecomposition(ParsedMultiwfnResult):
     """Result for bond order decomposition (per orbital) analysis."""
- 
+
     orbital_id: int
     contribution: float
- 
- 
+
+
 @dataclass
 class Valence(ParsedMultiwfnResult):
     """Result for valence analysis."""
- 
+
     atom_id: int
     type: Literal["total_valence", "free_valence"]
     valence: float
- 
- 
+
+
 @dataclass
 class MultiCenterBondOrder(ParsedMultiwfnResult):
     """Result for multi-center bond order analysis."""
- 
+
     atom_ids: list[int] = field(default_factory=list)
     bond_order: float = 0.0
- 
- 
+
+
 @dataclass
 class IBSIEntry(ParsedMultiwfnResult):
     """Single IBSI analysis entry between two atoms."""
- 
+
     atom1_id: int
     atom2_id: int
     distance: float
     int_dg_pair: float
     ibsi: float
- 
- 
+
+
 @dataclass
 class IBSIAnalysis(ParsedMultiwfnResult):
     """Complete IBSI analysis result set."""
- 
+
     entries: list[IBSIEntry] = field(default_factory=list)
- 
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "entries": [asdict(e) for e in self.entries],
         }
- 
 
 
 # ── Menu 10: Density of states ──────────────────────────────────────────
@@ -473,7 +472,7 @@ class IBSIAnalysis(ParsedMultiwfnResult):
 @dataclass
 class DOSMetadata(ParsedMultiwfnResult):
     """Metadata from density of states calculation.
- 
+
     Parameters
     ----------
     tdos_center_au
@@ -481,7 +480,7 @@ class DOSMetadata(ParsedMultiwfnResult):
     homo_level_au
         HOMO energy level used for the vertical dash line, in Hartree.
     """
- 
+
     tdos_center_au: float | None = None
     homo_level_au: float | None = None
 
@@ -510,6 +509,7 @@ class OrbitalEnergy(ParsedMultiwfnResult):
 @dataclass
 class Spectrum(ParsedMultiwfnResult):
     """Result for spectrum analysis."""
+
     maximum: list[int] | None = None
     X: list[float] | None = None
     value: list[float] | None = None
@@ -535,7 +535,6 @@ class SpectrumCurveExtrema(ParsedMultiwfnResult):
     """Collection of extrema reported for a spectrum curve."""
 
     extrema: list[SpectrumExtremum] = field(default_factory=list)
-
 
 
 @dataclass
@@ -586,11 +585,11 @@ class Color(ParsedMultiwfnResult):
 @dataclass
 class SurfaceGeometry(ParsedMultiwfnResult):
     """Isosurface geometry statistics.
- 
+
     Extracted once per surface calculation regardless of mapped
     property.
     """
- 
+
     volume_bohr3: float | None = None
     volume_angstrom3: float | None = None
     area_bohr2: float | None = None
@@ -600,12 +599,12 @@ class SurfaceGeometry(ParsedMultiwfnResult):
     n_vertices: int | None = None
     n_edges: int | None = None
     n_facets: int | None = None
- 
- 
+
+
 @dataclass
 class SurfaceExtremum(ParsedMultiwfnResult):
     """A single surface extremum (minimum or maximum)."""
- 
+
     type: Literal["min", "max"]
     index: int
     value_au: float
@@ -615,12 +614,12 @@ class SurfaceExtremum(ParsedMultiwfnResult):
     y_angstrom: float
     z_angstrom: float
     is_global: bool = False
- 
- 
+
+
 @dataclass
 class SurfaceStatistics(ParsedMultiwfnResult):
     """Summary statistics for a mapped surface property.
- 
+
     Parameters
     ----------
     mapped_property
@@ -629,15 +628,15 @@ class SurfaceStatistics(ParsedMultiwfnResult):
         ``"leae"``, ``"edr"``, ``"maxedr"``, ``"edensity"``,
         ``"lambda2_rho"``.
     """
- 
+
     mapped_property: str
- 
+
     # Global extrema
     global_min_au: float | None = None
     global_max_au: float | None = None
     global_min_kcal_mol: float | None = None
     global_max_kcal_mol: float | None = None
- 
+
     # Area breakdown
     overall_area_bohr2: float | None = None
     overall_area_angstrom2: float | None = None
@@ -645,7 +644,7 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     positive_area_angstrom2: float | None = None
     negative_area_bohr2: float | None = None
     negative_area_angstrom2: float | None = None
- 
+
     # Averages
     overall_average_au: float | None = None
     overall_average_kcal_mol: float | None = None
@@ -653,7 +652,7 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     positive_average_kcal_mol: float | None = None
     negative_average_au: float | None = None
     negative_average_kcal_mol: float | None = None
- 
+
     # Variances
     sigma2_total_au2: float | None = None
     sigma2_total_kcal_mol2: float | None = None
@@ -661,7 +660,7 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     positive_variance_kcal_mol2: float | None = None
     negative_variance_au2: float | None = None
     negative_variance_kcal_mol2: float | None = None
- 
+
     # Descriptors
     nu: float | None = None
     sigma2_tot_times_nu_au2: float | None = None
@@ -670,27 +669,27 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     pi_kcal_mol: float | None = None
     mpi_eV: float | None = None
     mpi_kcal_mol: float | None = None
- 
+
     # Polar surface area
     nonpolar_area_angstrom2: float | None = None
     nonpolar_area_pct: float | None = None
     polar_area_angstrom2: float | None = None
     polar_area_pct: float | None = None
- 
+
     # Skewness
     overall_skewness: float | None = None
     positive_skewness: float | None = None
     negative_skewness: float | None = None
- 
- 
+
+
 @dataclass
 class SurfaceAnalysisResult(ParsedMultiwfnResult):
     """Complete surface analysis for one mapped property.
- 
+
     Bundles geometry, extrema, and statistics so that each
     sequence (ESP, ALIE, etc.) is stored as a single coherent
     result that won't overwrite other sequences.
- 
+
     Parameters
     ----------
     mapped_property
@@ -698,7 +697,7 @@ class SurfaceAnalysisResult(ParsedMultiwfnResult):
         ``"leae"``, ``"edr"``, ``"maxedr"``, ``"edensity"``,
         ``"lambda2_rho"``.
     """
- 
+
     mapped_property: str
     geometry: SurfaceGeometry | None = None
     minima: list[SurfaceExtremum] = field(default_factory=list)
@@ -732,25 +731,25 @@ class SurfaceAnalysisResult(ParsedMultiwfnResult):
 
 # Backward-compatible alias for older integration tests.
 SurfaceAnalysis = SurfaceAnalysisResult
- 
+
 # ── Menu 15: Fuzzy atomic space ─────────────────────────────────────────
 
 
 @dataclass
 class FuzzyIntegrationEntry:
     """Single atom entry in a fuzzy integration table."""
- 
+
     atom_id: int
     atom_element: str
     value: float
     pct_of_sum: float
     pct_of_sum_abs: float
- 
- 
+
+
 @dataclass
 class FuzzyIntegrationResult(ParsedMultiwfnResult):
     """Result of fuzzy space integration for one property.
- 
+
     Parameters
     ----------
     integrated_property
@@ -763,38 +762,39 @@ class FuzzyIntegrationResult(ParsedMultiwfnResult):
         ``"orb_overlap_dr"``, ``"deltag_promolecular"``,
         ``"deltag_hirshfeld"``, ``"iri"``.
     """
- 
+
     integrated_property: str
     entries: list[FuzzyIntegrationEntry] = field(default_factory=list)
     total_sum: float | None = None
-    total_sum_abs: float | None = None 
- 
+    total_sum_abs: float | None = None
+
+
 # ── Atomic multipoles ───────────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class AtomicMultipole(ParsedMultiwfnResult):
     """Full atomic multipole moments for one atom."""
- 
+
     atom_id: int
     atom_element: str
- 
+
     # Charge / monopole
     atomic_charge: float | None = None
     monopole_moment: float | None = None
- 
+
     # Dipole
     dipole_x: float | None = None
     dipole_y: float | None = None
     dipole_z: float | None = None
     dipole_norm: float | None = None
- 
+
     # Contribution to molecular dipole
     mol_dipole_contrib_x: float | None = None
     mol_dipole_contrib_y: float | None = None
     mol_dipole_contrib_z: float | None = None
     mol_dipole_contrib_norm: float | None = None
- 
+
     # Quadrupole (traceless Cartesian)
     quadrupole_xx: float | None = None
     quadrupole_xy: float | None = None
@@ -803,24 +803,24 @@ class AtomicMultipole(ParsedMultiwfnResult):
     quadrupole_yz: float | None = None
     quadrupole_zz: float | None = None
     quadrupole_magnitude: float | None = None
- 
+
     # Spatial extent
     spatial_extent_r2: float | None = None
     spatial_extent_x: float | None = None
     spatial_extent_y: float | None = None
     spatial_extent_z: float | None = None
- 
+
     # Octopole (spherical harmonic magnitudes)
     octopole_magnitude: float | None = None
- 
- 
+
+
 @dataclass
 class MolecularMultipole(ParsedMultiwfnResult):
     """Molecular dipole and multipole moments."""
- 
+
     total_electrons: float | None = None
     net_charge: float | None = None
- 
+
     # Dipole
     dipole_x_au: float | None = None
     dipole_y_au: float | None = None
@@ -830,7 +830,7 @@ class MolecularMultipole(ParsedMultiwfnResult):
     dipole_y_debye: float | None = None
     dipole_z_debye: float | None = None
     dipole_magnitude_debye: float | None = None
- 
+
     # Quadrupole (traceless Cartesian)
     quadrupole_xx: float | None = None
     quadrupole_xy: float | None = None
@@ -839,73 +839,72 @@ class MolecularMultipole(ParsedMultiwfnResult):
     quadrupole_yz: float | None = None
     quadrupole_zz: float | None = None
     quadrupole_magnitude: float | None = None
- 
+
     # Spatial extent
     spatial_extent_r2: float | None = None
     spatial_extent_x: float | None = None
     spatial_extent_y: float | None = None
     spatial_extent_z: float | None = None
- 
+
     # Octopole magnitude
     octopole_magnitude: float | None = None
- 
- 
+
+
 # ── AOM diagnostics ──────────────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class AOMDiagnostics(ParsedMultiwfnResult):
     """Atomic overlap matrix quality diagnostics."""
- 
+
     error: float | None = None
     max_diagonal_deviation: float | None = None
     max_diagonal_orbital: int | None = None
     max_nondiagonal_deviation: float | None = None
     max_nondiagonal_orbitals: tuple[int, int] | None = None
     exported_file: str | None = None
- 
- 
+
+
 # ── Delocalization / Localization index ──────────────────────────────
- 
- 
+
+
 @dataclass
 class LocalizationIndex(ParsedMultiwfnResult):
     """Localization index for one atom."""
- 
+
     atom_id: int
     index: float
     atom_element: str | None = None
- 
- 
+
+
 @dataclass
 class DelocalizationIndexMatrix(ParsedMultiwfnResult):
     """Full delocalization index matrix (atom × atom).
- 
+
     Diagonal elements are localization indices (or atomic valence
     for closed-shell).  The ``label`` distinguishes "Total" from
     regular DI matrices.
     """
- 
+
     label: str = ""
     n_atoms: int = 0
     data: dict[tuple[int, int], float] = field(default_factory=dict)
-    localization_indices: list[LocalizationIndex] = field(
-        default_factory=list
-    ) 
- 
+    localization_indices: list[LocalizationIndex] = field(default_factory=list)
+
+
 # ── Overlap integration matrices ─────────────────────────────────────
- 
- 
+
+
 @dataclass
 class OverlapIntegrationMatrix(ParsedMultiwfnResult):
     """Overlap region integration matrix for one sign category.
- 
+
     Parameters
     ----------
     category
         One of ``"positive"``, ``"negative"``, ``"all"``.
     """
- 
+
     category: str
     integrated_property: str = ""
     n_atoms: int = 0
@@ -913,51 +912,49 @@ class OverlapIntegrationMatrix(ParsedMultiwfnResult):
     sum_diagonal: float | None = None
     sum_nondiagonal: float | None = None
     sum_all: float | None = None
- 
- 
+
+
 # ── CLRK matrix ──────────────────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class CLRKMatrix(ParsedMultiwfnResult):
     """Condensed linear response kernel matrix (atom × atom)."""
- 
+
     n_atoms: int = 0
     data: dict[tuple[int, int], float] = field(default_factory=dict)
- 
- 
+
+
 # ── FLU reference parameters ─────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class FLUReferenceParameter(ParsedMultiwfnResult):
     """FLU reference bond order for one element pair."""
- 
+
     element1: str
     element2: str
     reference_value: float
- 
- 
+
+
 # ── Keep existing AromaticityIndex / DelocalizationIndex ─────────────
- 
- 
+
+
 @dataclass
 class AromaticityIndex(ParsedMultiwfnResult):
     """Result for aromaticity indices (Menu 15)."""
- 
+
     index_name: str
     value: float
- 
- 
+
+
 @dataclass
 class DelocalizationIndex(ParsedMultiwfnResult):
     """Pairwise delocalization index between two atoms."""
- 
+
     atom1_id: int
     atom2_id: int
     index: float
- 
-
 
 
 # ── Menu 17: Basin analysis ─────────────────────────────────────────────
@@ -1026,21 +1023,23 @@ class LambdaIndex(ParsedMultiwfnResult):
     state_id: int
     lambda_index: float
 
-#-- Menu 19: Orbital localisation ────────────────────────────────────────
+
+# -- Menu 19: Orbital localisation ────────────────────────────────────────
+
 
 @dataclass
 class LMOAtomContribution:
     """Single atom contribution to a localized molecular orbital."""
- 
+
     atom_id: int
     atom_element: str
     contribution_pct: float
- 
- 
+
+
 @dataclass
 class LocalizedOrbital:
     """Character of a single localized molecular orbital.
- 
+
     Parameters
     ----------
     orbital_id
@@ -1052,18 +1051,16 @@ class LocalizedOrbital:
         Atom contributions listed for this LMO, ordered by
         decreasing percentage.
     """
- 
+
     orbital_id: int
     category: Literal["single_center", "two_center", "delocalized"]
-    contributions: list[LMOAtomContribution] = field(
-        default_factory=list
-    )
- 
- 
+    contributions: list[LMOAtomContribution] = field(default_factory=list)
+
+
 @dataclass
 class LocalizationConvergence:
     """Convergence history for one localization run.
- 
+
     Parameters
     ----------
     orbital_set
@@ -1076,21 +1073,21 @@ class LocalizationConvergence:
     converged
         Whether the localization converged successfully.
     """
- 
+
     orbital_set: str
     n_cycles: int = 0
     final_P: float | None = None
     converged: bool = False
- 
- 
+
+
 @dataclass
 class OrbitalLocalizationResult(ParsedMultiwfnResult):
     """Complete result for one orbital localization run.
- 
+
     Each ``Menu`` sequence (e.g. Pipek-Mezey/Hirshfeld/occupied)
     produces one of these.  The ``method``, ``population_scheme``,
     and ``orbital_set`` together uniquely identify the calculation.
- 
+
     Parameters
     ----------
     method
@@ -1111,22 +1108,16 @@ class OrbitalLocalizationResult(ParsedMultiwfnResult):
     exported_file
         Name of the exported file, if any.
     """
- 
+
     method: str
     population_scheme: str | None = None
     orbital_set: str = ""
- 
-    convergence: list[LocalizationConvergence] = field(
-        default_factory=list
-    )
-    occupied_lmos: list[LocalizedOrbital] = field(
-        default_factory=list
-    )
-    unoccupied_lmos: list[LocalizedOrbital] = field(
-        default_factory=list
-    )
+
+    convergence: list[LocalizationConvergence] = field(default_factory=list)
+    occupied_lmos: list[LocalizedOrbital] = field(default_factory=list)
+    unoccupied_lmos: list[LocalizedOrbital] = field(default_factory=list)
     exported_file: str | None = None
- 
+
 
 # ── Menu 20: Weak interactions ──────────────────────────────────────────
 
@@ -1167,10 +1158,11 @@ class DispersionContribution(ParsedMultiwfnResult):
 
 # ── Menu 22: CDFT ───────────────────────────────────────────────────────
 
+
 @dataclass
 class Reactivity(ParsedMultiwfnResult):
     """Result for global reactivity indices."""
- 
+
     chemical_potential: float | None = None
     chemical_potential_eV: float | None = None
     hardness: float | None = None
@@ -1185,60 +1177,58 @@ class Reactivity(ParsedMultiwfnResult):
     lumo_energy_eV: float | None = None
     delta_parameter_au: float | None = None
     delta_parameter_eV: float | None = None
- 
- 
+
+
 # ── Condensed Fukui ──────────────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class CondensedFukui(ParsedMultiwfnResult):
     """Result for condensed Fukui functions."""
- 
+
     atom_id: int
     fukui_plus: float | None = None
     fukui_minus: float | None = None
     fukui_zero: float | None = None
- 
- 
+
+
 @dataclass
 class DualDescriptor(ParsedMultiwfnResult):
     """Result for dual descriptor."""
- 
+
     atom_id: int
     value: float
- 
- 
+
+
 # ── Superdelocalizability ────────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class SuperdelocalizabilityEntry:
     """Per-atom superdelocalizability values."""
- 
+
     atom_id: int
     atom_element: str
     d_n: float
     d_e: float
     d_n_0: float
     d_e_0: float
- 
- 
+
+
 @dataclass
 class SuperdelocalizabilityResult(ParsedMultiwfnResult):
     """Complete superdelocalizability analysis.
- 
+
     Contains the alpha parameter, per-atom values, and sums.
     """
- 
+
     alpha_parameter: float | None = None
-    entries: list[SuperdelocalizabilityEntry] = field(
-        default_factory=list
-    )
+    entries: list[SuperdelocalizabilityEntry] = field(default_factory=list)
     sum_d_n: float | None = None
     sum_d_e: float | None = None
     sum_d_n_0: float | None = None
     sum_d_e_0: float | None = None
- 
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "alpha_parameter": self.alpha_parameter,
@@ -1248,65 +1238,62 @@ class SuperdelocalizabilityResult(ParsedMultiwfnResult):
             "sum_d_n_0": self.sum_d_n_0,
             "sum_d_e_0": self.sum_d_e_0,
         }
- 
- 
+
+
 # ── Orbital-weighted Fukui ───────────────────────────────────────────
- 
- 
+
+
 @dataclass
 class OrbitalWeightedFukuiEntry:
     """Per-atom orbital-weighted Fukui values."""
- 
+
     atom_id: int
     atom_element: str
     ow_f_plus: float
     ow_f_minus: float
     ow_f_zero: float
     ow_dd: float
- 
- 
+
+
 @dataclass
 class OrbitalWeightedFukuiResult(ParsedMultiwfnResult):
     """Complete orbital-weighted Fukui analysis.
- 
+
     Contains per-atom values and sums of f+ and f-.
     """
- 
-    entries: list[OrbitalWeightedFukuiEntry] = field(
-        default_factory=list
-    )
+
+    entries: list[OrbitalWeightedFukuiEntry] = field(default_factory=list)
     sum_ow_f_plus: float | None = None
     sum_ow_f_minus: float | None = None
- 
- 
- 
+
+
 # ── Orbital weight decomposition ────────────────────────────────────
- 
- 
+
+
 @dataclass
 class OrbitalWeightEntry:
     """Single orbital's weight in f+ or f- decomposition."""
- 
+
     orbital_id: int
     orbital_label: str
     weight_pct: float
     e_diff_eV: float
- 
- 
+
+
 @dataclass
 class OrbitalWeightDecomposition(ParsedMultiwfnResult):
     """Decomposition of orbital-weighted Fukui into orbital contributions.
- 
+
     Parameters
     ----------
     fukui_type
         Which Fukui function: ``"f+"``, ``"f-"``.
     """
- 
+
     fukui_type: str
     entries: list[OrbitalWeightEntry] = field(default_factory=list)
     total_weight_pct: float | None = None
- 
+
 
 # ── Menu 24: Polarizability ─────────────────────────────────────────────
 
@@ -1333,6 +1320,7 @@ class Polarizability(ParsedMultiwfnResult):
     gamma_total: float | None = None
     tensor: PolarizabilityTensor | None = None
 
+
 # ── Menu 25: Aromaticity ────────────────────────────────────────────────
 
 
@@ -1357,6 +1345,7 @@ class NICSScan(ParsedMultiwfnResult):
 
     distances: list[float] = field(default_factory=list)
     values: list[float] = field(default_factory=list)
+
 
 # ── Menu 100/200/300: Utilities ──────────────────────────────────────────
 
@@ -1443,7 +1432,9 @@ class ElectricMultipoleMomentReport(ParsedMultiwfnResult):
     octopole_spherical_magnitude: float | None = None
     hexadecapole: dict[str, float] = field(default_factory=dict)
     electronic_spatial_extent_r2: float | None = None
-    electronic_spatial_extent_components: tuple[float, float, float] | None = None
+    electronic_spatial_extent_components: tuple[float, float, float] | None = (
+        None
+    )
 
 
 @dataclass
@@ -1452,6 +1443,7 @@ class CoordinationNumber(ParsedMultiwfnResult):
 
     atom_id: int
     coordination_number: float
+
 
 @dataclass
 class CorrelationIndex(ParsedMultiwfnResult):

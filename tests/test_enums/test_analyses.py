@@ -100,8 +100,23 @@ class TestFindCategory:
         assert result == "BOND_ORDERS"
 
     def test_find_new_categories(self) -> None:
-        assert AnalysisClasses.find_category(Menu.GRID_EXTRACT_PLANE_XY) == "GRID_PROCESSING"
-        assert AnalysisClasses.find_category(Menu.GEOMETRY_PROPERTIES) == "UTILITIES"
-        assert AnalysisClasses.find_category(Menu.ORBITAL_OVERLAP_INTEGRAL) == "ORBITAL_ANALYSIS"
-        assert AnalysisClasses.find_category(Menu.SPACIAL_DELOCALISATION_EDENSITY) == "SPATIAL_DELOCALIZATION"
-        assert AnalysisClasses.find_category(Menu.EXPORT_VARIOUS_FILES) == "FILE_EXPORT"
+        assert (
+            AnalysisClasses.find_category(Menu.GRID_EXTRACT_PLANE_XY)
+            == "GRID_PROCESSING"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.GEOMETRY_PROPERTIES)
+            == "UTILITIES"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.ORBITAL_OVERLAP_INTEGRAL)
+            == "ORBITAL_ANALYSIS"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.SPACIAL_DELOCALISATION_EDENSITY)
+            == "SPATIAL_DELOCALIZATION"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.EXPORT_VARIOUS_FILES)
+            == "FILE_EXPORT"
+        )

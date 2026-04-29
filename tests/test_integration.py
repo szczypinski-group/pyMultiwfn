@@ -51,7 +51,8 @@ pytestmark = [
         _exe_path is None, reason="Multiwfn executable not found"
     ),
     pytest.mark.skipif(
-        len(_wfn_files) == 0, reason="No wavefunction files in tests/test_data/"
+        len(_wfn_files) == 0,
+        reason="No wavefunction files in tests/test_data/",
     ),
     pytest.mark.integration,
 ]

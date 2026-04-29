@@ -31,6 +31,7 @@ class MultiwfnJob:
     >>> result = job.run()
     >>> charges = result.parse_charges()
     """
+
     _SUPPORTED_INPUT_EXTENSIONS: tuple[str, ...] = (
         ".mwfn",
         ".wfn",
@@ -327,7 +328,7 @@ class MultiwfnJob:
         """
         self._commands.extend(commands)
 
-    #add argument for input file name
+    # add argument for input file name
     def run(
         self,
     ) -> "MultiwfnJob":

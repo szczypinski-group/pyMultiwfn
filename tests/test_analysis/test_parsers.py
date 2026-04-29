@@ -29,25 +29,20 @@ from pymultiwfn.analysis.parsers import (
     WeakInteractionParser,
 )
 from pymultiwfn.analysis.result import (
-    ChargeSet,
-    BondOrderSet,
-    Charge,
-    Dipole,
-    TopologyPath,
-    PoincareHopfCounts,
-    Cube,
-    SurfaceAnalysisResult,
-    Reactivity,
-    CondensedFukui,
-    DualDescriptor,
-    OrbitalBasisComposition,
-    OrbitalAtomComposition,
-    OxidationState,
-    FuzzyIntegrationResult,
-    AromaticityIndex,
-    DelocalizationIndex,
     AtomInfo,
+    BondOrderSet,
+    ChargeSet,
+    CondensedFukui,
+    Cube,
+    DelocalizationIndex,
+    Dipole,
+    DualDescriptor,
+    FuzzyIntegrationResult,
     HOMOLUMOGap,
+    OrbitalAtomComposition,
+    OrbitalBasisComposition,
+    PoincareHopfCounts,
+    Reactivity,
 )
 from pymultiwfn.enums.menu import Menu
 
@@ -305,9 +300,7 @@ class TestCriticalPointParser:
         assert paths == []
 
     def test_parse_topology_paths(self) -> None:
-        output = (
-            "Path  1, CP:  5 (3,-1) -->  CP:  1 (3,-3) Length:  1.234\n"
-        )
+        output = "Path  1, CP:  5 (3,-1) -->  CP:  1 (3,-3) Length:  1.234\n"
         paths = CriticalPointParser.parse_topology_paths(output)
         assert len(paths) == 1
         assert paths[0].path_id == 1
@@ -620,7 +613,9 @@ class TestFuzzySpaceParser:
         assert index_map["FLU"] == pytest.approx(0.00123)
 
     def test_parse_delocalization_indices(self) -> None:
-        output = "Delocalization index of atom  1(C ) and atom  2(N ):  0.45670\n"
+        output = (
+            "Delocalization index of atom  1(C ) and atom  2(N ):  0.45670\n"
+        )
         r = FuzzySpaceParser.parse_delocalization_indices(output)
         assert len(r) == 1
         assert isinstance(r[0], DelocalizationIndex)
@@ -654,9 +649,7 @@ class TestFuzzySpaceParser:
 
     def test_parse_flu_references(self) -> None:
         output = (
-            "FLU reference parameters\n"
-            "C - C :  1.38900\n"
-            "C - N :  1.34100\n"
+            "FLU reference parameters\nC - C :  1.38900\nC - N :  1.34100\n"
         )
         refs = FuzzySpaceParser.parse_flu_references(output)
         assert len(refs) == 2
@@ -824,10 +817,7 @@ class TestCDFTParser:
         assert CDFTParser.parse_condensed_fukui("") == []
 
     def test_parse_dual_descriptor(self) -> None:
-        output = (
-            "Atom     Dual Descriptor\n"
-            "     1(C )        0.06670\n"
-        )
+        output = "Atom     Dual Descriptor\n     1(C )        0.06670\n"
         result = CDFTParser.parse_dual_descriptor(output)
         assert len(result) == 1
         assert isinstance(result[0], DualDescriptor)
@@ -950,7 +940,9 @@ class TestWavefunctionParser:
         assert WavefunctionParser.parse_orbital_info("") == []
 
     def test_parse_gtf_info(self) -> None:
-        output = "    1   Center:    1(C )   Type: S    Exponent:  3047.52490\n"
+        output = (
+            "    1   Center:    1(C )   Type: S    Exponent:  3047.52490\n"
+        )
         gtfs = WavefunctionParser.parse_gtf_info(output)
         assert len(gtfs) == 1
         assert gtfs[0].gtf_index == 1
@@ -965,7 +957,9 @@ class TestWavefunctionParser:
         assert basis[0].gtf_end == 6
 
     def test_parse_exported_matrices(self) -> None:
-        output = "The matrix has been exported to coeff.txt in current folder\n"
+        output = (
+            "The matrix has been exported to coeff.txt in current folder\n"
+        )
         exports = WavefunctionParser.parse_exported_matrices(output)
         assert len(exports) == 1
         assert exports[0].file_name == "coeff.txt"
@@ -991,10 +985,7 @@ class TestCubeParser:
         assert results[0].x_dim == 80
 
     def test_parse_multiple_cubes(self) -> None:
-        output = (
-            "density.cube in current folder\n"
-            "esp.cube in current folder\n"
-        )
+        output = "density.cube in current folder\nesp.cube in current folder\n"
         results = CubeParser.parse(output)
         assert len(results) == 2
         assert results[0].file_name == "density.cube"
@@ -1202,6 +1193,7 @@ class TestParserRoute:
 
     def test_all_charge_menus_route_to_charge_parser(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
+
         charge_menus = [
             Menu.HIRSHFELD_CHARGE,
             Menu.MULLIKEN_POPULATION,
@@ -1213,6 +1205,7 @@ class TestParserRoute:
 
     def test_bond_order_menus_route_to_bond_order_parser(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
+
         bo_menus = [
             Menu.MAYER_BOND_ORDER,
             Menu.WIBERG_BOND_ORDER,
@@ -1223,9 +1216,14 @@ class TestParserRoute:
 
     def test_topology_menus_route_to_critical_point_parser(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
-        assert ParserRoute.ROUTE_TABLE.get(Menu.TOPOLOGY_VISUALISE_CPS) is CriticalPointParser
+
+        assert (
+            ParserRoute.ROUTE_TABLE.get(Menu.TOPOLOGY_VISUALISE_CPS)
+            is CriticalPointParser
+        )
 
     def test_unregistered_menu_returns_none(self) -> None:
         from pymultiwfn.analysis.parsers import ParserRoute
+
         # PROPERTIES_AT_POINT is interactive and not routed
         assert ParserRoute.ROUTE_TABLE.get(Menu.PROPERTIES_AT_POINT) is None
