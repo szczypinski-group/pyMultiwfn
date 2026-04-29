@@ -3,7 +3,7 @@ name: Lint Format and Test
 on: [push, pull_request]
 
 jobs:
-  uv-example:
+  uv-lint-tests:
     name: python
     runs-on: ubuntu-latest
 
