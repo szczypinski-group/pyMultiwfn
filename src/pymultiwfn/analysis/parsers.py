@@ -1797,8 +1797,8 @@ class BondOrderParser(OutputParser):
         """Extract IBSI analysis entries.
 
         Format:
-        "    1(C )    2(C )  Dist:  1.3950   Int(dg_pair): 0.87601   IBSI: 0.79442" # noqa: E501
-        """
+        "    1(C )    2(C )  Dist:  1.3950   Int(dg_pair): 0.87601   IBSI: 0.79442"
+        """ # noqa: E501
         pattern = re.compile(
             rf"(\d+)\s*\([^)]+\)\s+(\d+)\s*\([^)]+\)\s+"
             rf"Dist:\s+({FLOAT_PATTERN})\s+"
