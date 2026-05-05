@@ -281,7 +281,6 @@ class TestCriticalPointParser:
         assert cps[1].bonded_atom1_id == 10
         assert cps[1].bonded_atom2_id == 4
 
-
     def test_parse_bond_paths_empty(self) -> None:
         """Empty input produces no matches, so no TypeError is raised."""
         paths = CriticalPointParser.parse_bond_paths("")
