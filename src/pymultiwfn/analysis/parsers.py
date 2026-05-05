@@ -3793,7 +3793,7 @@ class CDFTParser(OutputParser):
         # Pattern for Fukui table rows
         # "     1(C )        0.14827        0.15436        0.15132"
         fukui_pat = re.compile(
-            rf"^\s+(\d+)\s*\([A-Za-z]+)\s+"
+            rf"^\s+(\d+)\s*\([A-Za-z]+\s*\)\s+"
             rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+"
             rf"({FLOAT_PATTERN})\s*$"
         )
@@ -3830,7 +3830,7 @@ class CDFTParser(OutputParser):
         results: list[DualDescriptor] = []
 
         dd_pat = re.compile(
-            rf"^\s+(\d+)\s*\([A-Za-z]+)\s+.*?"
+            rf"^\s+(\d+)\s*\([A-Za-z]+\s*\)\s+.*?"
             rf"({FLOAT_PATTERN})\s*$"
         )
 
