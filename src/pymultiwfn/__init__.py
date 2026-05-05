@@ -9,7 +9,6 @@ Usage
 """
 
 from importlib.metadata import version
-from typing import Any
 
 from pymultiwfn.analysis.parsers import (
     BondOrderParser,
@@ -50,7 +49,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> Any:
+def __getattr__(name: str) -> object:
     """Lazily resolve heavy imports to keep package import robust."""
     if name == "MultiwfnAnalysis":
         from pymultiwfn.analysis.analysis import MultiwfnAnalysis
