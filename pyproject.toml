@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pymultiwfn"
-version = "0.6.0"
+version = "1.0.0"
 description = "Python interface and automation toolkit for Multiwfn"
 requires-python = ">=3.12"
 authors = [
@@ -88,3 +88,17 @@ lint.ignore = [
 
 [tool.mypy]
 exclude = "tests/"
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["pymultiwfn"]
+omit = [
+    "tests/*",
+    "**/__init__.py",
+    "setup.py",
+]
+
+[tool.coverage.report]
+skip_covered = true

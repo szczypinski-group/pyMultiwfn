@@ -26,6 +26,28 @@ class TestAnalysisClassesStructure:
     def test_bond_orders_contains_mayer(self) -> None:
         assert Menu.MAYER_BOND_ORDER in AnalysisClasses.BOND_ORDERS.value
 
+    def test_every_menu_member_is_in_at_least_one_category(self) -> None:
+        """Every Menu enum member should appear in at least one category."""
+        all_categorised: set[Menu] = set()
+        for category in AnalysisClasses:
+            for item in category.value:
+                all_categorised.add(item)
+        missing = [m for m in Menu if m not in all_categorised]
+        assert missing == [], (
+            f"Menu members not in any AnalysisClasses category: "
+            f"{[m.name for m in missing]}"
+        )
+
+    def test_no_duplicate_within_category(self) -> None:
+        """No Menu member should appear twice in the same category."""
+        for category in AnalysisClasses:
+            seen: set[Menu] = set()
+            for item in category.value:
+                assert item not in seen, (
+                    f"{item.name} appears twice in {category.name}"
+                )
+                seen.add(item)
+
 
 class TestListCategories:
     """Tests for AnalysisClasses.list_categories()."""
@@ -40,6 +62,14 @@ class TestListCategories:
         assert "CHARGES" in cats
         assert "BOND_ORDERS" in cats
         assert "TOPOLOGY" in cats
+
+    def test_contains_new_categories(self) -> None:
+        cats = AnalysisClasses.list_categories()
+        assert "GRID_PROCESSING" in cats
+        assert "UTILITIES" in cats
+        assert "ORBITAL_ANALYSIS" in cats
+        assert "SPATIAL_DELOCALIZATION" in cats
+        assert "FILE_EXPORT" in cats
 
 
 class TestListAnalyses:
@@ -62,15 +92,6 @@ class TestFindCategory:
     """Tests for AnalysisClasses.find_category()."""
 
     def test_find_existing(self) -> None:
-        # find_category compares the argument against the Menu enum values
-        # in each category, using `menu in analysis.value` where analysis.value
-        # is a list of Menu enums. So we need to pass the Menu enum name as string
-        # and the source code checks `if menu in analysis.value`.
-        # But the source does: `if menu in analysis.value` where menu is a string
-        # and analysis.value is a list of Menu enums — this won't match.
-        # The source find_category is broken for string input; it only works
-        # if we pass a Menu enum directly.
-        # Since we can only change tests, let's test what actually works:
         result = AnalysisClasses.find_category(Menu.HIRSHFELD_CHARGE)
         assert result == "CHARGES"
 
@@ -78,6 +99,24 @@ class TestFindCategory:
         result = AnalysisClasses.find_category(Menu.MAYER_BOND_ORDER)
         assert result == "BOND_ORDERS"
 
-    def test_not_found(self) -> None:
-        result = AnalysisClasses.find_category(Menu.VIEW_STRUCTURE)
-        assert result is None
+    def test_find_new_categories(self) -> None:
+        assert (
+            AnalysisClasses.find_category(Menu.GRID_EXTRACT_PLANE_XY)
+            == "GRID_PROCESSING"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.GEOMETRY_PROPERTIES)
+            == "UTILITIES"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.ORBITAL_OVERLAP_INTEGRAL)
+            == "ORBITAL_ANALYSIS"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.SPACIAL_DELOCALISATION_EDENSITY)
+            == "SPATIAL_DELOCALIZATION"
+        )
+        assert (
+            AnalysisClasses.find_category(Menu.EXPORT_VARIOUS_FILES)
+            == "FILE_EXPORT"
+        )

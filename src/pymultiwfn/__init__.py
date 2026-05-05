@@ -10,7 +10,6 @@ Usage
 
 from importlib.metadata import version
 
-from pymultiwfn.analysis.analysis import MultiwfnAnalysis
 from pymultiwfn.analysis.parsers import (
     BondOrderParser,
     ChargeParser,
@@ -19,7 +18,7 @@ from pymultiwfn.analysis.parsers import (
     SpectrumParser,
 )
 from pymultiwfn.analysis.result import MultiwfnResult, ResultStore
-from pymultiwfn.api.exceptions import MultiwfnError
+from pymultiwfn.api.exceptions import InvalidInputFileError, MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
 from pymultiwfn.api.multiwfn import Multiwfn
 from pymultiwfn.enums.menu import Menu
@@ -38,6 +37,7 @@ __all__ = [
     "MultiwfnResult",
     "Multiwfn",
     "MultiwfnError",
+    "InvalidInputFileError",
     # Parsers
     "OutputParser",
     "ChargeParser",
@@ -47,3 +47,12 @@ __all__ = [
     # Storage
     "ResultStore",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Lazily resolve heavy imports to keep package import robust."""
+    if name == "MultiwfnAnalysis":
+        from pymultiwfn.analysis.analysis import MultiwfnAnalysis
+
+        return MultiwfnAnalysis
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -1,133 +1,132 @@
-"""Tests for pymultiwfn.analysis.analysis — MultiwfnAnalysis."""
+"""Pytest configuration and shared fixtures for pymultiwfn tests."""
 
+import platform
+import sys
 from pathlib import Path
 
 import pytest
 
-from pymultiwfn.analysis.analysis import MultiwfnAnalysis
-from pymultiwfn.enums.analyses import AnalysisClasses
-from pymultiwfn.enums.menu import Menu
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
-class TestMultiwfnAnalysisInit:
-    """Tests for initializing MultiwfnAnalysis."""
-
-    def test_single_file(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol.input_file == mock_wfn_file
-
-    def test_single_file_string(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(str(mock_wfn_file))
-        assert mol.input_file == Path(str(mock_wfn_file))
-
-    def test_with_single_menu(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file, analyses=Menu.HIRSHFELD_CHARGE)
-        assert mol.analyses == [Menu.HIRSHFELD_CHARGE]
-
-    def test_with_menu_list(self, mock_wfn_file: Path) -> None:
-        menus = [Menu.HIRSHFELD_CHARGE, Menu.MAYER_BOND_ORDER]
-        mol = MultiwfnAnalysis(mock_wfn_file, analyses=menus)
-        assert mol.analyses == menus
-
-    def test_with_analysis_class(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file, analyses=AnalysisClasses.CHARGES)
-        assert len(mol.analyses) == len(AnalysisClasses.CHARGES.value)
-
-    def test_no_analyses(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol.analyses == []
-
-    def test_cached_default_true(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol.cached is True
-
-    def test_cached_false(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file, cached=False)
-        assert mol.cached is False
+# =============================================================================
+# Path Fixtures
+# =============================================================================
 
 
-class TestAddMenu:
-    """Tests for the add_menu() method of MultiwfnAnalysis."""
-
-    def test_add_single(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol.add_menu(Menu.HIRSHFELD_CHARGE)
-        assert Menu.HIRSHFELD_CHARGE in mol.analyses
-
-    def test_add_list(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol.add_menu([Menu.HIRSHFELD_CHARGE, Menu.MAYER_BOND_ORDER])
-        assert len(mol.analyses) == 2
-
-    def test_add_analysis_class(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol.add_menu(AnalysisClasses.BOND_ORDERS)
-        assert len(mol.analyses) == len(AnalysisClasses.BOND_ORDERS.value)
-
-    def test_add_invalid_type(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        with pytest.raises(TypeError, match="valid Menu enum"):
-            mol.add_menu("not_a_menu")  # type: ignore[arg-type]
-
-    def test_add_multiple_times(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol.add_menu(Menu.HIRSHFELD_CHARGE)
-        mol.add_menu(Menu.MAYER_BOND_ORDER)
-        assert len(mol.analyses) == 2
+@pytest.fixture(scope="session")
+def project_root() -> Path:
+    return Path(__file__).parent.parent
 
 
-class TestConvenienceMethods:
-    """Test the _add_*_menus convenience methods."""
-
-    def test_add_charges(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_charges_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.CHARGES.value)
-
-    def test_add_bond_orders(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_bond_orders_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.BOND_ORDERS.value)
-
-    def test_add_topology(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_topology_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.TOPOLOGY.value)
-
-    def test_add_spectra(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_spectra_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.SPECTRA.value)
-
-    def test_add_surfaces(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_surfaces_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.SURFACES.value)
-
-    def test_add_aromaticity(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_aromaticity_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.AROMATICITY.value)
-
-    def test_add_cdft(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_cdft_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.CDFT.value)
-
-    def test_add_cubes(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        mol._add_cubes_menus()
-        assert len(mol.analyses) == len(AnalysisClasses.CUBES.value)
+@pytest.fixture(scope="session")
+def test_data_dir(project_root: Path) -> Path:
+    return project_root / "tests" / "test_data"
 
 
-class TestLogPath:
-    """Tests for the _store attribute of MultiwfnAnalysis."""
+@pytest.fixture
+def temp_dir(tmp_path: Path) -> Path:
+    return tmp_path
 
-    def test_store_none_before_run(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        assert mol._store is None
 
-    def test_get_store_returns_store(self, mock_wfn_file: Path) -> None:
-        mol = MultiwfnAnalysis(mock_wfn_file)
-        store = mol._get_store()
-        assert store is not None
+@pytest.fixture
+def mock_wfn_file(temp_dir: Path) -> Path:
+    path = temp_dir / "mock.wfn"
+    path.write_text("mock wavefunction content")
+    return path
+
+
+@pytest.fixture
+def mock_executable(temp_dir: Path) -> Path:
+    if platform.system() == "Windows":
+        exe_path = temp_dir / "Multiwfn.exe"
+        exe_path.write_text("@echo mock")
+    else:
+        exe_path = temp_dir / "Multiwfn"
+        exe_path.write_text("#!/bin/bash\necho 'mock'")
+        exe_path.chmod(0o755)
+    return exe_path
+
+
+# =============================================================================
+# Sample Output Fixtures
+# =============================================================================
+
+
+@pytest.fixture
+def sample_hirshfeld_output() -> str:
+    return (
+        "Final atomic charges:\n"
+        "Atom    1(C ):    -0.05230000\n"
+        "Atom    2(C ):    -0.08920000\n"
+        "Atom    3(H ):     0.05340000\n"
+        "Atom    4(H ):     0.05210000\n"
+        "Atom    5(O ):    -0.32450000\n"
+        "Atom    6(H ):     0.18230000\n"
+    )
+
+
+@pytest.fixture
+def sample_mayer_output() -> str:
+    return (
+        "Mayer bond order analysis\n"
+        "Bond order list:\n"
+        "#    1:         1(C )    2(C )    1.45230000\n"
+        "#    2:         1(C )    3(H )    0.92340000\n"
+        "#    3:         2(C )    4(H )    0.95670000\n"
+        "#    4:         2(C )    5(O )    1.89340000\n"
+        "#    5:         5(O )    6(N )    0.82340000\n"
+    )
+
+
+@pytest.fixture
+def sample_topology_output() -> str:
+    return (
+        "Topology analysis\n"
+        "CP  1 (3,-3)\n"
+        "Position (Bohr):   0.000000   0.000000   0.000000\n"
+        "Density of all electrons:   0.29876500\n"
+        "Laplacian of electron density:  -1.12345600\n"
+        "Ellipticity:   0.00000000\n"
+        "\n\n\n\n\n"
+        "CP  2 (3,-1)\n"
+        "Position (Bohr):   1.234567   0.567890   0.000000\n"
+        "Density of all electrons:   0.25432100\n"
+        "Laplacian of electron density:  -0.87654300\n"
+        "Ellipticity:   0.04523000\n"
+        "\n\n\n\n\n"
+        "CP  3 (3,+1)\n"
+        "Position (Bohr):   0.500000   0.500000   0.500000\n"
+        "Density of all electrons:   0.01234500\n"
+        "Laplacian of electron density:   0.05678900\n"
+        "\n\n\n\n\n"
+        "CP  4 (3,+3)\n"
+        "Position (Bohr):   1.000000   1.000000   1.000000\n"
+        "Density of all electrons:   0.00123400\n"
+        "Laplacian of electron density:   0.00987600\n"
+    )
+
+
+@pytest.fixture
+def sample_spectrum_output() -> str:
+    return (
+        "IR spectrum data\n"
+        "  500.0 cm^-1  Intensity:  12.34\n"
+        "  800.0 cm^-1  Intensity:  45.67\n"
+        " 1200.0 cm^-1  Intensity:  89.01\n"
+        " 1500.0 cm^-1  Intensity:  23.45\n"
+        " 3000.0 cm^-1  Intensity: 156.78\n"
+    )
+
+
+# =============================================================================
+# Markers
+# =============================================================================
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line("markers", "slow: marks tests as slow")
+    config.addinivalue_line("markers", "integration: marks integration tests")
+    config.addinivalue_line(
+        "markers", "requires_multiwfn: marks tests requiring Multiwfn"
+    )

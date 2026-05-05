@@ -77,9 +77,12 @@ class Menu(Enum):
     # Main Menu 1: Output all properties at a point
     # Interactive only – prompts for a coordinate or atom index then prints
     # all supported real-space functions at that point (rho, ESP, ELF, ...).
+    # INTERACTIVE ONLY - Ignore for now, output will not be parsed corectly or
+    # output expected results
     # ─────────────────────────────────────────────────────────────────────────
     # Print every real-space function value (rho, ESP, ELF, G, K, ...) at a
     # user-supplied coordinate or nucleus
+    # Requires xyz input and user interaction, ignore for now
     PROPERTIES_AT_POINT = ("1",)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -88,15 +91,22 @@ class Menu(Enum):
     # real-space function, then traces gradient paths between them.
     # CP types: (3,-3) nuclear/max, (3,-1) bond, (3,+1) ring, (3,+3) cage.
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES TO BE TESTED
+    TOPOLOGY_VISUALISE_CPS = ("2", "0")
+    TOPOLOGY_CP_NUCLEAR_POSITION = ("2", "2")
+    TOPOLOGY_CP_MIDPOINTS = ("2", "3")
+    TOPOLOGY_CP_TRIANGLE_CENTRES = ("2", "4")
+    TOPOLOGY_CP_PYRAMID_CENTRES = ("2", "5")
+    TOPOLOGY_CP_SPHERE_POINTS = ("2", "6", "0")
+    # Outputs CPout.txt
+    TOPOLOGY_CP_REAL_SPACE_POINTS = ("2", "7", "0")
+    TOPOLOGY_CP_PATHS_3MINUS3_3MINUS1 = ("2", "8")
+    TOPOLOGY_CP_PATHS_3PLUS1_3PLUS3 = ("2", "9")
+
+    # ALL FOLLOWING SEQUENCES ARE DEPRECATED
     # Search ALL critical points of rho starting from every nuclear position;
     # finds NCPs, BCPs, RCPs, and CCPs in one pass
     TOPOLOGY_SEARCH_CPS = ("2", "2", "-1")
-    # Trace gradient bond paths linking (3,-3) to (3,-1) CPs after a CP search
-    # has been completed
-    TOPOLOGY_GENERATE_PATHS = ("2", "3")
-    # Generate interbasin surfaces (IBS) that partition space into AIM atomic
-    # basins centred on each (3,-3) CP
-    TOPOLOGY_INTERBASIN_SURFACES = ("2", "4")
     # Full AIM workflow in one sequence: search all CPs, generate bond paths,
     # then generate interbasin surfaces
     TOPOLOGY_ANALYSIS_COMPLETE = ("2", "2", "-1", "3", "4")
@@ -126,6 +136,8 @@ class Menu(Enum):
     # Main Menu 3: Output / plot property along a line
     # Evaluates a real-space function at 3000 points between two atoms or
     # coordinates and produces a curve map (line.txt exported on request).
+    # FULLY INTERACTIVE - Ignore for now, output will not be parsed corectly
+    # or output expected results
     # ────────────────────────────────────────────────────────────────────────
     # Plot total electrostatic potential (ESP) along a line; reveals
     # electrophilic and nucleophilic interaction sites between atoms
@@ -175,6 +187,8 @@ class Menu(Enum):
     #   "4" = plane defined by three atom indices
     #   "5" = plane defined by three Cartesian points
     # Produces colour-filled, contour, relief, or gradient/vector maps.
+    # FULLY INTERACTIVE - Ignore for now, output will not be parsed corectly
+    # or output expected results
     # ─────────────────────────────────────────────────────────────────────────
     # Colour-filled map of electron density rho(r) in the XY plane; visualises
     # how charge is distributed across the molecule
@@ -245,50 +259,64 @@ class Menu(Enum):
     #   "3" ~ 120^3 points (high, for publication-quality figures)
     # "0" at the post-process prompt triggers cube export and returns.
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED
+    CUBE_LOCAL_INFORMATION_ENTROPY = ("5", "11", "2", "0")
+    CUBE_ELECTROSTATIC_POTENTIAL_FROM_CHARGE = ("5", "8", "2", "0")
+    CUBE_RDG_QUICK = ("5", "14", "2", "0")
+    CUBE_CORRELATION_HOLE_ALPHA = ("5", "17", "2", "1", "2", "0")
+    CUBE_EDR = ("5", "20", "2", "2", "2", "0")
+    CUBE_DELTAG_PROMOLECULAR_APPROX = ("5", "22", "2", "2", "0")
+    CUBE_DELTAG_HIRSHFELD_PAER_APPROX = ("5", "23", "2", "2", "0")
+    CUBE_IRI = ("5", "24", "2", "2", "0")
+    CUBE_VDW_POTENTIAL = ("5", "25", "2", "2", "0")
+
+    # EDITED SEQUENCES - TO BE TESTED
+    CUBE_ALIE = ("5", "18", "2", "2", "0")
+    CUBE_SOURCE_FUNCTION = ("5", "19", "2", "2", "0")
+
+    # CORRECT SEQUENCES - TO BE TESTED
     # Generate medium-quality .cube of electron density rho(r); standard input
     # for VMD/GaussView isosurface rendering
-    CUBE_DENSITY = ("5", "1", "2", "0")
+    CUBE_DENSITY = ("5", "1", "2", "2", "0")
     # Generate medium-quality .cube of spin density rho_alpha - rho_beta;
     # visualise unpaired electrons in radicals and open-shell molecules
-    CUBE_SPIN_DENSITY = ("5", "5", "2", "0")
+    CUBE_SPIN_DENSITY = ("5", "5", "2", "2", "0")
     # Generate medium-quality .cube of ELF; bonding pairs, lone pairs, and core
     # shells visible as isosurfaces
-    CUBE_ELF = ("5", "9", "2", "0")
+    CUBE_ELF = ("5", "9", "2", "2", "0")
     # Generate medium-quality .cube of LOL; electron-pair localisation function
     # with sharper basin boundaries than ELF
-    CUBE_LOL = ("5", "10", "2", "0")
+    CUBE_LOL = ("5", "10", "2", "2", "0")
     # Generate medium-quality .cube of total ESP; map onto rho=0.001 isosurface
     # to produce a surface electrostatic potential map
-    CUBE_ESP = ("5", "12", "2", "0")
+    CUBE_ESP = ("5", "12", "2", "2", "0")
     # Generate medium-quality .cube of nabla^2 rho; negative isosurfaces encode
     # charge concentration (covalent bonds, lone pairs, shells)
-    CUBE_LAPLACIAN = ("5", "3", "2", "0")
+    CUBE_LAPLACIAN = ("5", "3", "2", "2", "0")
     # Generate medium-quality .cube of |nabla rho|; high-value isosurfaces mark
     # interatomic and atomic-shell boundaries
-    CUBE_GRADIENT_NORM = ("5", "2", "2", "0")
+    CUBE_GRADIENT_NORM = ("5", "2", "2", "2", "0")
     # Generate medium-quality .cube of G(r), the positive-definite Lagrangian
     # kinetic energy density
-    CUBE_KINETIC_G = ("5", "7", "2", "0")
+    CUBE_KINETIC_G = ("5", "7", "2", "2", "0")
     # Generate medium-quality .cube of K(r), the Hamiltonian kinetic energy
     # density; K = G - (1/4) nabla^2 rho
-    CUBE_KINETIC_K = ("5", "6", "2", "0")
-    # Generate medium-quality .cube of ALIE; low-value isosurfaces reveal sites
-    # susceptible to electrophilic and radical attack
-    CUBE_ALIE = ("5", "18", "2", "0")
+    CUBE_KINETIC_K = ("5", "6", "2", "2", "0")
     # Generate medium-quality .cube of RDG; render at low isovalue (~0.5)
     # together with sign(lambda2)rho cube for NCI isosurface colouring
-    CUBE_RDG = ("5", "13", "2", "0")
+    CUBE_RDG = ("5", "13", "2", "2", "0")
     # Generate medium-quality .cube of sign(lambda2)*rho; colour-maps onto RDG
     # isosurface: blue=H-bond, green=vdW, red=steric repulsion
-    CUBE_SIGN_LAMBDA2_RHO = ("5", "15", "2", "0")
-    # Generate medium-quality .cube of Source Function relative t
-    # o the reference point defined in settings.ini
-    CUBE_SOURCE_FUNCTION = ("5", "19", "2", "0")
+    CUBE_SIGN_LAMBDA2_RHO = ("5", "15", "2", "2", "0")
+
+    # INTERACTIVE OR IMPLICITLY INTERACTIVE SEQUENCES - TO BE TESTED
     # Generate medium-quality .cube of a single MO wavefunction psi_i; user is
     # prompted for the orbital index; standard for orbital visualisation
-    CUBE_ORBITAL_WAVEFUNCTION = ("5", "4", "2", "0")
+    # INTERACTIVE
+    CUBE_ORBITAL_WAVEFUNCTION = ("5", "4", "2", "2", "0")
     # Generate medium-quality .cube of Fukui f-(r) via two-wavefunction
     # subtraction rho_N - rho_{N-1}; maps electrophilic attack susceptibility
+    # NOT POSSIBLE - REQUIRES MULTIPLE WAVEFUNCTIONS
     CUBE_FUKUI_MINUS = ("5", "0", "-1", "2", "0")
     # Generate medium-quality .cube of Fukui f+(r) via rho_{N+1} - rho_N; maps
     # nucleophilic attack susceptibility
@@ -317,31 +345,46 @@ class Menu(Enum):
     # Provides subfunctions to inspect, edit, and save the loaded wavefunction.
     # "0" from the submenu returns to main menu.
     # ─────────────────────────────────────────────────────────────────────────
-    # Save the (possibly modified) wavefunction to new.wfn; also converts
-    # fch/molden to .wfn format; zero-occupation orbitals are dropped
-    # automatically
-    CHECK_WAVEFUNCTION = ("6", "0")
-    # Print index, energy, occupation number, and spin type for every o
-    # rbital in the loaded wavefunction
-    PRINT_ORBITAL_INFO = ("6", "3", "0")
+    # NEW SEQUENCES - TO BE TESTED
+    PRINT_COEFFICIENT_MATRIX = ("6", "5", "1")
+
+    PRINT_DENSITY_MATRIX = ("6", "6", "1")
+
+    PRINT_INTEGRAL_MATRIX_FOCK = ("6", "7", "0", "1", "1")
+    PRINT_INTEGRAL_MATRIX_OVERLAP = ("6", "7", "1", "1")
+    PRINT_INTEGRAL_MATRIX_ELECTRIC_DIPOLE = ("6", "7", "2", "1")
+    PRINT_INTEGRAL_MATRIX_MAGNETIC_DIPOLE = ("6", "7", "3", "1")
+    PRINT_INTEGRAL_MATRIX_VELOCITY = ("6", "7", "4", "1")
+    PRINT_INTEGRAL_MATRIX_EKINETIC = ("6", "7", "5", "1")
+    PRINT_INTEGRAL_MATRIX_QUADRUPOLE = ("6", "7", "6", "1")
+    PRINT_INTEGRAL_MATRIX_OCTOPOLE = ("6", "7", "7", "1")
+    PRINT_INTEGRAL_MATRIX_HEXADECAPOLE = ("6", "7", "8", "1")
+
+    # #INTERACTIVE SEQUENCES - to be tested
+    # #CORRECT SEQUENCES
+    # # Save the (possibly modified) wavefunction to new.wfn; also converts
+    # # fch/molden to .wfn format; zero-occupation orbitals are dropped
+    # # automatically
+    # SAVE_WFN = ("6", "0")
     # Print centre atom, angular-momentum type (s/p/d/f/...), and exponent for
-    # every Gaussian-type function (GTF) in the basis
-    PRINT_GTF_INFO = ("6", "1", "0")
+    # # every Gaussian-type function (GTF) in the basis
+    # PRINT_ALL_GTF = ("6", "1")
     # Print shell assignments, contracted function types, and GTF index ranges
-    # for every basis function
-    PRINT_BASIS_INFO = ("6", "2", "0")
-    # Print the one-particle density matrix P expressed in the basis-function
-    # representation
-    PRINT_DENSITY_MATRIX = ("6", "6", "0")
-    # Print the overlap matrix S in the basis-function representation;
-    # eigenvalues are also shown to flag near-linear-dependence issues
-    PRINT_OVERLAP_MATRIX = ("6", "7", "0")
-    # Manually set the occupation number of selected orbitals; set to 0 to
+    # # for every basis function
+    # PRINT_ALL_BASIS_FUNCTIONS = ("6", "2")
+    # # Print index, energy, occupation number, and spin type for every o
+    # # rbital in the loaded wavefunction
+    # PRINT_ORBITAL_INFO = ("6", "3")
+
+    # # Print the one-particle density matrix P expressed in the basis-function
+    # # representation
+    # PRINT_DENSITY_MATRIX = ("6", "6", "0")
+    # # Manually set the occupation number of selected orbitals; set to 0 to
     # remove their contribution from subsequent real-space function evaluations
-    MODIFY_OCCUPATION = ("6", "26", "0")
-    # Remove all core (inner-shell) orbitals from the wavefunction, retaining
-    # only valence-shell orbitals for subsequent analyses
-    DELETE_INNER_ORBITALS = ("6", "34", "0")
+    # MODIFY_OCCUPATION = ("6", "26", "0")
+    # # Remove all core (inner-shell) orbitals from the wavefunction, retaining
+    # # only valence-shell orbitals for subsequent analyses
+    # DELETE_INNER_ORBITALS = ("6", "34", "0")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 7: Population analysis & atomic charges
@@ -350,6 +393,23 @@ class Menu(Enum):
     #   "n" → skip writing the .chg output file to disk
     #   "0" → return to main menu after printing charges
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED
+    MULLIKEN_DECOMPOSE_ATOMIC_POPULATION = ("7", "5", "2", "n")
+    MULLIKEN_DECOMPOSE_BASIS_FUNCTION = ("7", "5", "3", "n")
+
+    # INTERACTIVE SEQUENCES - TO BE TESTED
+    # Lowdin atomic charges via Lowdin orthogonalisation; slightly more basis-
+    # set stable than Mulliken but still dependent on basis choice
+    # INTERACTIVE
+    LOWDIN_POPULATION = ("7", "6", "ENTER", "0")
+
+    # INGNORE FOR NOW
+    # Electronegativity Equalization Method (EEM) charges; fast geometry-based
+    # empirical model requiring no wavefunction evaluation
+    # NEEDS MOL2
+    EEM_CHARGE = ("7", "17", "n", "0")
+
+    # CORRECT SEQUENCES - TO BE TESTED
     # Hirshfeld atomic charges from deformation-density partitioning;
     # qualitatively correct but systematically underestimates charge transfer
     HIRSHFELD_CHARGE = ("7", "1", "1", "n", "0")
@@ -358,22 +418,20 @@ class Menu(Enum):
     VDD_POPULATION = ("7", "2", "1", "n", "0")
     # Mulliken atomic charges and basis-function populations; oldest method,
     # highly basis-set dependent, avoid with diffuse basis functions
-    MULLIKEN_POPULATION = ("7", "5", "0")
-    # Lowdin atomic charges via Lowdin orthogonalisation; slightly more basis-
-    # set stable than Mulliken but still dependent on basis choice
-    LOWDIN_POPULATION = ("7", "6", "0")
+    MULLIKEN_POPULATION = ("7", "5", "1", "n", "0")
+
     # Ros-Schuit C-squared Population Analysis (SCPA); modified Mulliken scheme
     # that prevents negative population numbers
-    SCPA_POPULATION = ("7", "7", "0")
+    SCPA_POPULATION = ("7", "7", "n", "0")
     # Stout-Politzer modified Mulliken charges; cross-terms partitioned by the
     # ratio of squared orbital coefficients
-    STOUT_POLITZER_POPULATION = ("7", "8", "0")
+    STOUT_POLITZER_POPULATION = ("7", "8", "n", "0")
     # Bickelhaupt modified Mulliken charges; cross-terms weighted by the total
     # local populations summed across all orbitals
-    BICKELHAUPT_POPULATION = ("7", "9", "0")
+    BICKELHAUPT_POPULATION = ("7", "9", "n", "0")
     # Becke atomic charges with atomic-dipole-moment correction applied;
     # reasonable for typical organic systems using default CSD radii
-    BECKE_CHARGE = ("7", "10", "1", "n", "0")
+    BECKE_CHARGE = ("7", "10", "0", "n", "0")
     # Atomic Dipole moment Corrected Hirshfeld (ADCH) charges; exactly
     # reproduces the molecular dipole moment and gives reliable ESP; highly
     # recommended
@@ -381,52 +439,56 @@ class Menu(Enum):
     # CHELPG ESP-fitting charges on a cubic grid of points; best rotational
     # invariance among ESP-fit methods; widely used for force-field
     # parametrisation
-    CHELPG_CHARGE = ("7", "12", "n", "0")
+    CHELPG_CHARGE = ("7", "12", "1", "n", "0")
     # Merz-Kollmann (MK) ESP-fitting charges on concentric shells at 1.4-2.0x
     # vdW radii; standard for AMBER/GAFF parametrisation
-    MK_CHARGE = ("7", "13", "n", "0")
-    # AIM/Bader charges obtained by integrating rho in QTAIM topological atomic
-    # basins; computed via the basin analysis module (menu 17)
-    AIM_CHARGE = ("7", "14", "0")
-    # Iterative Hirshfeld (Hirshfeld-I) charges; self-consistently updates
-    # reference-atom charges until convergence; better dipole reproduction than
-    # standard Hirshfeld
-    HIRSHFELD_I_CHARGE = ("7", "15", "1", "n", "0")
+    MK_CHARGE = ("7", "13", "1", "n", "0")
+
     # CM5 charges (charge model 5); Hirshfeld-based with empirical correction
     # terms for improved dipole-moment reproduction across diverse molecules
     CM5_CHARGE = ("7", "16", "1", "n", "0")
-    # Electronegativity Equalization Method (EEM) charges; fast geometry-based
-    # empirical model requiring no wavefunction evaluation
-    EEM_CHARGE = ("7", "17", "n", "0")
+
     # RESP (Restrained ESP) charges; ESP fit with hyperbolic
     # restraint toward zero; the standard charge model for AMBER/GAFF force
     # fields
-    RESP_CHARGE = ("7", "18", "n", "0")
+    # FORCED DEFAULTS
+    RESP_CHARGE = ("7", "18", "1n", "0")
     # Gasteiger-Marsili empirical charges; purely connectivity-based, extremely
     # fast, no wavefunction needed; suitable for large databases
     GASTEIGER_CHARGE = ("7", "19", "n", "0")
     # Minimal Basis Iterative Stockholder (MBIS) charges; information-theoretic
     # partitioning giving excellent dipole and higher-multipole reproduction
     MBIS_CHARGE = ("7", "20", "1", "n", "0")
-    # DDEC6 charges (Density Derived Electrostatic and Chemical); combines ESP
-    # fitting and iterative Hirshfeld; recommended for periodic systems and
-    # force-field development
-    DDEC_CHARGE = ("7", "21", "1", "n", "0")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 8: Orbital composition analysis
     # Decomposes each MO into percentage contributions from basis functions,
     # shells, atoms, or user-defined fragments.
     # ─────────────────────────────────────────────────────────────────────────
-    # Mulliken orbital composition: percentage of each basis function, shell,
-    # and atom in a selected MO; quick but basis-set sensitive
-    ORBITAL_COMPOSITION_MULLIKEN = ("8", "1", "0")
-    # SCPA (C-squared) orbital composition: avoids negative composition values
-    # that can arise in the Mulliken scheme
-    ORBITAL_COMPOSITION_SCPA = ("8", "2", "0")
-    # Stout-Politzer orbital composition: cross-terms partitioned by
-    # coefficient-square ratios; less commonly used
-    ORBITAL_COMPOSITION_STOUT_POLITZER = ("8", "3", "0")
+    # NEW SEQUENCES - TO BE TESTED
+    ORBITAL_COMPOSITION_MULLIKEN_HOMO = ("8", "1", "h")
+    ORBITAL_COMPOSITION_MULLIKEN_LUMO = ("8", "1", "l")
+    ORBITAL_COMPOSITION_MULLIKEN_ALL = ("8", "1", "a")
+
+    ORBITAL_COMPOSITION_STOUT_POLITZER_HOMO = ("8", "2", "h")
+    ORBITAL_COMPOSITION_STOUT_POLITZER_LUMO = ("8", "2", "l")
+    ORBITAL_COMPOSITION_STOUT_POLITZER_ALL = ("8", "2", "a")
+
+    ORBITAL_COMPOSITION_SCPA_HOMO = ("8", "3", "h")
+    ORBITAL_COMPOSITION_SCPA_LUMO = ("8", "3", "l")
+    ORBITAL_COMPOSITION_SCPA_ALL = ("8", "3", "a")
+
+    FRAGMENT_CONTRIBUTION_HIRSHFELD_HOMO = ("8", "8", "1", "h")
+    FRAGMENT_CONTRIBUTION_HIRSHFELD_LUMO = ("8", "8", "1", "l")
+    FRAGMENT_CONTRIBUTION_HIRSHFELD_ALL = ("8", "8", "1", "-1")
+    ATOM_CONTRIBUTION_HIRSHFELD = ("8", "8", "1", "-4")
+
+    FRAGMENT_CONTRIBUTION_BECKE_HOMO = ("8", "9", "1", "h")
+    FRAGMENT_CONTRIBUTION_BECKE_LUMO = ("8", "9", "1", "l")
+    FRAGMENT_CONTRIBUTION_BECKE_ALL = ("8", "9", "1", "-1")
+    ATOM_CONTRIBUTION_BECKE = ("8", "9", "1", "-4")
+
+    # INTERACTIVE SEQUENCES - IGNORE
     # Mulliken fragment composition: prints the total percentage of a pre-
     # defined fragment in every occupied MO as a table
     ORBITAL_COMPOSITION_FRAGMENT_MULLIKEN = ("8", "4", "0")
@@ -438,7 +500,9 @@ class Menu(Enum):
     ORBITAL_COMPOSITION_FRAGMENT_SCPA = ("8", "6", "0")
     # Natural Atomic Orbital (NAO) composition using the MO-in-NAO coefficient
     # matrix from NBO output; excellent basis-set stability for occupied MOs
+    # REQUIRES SPECIFIC FILE TYPE
     ORBITAL_COMPOSITION_NAO = ("8", "7", "0")
+
     # Hirshfeld orbital composition: integral of |psi_i|^2 * w_A(r) for each
     # atom A; highly stable regardless of basis-set choice
     ORBITAL_COMPOSITION_HIRSHFELD = ("8", "8", "0")
@@ -455,43 +519,49 @@ class Menu(Enum):
     # Prints bond orders between all atom pairs above a threshold, plus
     # total and free valences for each atom.  "0" returns to main menu.
     # ─────────────────────────────────────────────────────────────────────────
-    # Mayer bond orders from PS-matrix products; values approximately 1/2/3 for
-    # single/double/triple bonds; the best all-round bond-order method
-    MAYER_BOND_ORDER = ("9", "1", "0")
-    # Multi-centre bond order (up to 12 centres) in the original basis-function
-    # representation; sensitive to diffuse basis functions
+    # NEW SEQUENCES - TO BE TESTED
+
+    # INTERACTIVE - REQUIRES USER INPUT
     MULTICENTER_BOND_ORDER = ("9", "2", "0")
     # Multi-centre bond order in the NAO basis (S becomes identity); much more
     # basis-set stable, recommended when diffuse functions are present
     MULTICENTER_BOND_ORDER_NAO = ("9", "-2", "0")
     # Wiberg bond order in the Lowdin-orthogonalised basis (WL); more stable
     # than Mayer for large basis sets but can overestimate polar bonds
-    WIBERG_BOND_ORDER = ("9", "3", "0")
-    # Mulliken bond orders (2*PS off-diagonal elements); positive = bonding
-    # character, negative = antibonding; qualitative indicator only
-    MULLIKEN_BOND_ORDER = ("9", "4", "0")
     # Decompose Mulliken bond order between a chosen atom pair into per-orbital
     # contributions to identify bonding vs. antibonding MOs
     MULLIKEN_BOND_ORDER_DECOMPOSE = ("9", "5", "0")
     # Orbital-occupancy-perturbed Mayer bond order: prints the contribution of
     # each occupied MO to the Mayer bond order for a selected A-B pair
     ORBITAL_PERTURBED_MAYER = ("9", "6", "0")
-    # Fuzzy bond order (Becke-space integration of PS products); more basis-set
-    # stable than Mayer; essentially equivalent to the AIM delocalization index
-    FUZZY_BOND_ORDER = ("9", "7", "0")
-    # Laplacian Bond Order (LBO): integral of -nabla^2 rho in the fuzzy overlap
-    # space; correlates with BDE and vibrational frequency; independent of
-    # wavefunction type
-    LAPLACIAN_BOND_ORDER = ("9", "8", "0")
     # Decompose Wiberg bond order between two atoms into per-orbital
     # contributions; identifies which MOs are responsible for the bond
+    # NEEDS NAO BASIS
     WIBERG_DECOMPOSITION = ("9", "9", "0")
-    # Intrinsic Bond Strength Index (IBSI): geometry-free bond-order measure
-    # derived from the electron density at the bond critical point
-    IBSI_ANALYSIS = ("9", "10", "0")
     # AV1245 multicentric aromaticity index computed from Mayer bond orders
     # along a ring; robust against ring size and basis-set choice
     AV1245_INDEX = ("9", "11", "0")
+
+    # CORRECT SEQUENCES - TO BE TESTED
+    # Mayer bond orders from PS-matrix products; values approximately 1/2/3 for
+    # single/double/triple bonds; the best all-round bond-order method
+    MAYER_BOND_ORDER = ("9", "1", "n", "0")
+    # Multi-centre bond order (up to 12 centres) in the original basis-function
+    # representation; sensitive to diffuse basis functions
+    WIBERG_BOND_ORDER = ("9", "3", "n", "0")
+    # Mulliken bond orders (2*PS off-diagonal elements); positive = bonding
+    # character, negative = antibonding; qualitative indicator only
+    MULLIKEN_BOND_ORDER = ("9", "4", "n", "0")
+    # Fuzzy bond order (Becke-space integration of PS products); more basis-set
+    # stable than Mayer; essentially equivalent to the AIM delocalization index
+    FUZZY_BOND_ORDER = ("9", "7", "n", "0")
+    # Laplacian Bond Order (LBO): integral of -nabla^2 rho in the fuzzy overlap
+    # space; correlates with BDE and vibrational frequency; independent of
+    # wavefunction type
+    LAPLACIAN_BOND_ORDER = ("9", "8", "n", "0")
+    # Intrinsic Bond Strength Index (IBSI): geometry-free bond-order measure
+    # derived from the electron density at the bond critical point
+    IBSI_ANALYSIS = ("9", "10", "1", "1", "0")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 10: Density of states
@@ -500,61 +570,48 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Plot Total Density of States (TDOS): broadened orbital energy spectrum
     # showing how densely electronic states are distributed in energy
-    PLOT_DOS = ("10", "1")
-    # Plot Partial DOS (PDOS): shows contribution of up to 10 user-defined atom
-    # or fragment groups to the TDOS; reveals orbital character of each energy
-    # region
-    PLOT_PDOS = ("10", "2")
-    # Plot Overlap Population DOS (OPDOS): positive regions indicate bonding,
-    # negative indicate antibonding character for fragment pair interactions
-    PLOT_OPDOS = ("10", "3")
-    # Plot Local DOS (LDOS) at a specified point or along a line; shows the
-    # energy-resolved local electronic structure at that location
-    PLOT_LDOS = ("10", "4")
-    # Simulate photoelectron (PES) spectrum by broadening orbital ionisation
-    # energies using Koopmans theorem eigenvalues
-    PLOT_PHOTOELECTRON_SPECTRUM = ("10", "5")
-    # Plot Crystal Orbital Hamilton Population (COHP): energy-resolved bond-
-    # interaction strength analysis between user-defined fragment pairs
-    PLOT_COHP = ("10", "6")
+    PLOT_TDOS = ("10", "0", "2")
+
+    PLOT_TDOS_OPDOS = ("10", "00", "2")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 11: Spectra simulation
     # Reads transition data from Gaussian/ORCA output or plain-text files
     # and broadens discrete transitions into simulated spectra using
     # Gaussian, Lorentzian, or pseudo-Voigt broadening functions.
+    # REQUIRES .OUT FILES - IGNORE FOR NOW
     # ─────────────────────────────────────────────────────────────────────────
     # Simulate IR absorption spectrum by broadening harmonic (or anharmonic)
     # vibrational frequencies weighted by IR intensities in km/mol
-    PLOT_IR_SPECTRUM = ("11", "1")
+    PLOT_IR_SPECTRUM = ("11", "1", "0", "1")
     # Simulate Raman spectrum from Raman activities; optionally converts
     # activities to intensities given a laser wavelength and temperature
-    PLOT_RAMAN_SPECTRUM = ("11", "2")
+    PLOT_RAMAN_SPECTRUM = ("11", "2", "0", "1")
     # Simulate UV-Vis absorption spectrum by broadening TD-DFT/CIS excitation
     # energies weighted by oscillator strengths; area calibrated to molar
     # absorptivity
-    PLOT_UV_VIS_SPECTRUM = ("11", "3")
+    PLOT_UV_VIS_SPECTRUM = ("11", "3", "0", "1")
     # Simulate Electronic Circular Dichroism (ECD) spectrum from rotatory
     # strengths in either length or velocity gauge representation
-    PLOT_ECD_SPECTRUM = ("11", "4")
+    PLOT_ECD_SPECTRUM = ("11", "4", "0", "1")
     # Simulate Vibrational Circular Dichroism (VCD) spectrum by broadening
     # vibrational rotatory strengths
-    PLOT_VCD_SPECTRUM = ("11", "5")
+    PLOT_VCD_SPECTRUM = ("11", "5", "0", "1")
     # Simulate Raman Optical Activity (ROA) spectrum from computed ROA
     # intensities
-    PLOT_ROA_SPECTRUM = ("11", "6")
+    PLOT_ROA_SPECTRUM = ("11", "6", "0", "1")
     # Simulate NMR spectrum from calculated chemical shielding tensors; convert
     # to chemical shifts by subtracting a reference shielding value
-    PLOT_NMR_SPECTRUM = ("11", "7")
+    PLOT_NMR_SPECTRUM = ("11", "7", "0", "1")
     # Simulate fluorescence/phosphorescence spectrum; applies Kasha rule so
     # only the first excited state contributes when appropriate
-    PLOT_FLUORESCENCE_SPECTRUM = ("11", "8")
+    PLOT_FLUORESCENCE_SPECTRUM = ("11", "8", "0", "1")
     # Plot photoelectron valence spectrum  by broadening orbital ionisation
     # energies; analogous to TDOS but focused on valence region
-    PLOT_PVS = ("11", "9")
+    PLOT_PVS = ("11", "9", "0", "1")
     # Predict the perceived colour of a compound from its computed UV-Vis
     # absorption spectrum using CIE colour matching functions
-    PREDICT_COLOR = ("11", "10")
+    PREDICT_COLOR = ("11", "0")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 12: Quantitative molecular surface analysis
@@ -562,6 +619,17 @@ class Menu(Enum):
     # maps a chosen function onto it, and computes surface statistical
     # descriptors (V_S, sigma^2, Pi, etc.) and locates surface extrema.
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED
+    QMSA_ESP = ("12", "0", "-2")
+    QMSA_ALIE = ("12", "2", "2", "0", "-2")
+    QMSA_LEA = ("12", "2", "4", "0", "-2")
+    QMSA_LEAE = ("12", "2", "-4", "0", "-2")
+    QMSA_EDR = ("12", "2", "5", "0", "-2")
+    QMSA_MAXEDR = ("12", "2", "6", "0", "-2")
+    QMSA_EDENSITY = ("12", "2", "11", "0", "-2")
+    QMSA_LAMBDA2_RHO = ("12", "2", "12", "0", "-2")
+
+    # DEPRECATED SEQUENCES - TO BE TESTED
     # Map ESP onto the vdW surface (rho=0.001); compute V_S+, V_S-, sigma^2, Pi
     # and locate surface ESP minima/maxima; outputs GIPF descriptors for
     # property prediction
@@ -592,6 +660,7 @@ class Menu(Enum):
     # Works on grid data already held in memory (from Menu 5 cube generation)
     # or loaded from an external .cube/.grd file at startup.
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED
     # Export the current in-memory grid data to a Gaussian .cube file in the
     # working directory
     EXPORT_CUBE = ("13", "0")
@@ -658,6 +727,7 @@ class Menu(Enum):
     # Main Menu 14: Adaptive Natural Density Partitioning (AdNDP)
     # Decomposes the electron density into n-centre two-electron (nc-2e)
     # bonding elements interactively; visualises results in Multiwfn GUI.
+    # NEED SPECIFIC FILE
     # ─────────────────────────────────────────────────────────────────────────
     # Launch the AdNDP interactive interface to search for 1c-2e lone pairs,
     # 2c-2e bonds, and multi-centre bonding elements; widely used for cluster
@@ -669,13 +739,59 @@ class Menu(Enum):
     # Numerical integration of real-space functions in Becke or Hirshfeld
     # fuzzy atomic spaces; computes delocalization indices and aromaticity.
     # ─────────────────────────────────────────────────────────────────────────
-    # Integrate a chosen real-space function (rho, ELF, kinetic energy, etc.)
-    # over each Becke or Hirshfeld fuzzy atomic space; yields atomic
-    # contributions
-    FUZZY_INTEGRATE_PROPERTY = ("15", "1")
-    # Compute atomic multipole moments (charge, dipole, quadrupole) in fuzzy
-    # atomic spaces; also outputs atomic electronic spatial extent <r^2>
-    ATOMIC_DIPOLE_MOMENTS = ("15", "2")
+    # NEW SEQUENCES - TO BE TESTED
+    FUZZY_INTEGRATE_EDENSITY = ("15", "1", "1")
+    FUZZY_INTEGRATE_NORM_RHO = ("15", "1", "2")
+    FUZZY_INTEGRATE_LAPLACIAN = ("15", "1", "3")
+    FUZZY_INTEGRATE_ORB_WFN_HOMO = ("15", "1", "4", "h")
+    FUZZY_INTEGRATE_ORB_WFN_LUMO = ("15", "1", "4", "l")
+    FUZZY_INTEGRATE_ESPIN_DENSITY = ("15", "1", "5")
+    FUZZY_INTEGRATE_KR = ("15", "1", "6")
+    FUZZY_INTEGRATE_GR = ("15", "1", "7")
+    FUZZY_INTEGRATE_ESP_CHARGES = ("15", "1", "8")
+    FUZZY_INTEGRATE_ELF = ("15", "1", "9")
+    FUZZY_INTEGRATE_LOL = ("15", "1", "10")
+    FUZZY_INTEGRATE_LOCAL_ENTROPY = ("15", "1", "11")
+    FUZZY_INTEGRATE_ESP = ("15", "1", "12")
+    FUZZY_INTEGRATE_RDG = ("15", "1", "13")
+    FUZZY_INTEGRATE_RDG_PROMOLECULAR = ("15", "1", "14")
+    FUZZY_INTEGRATE_LAMBDA2RHO = ("15", "1", "15")
+    FUZZY_INTEGRATE_LAMBDA2RGO_PROMOLECULAR = ("15", "1", "16")
+    FUZZY_INTEGRATE_ALIE = ("15", "1", "18")
+    FUZZY_INTEGRATE_EDR = ("15", "1", "20")
+    FUZZY_INTEGRATE_ORB_OVERLAP_DR = ("15", "1", "21")
+    FUZZY_INTEGRATE_DELTAG_PROMOLECULAR = ("15", "1", "22")
+    FUZZY_INTEGRATE_DELTAG_HIRSHFELD = ("15", "1", "23")
+    FUZZY_INTEGRATE_IRI = ("15", "1", "24")
+
+    FUZZY_MULTIPOLE = ("15", "2", "1")
+
+    FUZZY_OVERLAP_EDENSITY = ("15", "8", "1", "n")
+    FUZZY_OVERLAP_NORM_RHO = ("15", "8", "1", "n")
+    FUZZY_OVERLAP_LAPLACIAN = ("15", "8", "3", "n")
+    FUZZY_OVERLAP_ORB_WFN_HOMO = ("15", "8", "4", "h", "n")
+    FUZZY_OVERLAP_ORB_WFN_LUMO = ("15", "8", "4", "l", "n")
+    FUZZY_OVERLAP_ESPIN_DENSITY = ("15", "8", "5", "n")
+    FUZZY_OVERLAP_KR = ("15", "8", "6", "n")
+    FUZZY_OVERLAP_GR = ("15", "8", "7", "n")
+    FUZZY_OVERLAP_ESP_CHARGES = ("15", "8", "8", "n")
+    FUZZY_OVERLAP_ELF = ("15", "8", "9", "n")
+    FUZZY_OVERLAP_LOL = ("15", "8", "10", "n")
+    FUZZY_OVERLAP_LOCAL_ENTROPY = ("15", "8", "11", "n")
+    FUZZY_OVERLAP_ESP = ("15", "8", "12", "n")
+    FUZZY_OVERLAP_RDG = ("15", "8", "13", "n")
+    FUZZY_OVERLAP_RDG_PROMOLECULAR = ("15", "8", "14", "n")
+    FUZZY_OVERLAP_LAMBDA2RHO = ("15", "8", "15", "n")
+    FUZZY_OVERLAP_LAMBDA2RGO_PROMOLECULAR = ("15", "8", "16", "n")
+    FUZZY_OVERLAP_ALIE = ("15", "8", "18", "n")
+    FUZZY_OVERLAP_EDR = ("15", "8", "20", "n")
+    FUZZY_OVERLAP_ORB_OVERLAP_DR = ("15", "8", "21", "n")
+    FUZZY_OVERLAP_DELTAG_PROMOLECULAR = ("15", "8", "22", "n")
+    FUZZY_OVERLAP_DELTAG_HIRSHFELD = ("15", "8", "23", "n")
+    FUZZY_OVERLAP_IRI = ("15", "8", "24", "n")
+
+    CLRK_MATRIX = ("15", "9", "n")
+
     # Compute the Atomic Overlap Matrix (AOM) S_AB = integral(psi_i * psi_j *
     # w_A) dr; required input for NOCV, ETS-NOCV, and delocalization-index
     # calculations
@@ -683,49 +799,35 @@ class Menu(Enum):
     # Compute localization index and pairwise delocalization index (DI) for
     # all atom pairs in fuzzy spaces; DI is a bond-order analogue grounded in
     # density-matrix theory
-    LOCALIZATION_DELOCALIZATION_INDEX = ("15", "4")
+    LOCALIZATION_DELOCALIZATION_INDEX = ("15", "4", "n")
     # Para Delocalization Index (PDI): average DI between para-related carbon
     # atoms in a 6-membered ring; larger PDI indicates stronger aromaticity
-    PDI_AROMATICITY = ("15", "5")
+    PDI_AROMATICITY = ("15", "5", "q")
     # Aromatic Fluctuation Index (FLU): measures deviation of DI from reference
     # bond values; value near 0 indicates a fully aromatic ring
-    FLU_AROMATICITY = ("15", "6")
+    FLU_AROMATICITY = ("15", "6", "q")
     # FLU-pi: FLU computed using only pi-orbital contributions to the
     # delocalization index; more selective for pi-electron aromaticity
+    # INTERACTIVE - REQUIRES USER INPUT
     FLU_PI_AROMATICITY = ("15", "7")
-    # Integrate a real-space function in the pairwise fuzzy overlap space
-    # w_A(r)*w_B(r) between two atoms; quantifies inter-atomic property sharing
-    FUZZY_INTEGRATE_OVERLAP = ("15", "8")
     # Compute the condensed linear response kernel chi_AB; measures how much
     # electron density at atom B responds to an external perturbation at atom A
     CONDENSED_LINEAR_RESPONSE = ("15", "9")
     # Compute the para linear response (PLR) aromaticity index from the
     # condensed linear response kernel; large PLR indicates strong aromatic
     # delocalization
-    PARA_LINEAR_RESPONSE = ("15", "10")
-    # Compute multi-centre delocalization index (MCI or Iring) for a user-
-    # specified ring; large positive value indicates aromaticity, negative
-    # indicates antiaromaticity
-    MULTICENTER_DI = ("15", "11")
-    # Information-theoretic aromaticity (ITA) index based on Shannon entropy of
-    # atomic electron populations; ITA near 0 = aromatic
-    ITA_AROMATICITY = ("15", "12")
-    # Compute fuzzy atomic volumes and, optionally, atomic and homomolecular C6
-    # dispersion coefficients via the Tkatchenko-Scheffler method
-    ATOMIC_VOLUME_POLARIZABILITY = ("15", "13")
-    # Interfragment Delocalization Index (IFDI): total electron delocalization
-    # between two user-defined molecular fragments; also outputs fragment
-    # localization index (FLI)
-    IFDI_ANALYSIS = ("15", "44")
+    PARA_LINEAR_RESPONSE = ("15", "10", "q")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 16: Charge Decomposition Analysis (CDA)
     # Generalised CDA (GCDA): decomposes orbital interactions between two or
     # more fragments into donation, back-donation, repulsion, and residual.
+    # INTERACTIVE
     # ─────────────────────────────────────────────────────────────────────────
     # Launch the CDA/GCDA: decompose charge transfer between fragments
     # into donation (d), back-donation (b), repulsion (r), and residual (Delta)
     # terms; plot the orbital interaction diagram
+    # INTERACTIVE - REQUIRES USER INPUT
     CDA_ANALYSIS = ("16",)
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -733,6 +835,43 @@ class Menu(Enum):
     # Locates attractors of a real-space function, builds gradient-following
     # basins, and integrates properties (rho, multipoles, DI) within each.
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED
+    BASIN_ANALYSIS_RHO = (
+        "17",
+        "1",
+        "1",
+        "2",
+    )
+
+    BASIN_EDENSITY = (
+        "17",
+        "1",
+        "1",
+        "1",
+    )
+    BASIN_NORM_RHO = ("17", "1", "2", "n")
+    BASIN_LAPLACIAN = ("17", "1", "3", "n")
+    BASIN_ORB_WFN_HOMO = ("17", "1", "4", "h", "n")
+    BASIN_ORB_WFN_LUMO = ("17", "1", "4", "l", "n")
+    BASIN_ESPIN_DENSITY = ("17", "1", "5", "n")
+    BASIN_KR = ("17", "1", "6", "n")
+    BASIN_GR = ("17", "1", "7", "n")
+    BASIN_ESP_CHARGES = ("17", "1", "8", "n")
+    BASIN_ELF = ("17", "1", "9", "n")
+    BASIN_LOL = ("17", "1", "10", "n")
+    BASIN_LOCAL_ENTROPY = ("17", "1", "11", "n")
+    BASIN_ESP = ("17", "1", "12", "n")
+    BASIN_RDG = ("17", "1", "13", "n")
+    BASIN_RDG_PROMOLECULAR = ("17", "1", "14", "n")
+    BASIN_LAMBDA2RHO = ("17", "1", "15", "n")
+    BASIN_LAMBDA2RGO_PROMOLECULAR = ("17", "1", "16", "n")
+    BASIN_ALIE = ("17", "1", "18", "n")
+    BASIN_EDR = ("17", "1", "20", "n")
+    BASIN_ORB_OVERLAP_DR = ("17", "1", "21", "n")
+    BASIN_DELTAG_PROMOLECULAR = ("17", "1", "22", "n")
+    BASIN_DELTAG_HIRSHFELD = ("17", "1", "23", "n")
+    BASIN_IRI = ("17", "1", "24", "n")
+
     # AIM basin analysis: attractors are nuclei; integrates rho in each QTAIM
     # atomic basin to yield Bader/AIM charges, atomic multipoles, LI, and DI
     BASIN_ANALYSIS_AIM = ("17", "1")
@@ -759,6 +898,7 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 18: Electron excitation analysis
     # Analyses TD-DFT/CIS excited states loaded from Gaussian or ORCA output.
+    # REQUIRES BOTH FCH AND OUT FILES - IGNORE FOR NOW
     # ─────────────────────────────────────────────────────────────────────────
     # Analyse hole and electron density distributions for a TD-DFT transition:
     # compute centroid distance, t index, and Sr overlap integral; visualise
@@ -804,12 +944,15 @@ class Menu(Enum):
     # Transforms canonical delocalized MOs into spatially localised MOs
     # for chemical interpretation as bonds, lone pairs, and core orbitals.
     # ─────────────────────────────────────────────────────────────────────────
-    # Boys orbital localization: minimises sum of <r^2> of orbital centroids;
-    # produces compact, chemically intuitive lone pairs and bond orbitals
-    BOYS_LOCALIZATION = ("19", "1")
-    # Pipek-Mezey localization: maximises sum of Mulliken atomic populations;
-    # cleanly separates sigma and pi orbitals, unlike Boys method
-    PIPEK_MEZEY_LOCALIZATION = ("19", "2")
+    # NEW SEQUENCES - TO BE TESTED - FORCED DEFAULT TO HIRSHFELD COMPOSITION
+    PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED = ("19", "1")
+    PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL = ("19", "2")
+    PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED = ("19", "-6", "2", "1")
+    PIPEK_MEZEY_LOCALIZATION_LOWDIN_ALL = ("19", "-6", "2", "2")
+    PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED = ("19", "-6", "3", "1")
+    PIPEK_MEZEY_LOCALIZATION_BECKE_ALL = ("19", "-6", "3", "2")
+    BOYS_LOCALIZATION_OCCUPIED = ("19", "-6", "10", "1")
+    BOYS_LOCALIZATION_ALL = ("19", "-6", "10", "2")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 20: Weak interaction analysis
@@ -819,49 +962,59 @@ class Menu(Enum):
     # NCI analysis from wavefunction: generate RDG and sign(lambda2)*rho cubes;
     # render RDG isosurface coloured by sign(lambda2)*rho in VMD to visualise
     # H-bonds, vdW contacts, and steric clashes
-    NCI_ANALYSIS = ("20", "1")
+    NCI_ANALYSIS = ("20", "1", "2", "1", "2")
     # Promolecular NCI: same as NCI but built from superposition of free-atom
     # densities; very fast and suitable for macromolecules and protein-ligand
     # binding without a full wavefunction
-    NCI_PROMOLECULAR = ("20", "2")
-    # Averaged NCI (ANCI): NCI analysis averaged over an ensemble of MD
-    # trajectory snapshots; reveals which non-covalent interactions persist
-    # statistically over time
-    ANCI_ANALYSIS = ("20", "3")
+    NCI_PROMOLECULAR = ("20", "2", "2", "1", "2")
     # Interaction Region Indicator (IRI): improved NCI variant that decays
     # smoothly at atomic cores and better resolves weak intermolecular contacts
     # recommended over standard RDG
-    IRI_ANALYSIS = ("20", "4")
+    IRI_ANALYSIS = ("20", "4", "2", "1", "2")
     # Density Overlap Regions Indicator (DORI): highlights regions where two
     # electron densities overlap, clearly revealing both covalent and non-
     # covalent interaction zones
-    DORI_ANALYSIS = ("20", "5")
+    DORI_ANALYSIS = ("20", "5", "2", "1", "2")
     # Compute and visualise the van der Waals interaction potential landscape
     # around the molecule
-    VDW_POTENTIAL = ("20", "6")
+    VDW_POTENTIAL = ("20", "6", "2", "1", "2")
+
+    # Averaged NCI (ANCI): NCI analysis averaged over an ensemble of MD
+    # trajectory snapshots; reveals which non-covalent interactions persist
+    # statistically over time
+    # INTERACTIVE - REQUIRES USER INPUT
+    ANCI_ANALYSIS = ("20", "3", "2", "1", "2")
+
+    # INTERACTIVE - REQUIRES USER INPUT
     # Independent Gradient Model (IGM): decomposes the density gradient into
     # intra- and inter-fragment parts; isolates and visualises inter-fragment
     # non-covalent interactions
+    # INTEACTIVE - REQUIRES USER INPUT
     IGM_ANALYSIS = ("20", "10")
     # IGM-H (Hirshfeld-based IGM): uses Hirshfeld atomic densities as the
     # reference for gradient decomposition; more accurate inter-fragment
     # gradient isolation than standard IGM
+    # INTERACTIVE - REQUIRES USER INPUT
     IGMH_ANALYSIS = ("20", "11")
     # Averaged IGM (aIGM): IGM analysis averaged over an MD trajectory ensemble
     # identifies which inter-fragment interactions are persistent in dynamic
     # systems
+    # INTERACTIVE - REQUIRES USER INPUT
     AIGM_ANALYSIS = ("20", "12")
     # Modified IGM (mIGM): coordinate-only IGM variant that avoids the need for
     # a wavefunction; nearly identical results to IGMH for weak interactions at
     # orders-of-magnitude lower cost
+    # INTERACTIVE - REQUIRES USER INPUT
     MIGM_ANALYSIS = ("20", "-10")
     # Averaged mIGM (amIGM): mIGM averaged over MD snapshots; extends mIGM to
     # fluctuation environments; more robust than aNCI and recommended for MD-
     # based NCI studies
+    # INTERACTIVE - REQUIRES USER INPUT
     AMIGM_ANALYSIS = ("20", "-11")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 21: Energy Decomposition Analysis (EDA)
+    # INTERACTIVE OR REQUIRES SPECIFIC FILE TYPES
     # ─────────────────────────────────────────────────────────────────────────
     # Simple EDA using combined fragment wavefunctions: decomposes interaction
     # energy into electrostatic, Pauli exchange-repulsion, polarisation, and
@@ -882,19 +1035,12 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 22: Conceptual DFT (CDFT)
     # Chemical reactivity descriptors derived from DFT response theory.
+    # NEED MULTIPLE FILES
     # ─────────────────────────────────────────────────────────────────────────
     # Launch the CDFT module: compute global reactivity indices including
     # chemical potential mu, chemical hardness eta, softness S, and
     # electrophilicity index omega
     CDFT_ANALYSIS = ("22",)
-    # Compute Fukui functions f+(r), f-(r), and f0(r) from finite-difference
-    # density differences; outputs both grid-based maps and condensed per-atom
-    # values
-    FUKUI_FUNCTION = ("22", "1")
-    # Compute the dual descriptor Delta_f(r) = f+(r) - f-(r); positive regions
-    # are nucleophilic centres, negative regions are electrophilic centres;
-    # superior to Fukui for ambiphilic reactivity
-    DUAL_DESCRIPTOR = ("22", "2")
     # Condense Fukui functions to atomic values using Mulliken, Hirshfeld,
     # Becke, or AIM partitioning; tabulates f+, f-, and f0 for each atom
     CONDENSED_FUKUI = ("22", "3")
@@ -902,15 +1048,19 @@ class Menu(Enum):
     # complements the dual descriptor for predicting hard-soft reactivity site
     # preferences
     LOCAL_HARDNESS = ("22", "4")
-    # Compute local ionisation energy I(r) = sum_i(eta_i * |psi_i(r)|^2) /
-    # rho(r) as a reactivity map; low-I surface pockets indicate preferred
-    # electrophilic attack sites
-    LOCAL_IONIZATION_ENERGY = ("22", "5")
+    # Compute orbital weights as a reactivity map; low-weight regions indicate
+    # preferred electrophilic attack sites
+    ORBITAL_WEIGHTS = ("22", "5")
+
+    ORBITAL_WEIGHTED_FUKUI = ("22", "6")
+    GRID_FUKUI = ("22", "7", "2", "5", "6", "7", "8")
+    SUPERDELOCALIZABILITIES_NUC_E = ("22", "8")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 23: ETS-NOCV
     # Extended Transition State combined with Natural Orbitals for Chemical
     # Valence: energy-decomposed orbital interaction analysis.
+    # INTERACTIVE OR REQUIRES SPECIFIC FILE TYPES
     # ─────────────────────────────────────────────────────────────────────────
     # ETS-NOCV: diagonalise the deformation density matrix to obtain NOCV
     # pairs; decompose the orbital interaction energy Delta_E_orb into
@@ -920,6 +1070,7 @@ class Menu(Enum):
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 24: Polarizability
+    # INTERACTIVE
     # ─────────────────────────────────────────────────────────────────────────
     # Parse and print polarizability (alpha) and hyperpolarizability (beta,
     # gamma) tensors from a Gaussian frequency or finite-field task output file
@@ -938,6 +1089,7 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 25: Aromaticity
     # Magnetic, geometric, and electronic indices for aromaticity assessment.
+    # REQUIRES GAUSSIAN
     # ─────────────────────────────────────────────────────────────────────────
     # Anisotropy of the Induced Current Density: compute the magnetically
     # induced ring-current density and export as a 3D isosurface; diatropic
@@ -981,6 +1133,7 @@ class Menu(Enum):
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 100: Utilities Part 1
+    # INTERACTIVE
     # ─────────────────────────────────────────────────────────────────────────
     # Plot a 2D scatter graph of two real-space functions evaluated on the same
     # grid and export both as .cube files; classic use is RDG vs.
@@ -1072,6 +1225,35 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 200: Utilities Part 2
     # ─────────────────────────────────────────────────────────────────────────
+    # NEW SEQUENCES - TO BE TESTED - FORCED DEFAULT TO HIRSHFELD COMPOSITION
+    ORBITAL_INTEGRAL_ELECTRIC_DIPOLE = ("200", "10", "1", "3")
+    ORBITAL_INTEGRAL_MAGNETIC_DIPOLE = ("200", "10", "2", "3")
+    ORBITAL_INTEGRAL_VELOCITY = ("200", "10", "3", "3")
+    ORBITAL_INTEGRAL_KINETIC_ENERGY = ("200", "10", "4", "3")
+    ORBITAL_INTEGRAL_OVERLAP = ("200", "10", "5", "3")
+
+    SPACIAL_DELOCALISATION_EDENSITY = ("200", "19", "1", "1")
+    SPACIAL_DELOCALISATIOn_NORM_RHO = ("200", "19", "1", "2")
+    SPATIAL_DELOCALISATION_LAPLACIAN = ("200", "19", "1", "3")
+    SPATIAL_DELOCALISATION_ORB_WFN = ("200", "19", "1", "4")
+    SPATIAL_DELOCALISATION_ESPIN_DENSITY = ("200", "19", "1", "5")
+    SPATIAL_DELOCALISATION_KR = ("200", "19", "1", "6")
+    SPATIAL_DELOCALISATION_GR = ("200", "19", "1", "7")
+    SPATIAL_DELOCALISATION_ESP_CHARGES = ("200", "19", "1", "8")
+    SPATIAL_DELOCALISATION_ELF = ("200", "19", "1", "9")
+    SPATIAL_DELOCALISATION_LOL = ("200", "19", "1", "10")
+    SPATIAL_DELOCALISATION_LOCAL_ENTROPY = ("200", "19", "1", "11")
+    SPATIAL_DELOCALISATION_ESP_TOTAL = ("200", "19", "1", "12")
+    SPATIAL_DELOCALISATION_RDG = ("200", "19", "1", "13")
+    SPATIAL_DELOCALISATION_RDG_PROMOLECULAR = ("200", "19", "1", "14")
+    SPATIAL_DELOCALISATION_LAMBDA2RHO = ("200", "19", "1", "15")
+    SPATIAL_DELOCALISATION_LAMBDA2RHO_PROMOLECULAR = ("200", "19", "1", "16")
+    SPATIAL_DELOCALISATION_ALIE = ("200", "19", "1", "18")
+    SPATIAL_DELOCALISATION_EDR = ("200", "19", "1", "20")
+    SPATIAL_DELOCALISATION_ORB_OVERLAP_DR = ("200", "19", "1", "21")
+    SPATIAL_DELOCALISATION_DELTAG_PROMOLECULAR = ("200", "19", "1", "22")
+    SPATIAL_DELOCALISATION_DELTAG_HIRSHFELD = ("    200", "19", "1", "23")
+    SPATIAL_DELOCALISATION_IRI = ("200", "19", "1", "24")
     # Fluctuation NCI (aRDG): RDG-based weak-interaction analysis time-averaged
     # over an MD trajectory; reveals which non-covalent contacts persist
     # throughout the simulation
@@ -1181,7 +1363,7 @@ class Menu(Enum):
     # (distance to nearest internal atom) vs. d_e (distance to nearest external
     # atom) for every surface point; reveals steric complementarity and packing
     # motifs
-    SURFACE_DISTANCE_PROJECTION = ("300", "8")
+    SURFACE_DISTANCE_PROJECTION = ("300", "8", "0")
     # Determine the Fermi energy level from the orbital energy distribution and
     # occupation numbers; particularly useful for periodic or large cluster
     # systems
