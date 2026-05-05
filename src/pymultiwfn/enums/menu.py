@@ -545,7 +545,7 @@ class Menu(Enum):
     # CORRECT SEQUENCES - TO BE TESTED
     # Mayer bond orders from PS-matrix products; values approximately 1/2/3 for
     # single/double/triple bonds; the best all-round bond-order method
-    MAYER_BOND_ORDER = ("9", "1", "n0")
+    MAYER_BOND_ORDER = ("9", "1", "n", "0")
     # Multi-centre bond order (up to 12 centres) in the original basis-function
     # representation; sensitive to diffuse basis functions
     WIBERG_BOND_ORDER = ("9", "3", "n", "0")
