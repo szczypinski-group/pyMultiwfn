@@ -281,18 +281,6 @@ class TestCriticalPointParser:
         assert cps[1].bonded_atom1_id == 10
         assert cps[1].bonded_atom2_id == 4
 
-    # def test_parse_bond_paths_raises_due_to_legacy_api(self) -> None:
-    #     """parse_bond_paths uses legacy kwargs incompatible with TopologyPath.
-
-    #     This tests that the known bug raises TypeError so it can be
-    #     tracked until the parser is fixed.
-    #     """
-    #     output = (
-    #         "Bond path between atom  1(C ) and atom  2(N ), "
-    #         "BCP  3, length  2.456\n"
-    #     )
-    #     with pytest.raises(TypeError, match="unexpected keyword argument"):
-    #         CriticalPointParser.parse_bond_paths(output)
 
     def test_parse_bond_paths_empty(self) -> None:
         """Empty input produces no matches, so no TypeError is raised."""
