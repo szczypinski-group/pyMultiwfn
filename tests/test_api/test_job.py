@@ -65,7 +65,9 @@ class TestJobInit:
             job = MultiwfnJob(input_file=mock_wfn_file, analysis=None)
             assert isinstance(job, MultiwfnJob)
         except MultiwfnError:
-            pytest.skip("Default Multiwfn executable is unavailable in this environment.")
+            pytest.skip(
+                "Default executable is unavailable in this environment."
+            )
 
     def test_invalid_timeout(
         self, mock_wfn_file: Path, multiwfn: Multiwfn

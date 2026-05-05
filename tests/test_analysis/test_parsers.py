@@ -465,7 +465,7 @@ class TestSurfaceParser:
 
     def test_parse_geometry(self) -> None:
         output = (
-            "Volume enclosed in the isosurface:  234.5678 Bohr^3 ( 34.7360 Angstrom^3)\n"
+            "Volume enclosed in the isosurface:  234.5678 Bohr^3 ( 34.7360 Angstrom^3)\n"  # noqa: E501
             "Overall surface area:  448.2930 Bohr^2 ( 125.5350 Angstrom^2)\n"
             "Sphericity:   0.8765\n"
         )
@@ -478,9 +478,9 @@ class TestSurfaceParser:
     def test_parse_extrema_min(self) -> None:
         output = (
             "The number of surface minima:    2\n"
-            "  #         a.u.        eV         kcal/mol      X         Y         Z\n"
-            "*    1 -0.02750965   -0.748576  -17.262580   -0.225  0.366  -1.831\n"
-            "     2 -0.01234567   -0.335890   -7.745670    0.500  0.500   0.500\n"
+            "  #         a.u.        eV         kcal/mol      X         Y         Z\n"  # noqa: E501
+            "*    1 -0.02750965   -0.748576  -17.262580   -0.225  0.366  -1.831\n"  # noqa: E501
+            "     2 -0.01234567   -0.335890   -7.745670    0.500  0.500   0.500\n"  # noqa: E501
         )
         extrema = SurfaceParser.parse_extrema(output, "min")
         assert len(extrema) == 2
@@ -491,8 +491,8 @@ class TestSurfaceParser:
     def test_parse_extrema_max(self) -> None:
         output = (
             "The number of surface maxima:    1\n"
-            "  #         a.u.        eV         kcal/mol      X         Y         Z\n"
-            "*    1  0.03456789    0.940580   21.694560    1.000  1.000   1.000\n"
+            "  #         a.u.        eV         kcal/mol      X         Y         Z\n"  # noqa: E501
+            "*    1  0.03456789    0.940580   21.694560    1.000  1.000   1.000\n"  # noqa: E501
         )
         extrema = SurfaceParser.parse_extrema(output, "max")
         assert len(extrema) == 1
@@ -537,12 +537,12 @@ class TestOrbitalCompositionParser:
 
     def test_parse_basis_compositions(self) -> None:
         output = (
-            "Orbital:    21  Energy(a.u.):     -0.246939  Occ:  2.000000  Type: Alpha&Beta\n"
-            "    20   Z        2(C )    9      8.67678 %      5.61233 %     14.28911 %\n"
+            "Orbital:    21  Energy(a.u.):     -0.246939  Occ:  2.000000  Type: Alpha&Beta\n"  # noqa: E501
+            "    20   Z        2(C )    9      8.67678 %      5.61233 %     14.28911 %\n"  # noqa: E501
             "Composition of each shell\n"
             "Shell     9 Type: P    in atom    2(C ) :    14.28911 %\n"
             "Composition of different types of shells\n"
-            "  s:   0.000  p:  99.010  d:   0.990  f:   0.000  g:   0.000  h:   0.000\n"
+            "  s:   0.000  p:  99.010  d:   0.990  f:   0.000  g:   0.000  h:   0.000\n"  # noqa: E501
             "Composition of each atom:\n"
             "Atom     2(C ) :    14.28911 %\n"
             "Orbital delocalization index:   24.69\n"
@@ -558,7 +558,7 @@ class TestOrbitalCompositionParser:
 
     def test_parse_atom_compositions(self) -> None:
         output = (
-            "Orbital:    5  Energy(a.u.):     -0.72340  Occ:  2.000000  Type: Alpha&Beta\n"
+            "Orbital:    5  Energy(a.u.):     -0.72340  Occ:  2.000000  Type: Alpha&Beta\n"  # noqa: E501
             "The sum of contributions before normalization   99.999199 %\n"
             "Contributions after normalization:\n"
             "Atom     1(C ) :      4.109 %\n"
@@ -591,7 +591,7 @@ class TestFuzzySpaceParser:
     def test_parse_fuzzy_integration(self) -> None:
         output = (
             "Atomic space  Value  %  %abs\n"
-            "     1(C )            6.21199090            14.790461            14.790461\n"
+            "     1(C )            6.21199090            14.790461            14.790461\n"  # noqa: E501
             "Summing up above values:   42.00000000\n"
             "Summing up absolute value of above values:   42.00000000\n"
         )
@@ -785,7 +785,10 @@ class TestEDAParser:
 
 
 class TestCDFTParser:
-    """Tests for the CDFTParser — uses parse_reactivity instead of parse_global_indices."""
+    """Tests for the CDFTParser.
+
+    uses parse_reactivity instead of parse_global_indices.
+    """
 
     def test_parse_reactivity(self) -> None:
         output = (
@@ -844,7 +847,7 @@ class TestCDFTParser:
             "superdelocalizability analysis\n"
             "alpha parameter:   0.10000 Hartree\n"
             "Atom      D_N       D_E       D_N_0     D_E_0\n"
-            "     1(C )        0.12340        0.56780        0.09870        0.43210\n"
+            "     1(C )        0.12340        0.56780        0.09870        0.43210\n"  # noqa: E501
             "Sum of D_N:   0.12340\n"
             "Sum of D_E:   0.56780\n"
             "Sum of D_N_0:   0.09870\n"
@@ -931,7 +934,7 @@ class TestWavefunctionParser:
         assert o[0].energy_au == pytest.approx(-0.7234)
 
     def test_orbital_info_format2(self) -> None:
-        output = "Orb: 10 Ene(au/eV): -0.50000 -13.606 Occ: 2.000000 Type: AlphaBeta\n"
+        output = "Orb: 10 Ene(au/eV): -0.50000 -13.606 Occ: 2.000000 Type: AlphaBeta\n"  # noqa: E501
         o = WavefunctionParser.parse_orbital_info(output)
         assert len(o) == 1
         assert o[0].orbital_id == 10
@@ -949,7 +952,7 @@ class TestWavefunctionParser:
         assert gtfs[0].exponent == pytest.approx(3047.5249)
 
     def test_parse_basis_info(self) -> None:
-        output = "Basis:    1  Shell:    1  Center:    1(C )  Type: S   GTF:    1 to    6\n"
+        output = "Basis:    1  Shell:    1  Center:    1(C )  Type: S   GTF:    1 to    6\n"  # noqa: E501
         basis = WavefunctionParser.parse_basis_info(output)
         assert len(basis) == 1
         assert basis[0].basis_index == 1
@@ -1097,15 +1100,15 @@ class TestUtilityParser:
 
     def test_parse_menu300_electric_multipole_report(self) -> None:
         output = (
-            " X, Y, Z of center of positive charges (nuclear charges) in Angstrom\n"
-            "    0.000000   -0.000000   -0.000000\n"
-            " X, Y, Z of center of negative charges (electronic charges) in Angstrom\n"
-            "   -0.000000   -0.000000   -0.000000\n\n"
-            " Dipole moment from nuclear charges (a.u.):    0.000000  -0.000000  -0.000000\n"
-            " Dipole moment from electrons (a.u.):          0.000000   0.000000   0.000000\n\n"
-            " Dipole moment (a.u.):       0.000000      0.000000     -0.000000\n"
-            " Dipole moment (Debye):      0.000000      0.000000     -0.000000\n"
-            " Magnitude of dipole moment:      0.000000 a.u.      0.000000 Debye\n\n"
+            " X, Y, Z of center of positive charges (nuclear charges) in Angstrom\n"  # noqa: E501
+            "    0.000000   -0.000000   -0.000000\n"  # noqa: E501
+            " X, Y, Z of center of negative charges (electronic charges) in Angstrom\n"  # noqa: E501
+            "   -0.000000   -0.000000   -0.000000\n\n"  # noqa: E501
+            " Dipole moment from nuclear charges (a.u.):    0.000000  -0.000000  -0.000000\n"  # noqa: E501
+            " Dipole moment from electrons (a.u.):          0.000000   0.000000   0.000000\n\n"  # noqa: E501
+            " Dipole moment (a.u.):       0.000000      0.000000     -0.000000\n"  # noqa: E501
+            " Dipole moment (Debye):      0.000000      0.000000     -0.000000\n"  # noqa: E501
+            " Magnitude of dipole moment:      0.000000 a.u.      0.000000 Debye\n\n"  # noqa: E501
             " Quadrupole moments (Standard Cartesian form):\n"
             " XX=  -23.392606  XY=    0.000000  XZ=   -0.000000\n"
             " YX=    0.000000  YY=  -23.392606  YZ=    0.000000\n"
@@ -1113,27 +1116,27 @@ class TestUtilityParser:
             " Quadrupole moments (Traceless Cartesian form):\n"
             " XX=    2.674668  XY=    0.000000  XZ=   -0.000000\n"
             " YX=    0.000000  YY=    2.674668  YZ=    0.000000\n"
-            " ZX=   -0.000000  ZY=    0.000000  ZZ=   -5.349337\n"
-            " Magnitude of the traceless quadrupole moment tensor:    5.349337\n"
+            " ZX=   -0.000000  ZY=    0.000000  ZZ=   -5.349337\n"  # noqa: E501
+            " Magnitude of the traceless quadrupole moment tensor:    5.349337\n"  # noqa: E501
             " Quadrupole moments (Spherical harmonic form):\n"
-            " Q_2,0 =  -5.349337   Q_2,-1=   0.000000   Q_2,1=  -0.000000\n"
+            " Q_2,0 =  -5.349337   Q_2,-1=   0.000000   Q_2,1=  -0.000000\n"  # noqa: E501
             " Q_2,-2=   0.000000   Q_2,2 =   0.000000\n"
             " Magnitude: |Q_2|=    5.349337\n\n"
             " Octopole moments (Cartesian form):\n"
-            " XXX=    0.0000  YYY=   -0.0000  ZZZ=   -0.0000  XYY=   -0.0000  XXY=   -0.0000\n"
-            " XXZ=   -0.0000  XZZ=    0.0000  YZZ=   -0.0000  YYZ=    0.0000  XYZ=   -0.0000\n"
+            " XXX=    0.0000  YYY=   -0.0000  ZZZ=   -0.0000  XYY=   -0.0000  XXY=   -0.0000\n"  # noqa: E501
+            " XXZ=   -0.0000  XZZ=    0.0000  YZZ=   -0.0000  YYZ=    0.0000  XYZ=   -0.0000\n"  # noqa: E501
             " Octopole moments (Spherical harmonic form):\n"
             " Q_3,0 =     0.0000  Q_3,-1=     0.0000  Q_3,1 =    -0.0000\n"
-            " Q_3,-2=    -0.0000  Q_3,2 =    -0.0000  Q_3,-3=     0.0000  Q_3,3 =     0.0000\n"
+            " Q_3,-2=    -0.0000  Q_3,2 =    -0.0000  Q_3,-3=     0.0000  Q_3,3 =     0.0000\n"  # noqa: E501
             " Magnitude: |Q_3|=      0.0000\n\n"
             " Hexadecapole moments:\n"
-            " XXXX=       -719.7607  YYYY=       -719.7607  ZZZZ=       -106.5004\n"
-            " XXXY=         -0.0000  XXXZ=          0.0000  YYYX=          0.0000\n"
-            " YYYZ=         -0.0000  ZZZX=         -0.0000  ZZZY=          0.0000\n"
-            " XXYY=       -239.9202  XXZZ=       -161.0740  YYZZ=       -161.0740\n"
-            " XXYZ=          0.0000  YYXZ=          0.0000  ZZXY=          0.0000\n\n"
+            " XXXX=       -719.7607  YYYY=       -719.7607  ZZZZ=       -106.5004\n"  # noqa: E501
+            " XXXY=         -0.0000  XXXZ=          0.0000  YYYX=          0.0000\n"  # noqa: E501
+            " YYYZ=         -0.0000  ZZZX=         -0.0000  ZZZY=          0.0000\n"  # noqa: E501
+            " XXYY=       -239.9202  XXZZ=       -161.0740  YYZZ=       -161.0740\n"  # noqa: E501
+            " XXYZ=          0.0000  YYXZ=          0.0000  ZZXY=          0.0000\n\n"  # noqa: E501
             " Electronic spatial extent <r^2>:      459.038682\n"
-            " Components of <r^2>:  X=     215.148370  Y=     215.148370  Z=      28.741943\n"
+            " Components of <r^2>:  X=     215.148370  Y=     215.148370  Z=      28.741943\n"  # noqa: E501
         )
         report = UtilityParser.parse_electric_multipole_moment_report(output)
         assert report is not None
@@ -1165,7 +1168,7 @@ class TestUtilityParser:
             UtilityParser.parse_dipole_moments(output)
 
     def test_parse_dipole_moments_plain_triplet(self) -> None:
-        """Plain triplet format also raises because DipoleMoment needs total."""
+        """Plain triplet format raises because DipoleMoment needs total."""
         output = "Dipole moment (a.u.):   1.234   -0.567   0.901\n"
         with pytest.raises(TypeError, match="total"):
             UtilityParser.parse_dipole_moments(output)

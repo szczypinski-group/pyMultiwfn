@@ -681,6 +681,11 @@ class SurfaceStatistics(ParsedMultiwfnResult):
     positive_skewness: float | None = None
     negative_skewness: float | None = None
 
+    negative_area_pct: float | None = None
+
+    positive_surface_volume: float | None = None
+    negative_surface_volume: float | None = None
+
 
 @dataclass
 class SurfaceAnalysisResult(ParsedMultiwfnResult):
@@ -1068,15 +1073,15 @@ class LocalizationConvergence:
         ``"unoccupied"`` or ``"all"``.
     n_cycles
         Number of cycles to convergence.
-    final_P
-        Final value of the localization functional P.
+    final_p
+        Final value of the localization functional p.
     converged
         Whether the localization converged successfully.
     """
 
     orbital_set: str
     n_cycles: int = 0
-    final_P: float | None = None
+    final_p: float | None = None
     converged: bool = False
 
 

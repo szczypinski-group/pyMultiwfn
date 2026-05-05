@@ -299,23 +299,22 @@ class CriticalPointParser(OutputParser):
                 in_long_summary = False
                 continue
 
-            if in_long_summary:
-                if match := re.match(long_pattern, line):
-                    cp_type_str = f"({match[5]},{match[6]})"
-                    cp = CriticalPoint(
-                        index=int(match[1]),
-                        x=float(match[2]),
-                        y=float(match[3]),
-                        z=float(match[4]),
-                        type=cls.CP_TYPE_NAMES.get(cp_type_str, "unknown"),
-                    )
-                    if match[7]:
-                        cp.nucleus_atom_id = int(match[7])
-                        cp.nucleus_element = match[8].strip()
-                    if match[9]:
-                        cp.bonded_atom1_id = int(match[9])
-                        cp.bonded_atom2_id = int(match[10])
-                    cps.append(cp)
+            if in_long_summary and (match := re.match(long_pattern, line)):
+                cp_type_str = f"({match[5]},{match[6]})"
+                cp = CriticalPoint(
+                    index=int(match[1]),
+                    x=float(match[2]),
+                    y=float(match[3]),
+                    z=float(match[4]),
+                    type=cls.CP_TYPE_NAMES.get(cp_type_str, "unknown"),
+                )
+                if match[7]:
+                    cp.nucleus_atom_id = int(match[7])
+                    cp.nucleus_element = match[8].strip()
+                if match[9]:
+                    cp.bonded_atom1_id = int(match[9])
+                    cp.bonded_atom2_id = int(match[10])
+                cps.append(cp)
 
         if cps:
             return cps
@@ -335,18 +334,17 @@ class CriticalPointParser(OutputParser):
                 in_short_summary = False
                 continue
 
-            if in_short_summary:
-                if match := re.match(short_pattern, line):
-                    cp_type_str = f"({match[5]},{match[6]})"
-                    cps.append(
-                        CriticalPoint(
-                            index=int(match[1]),
-                            x=float(match[2]),
-                            y=float(match[3]),
-                            z=float(match[4]),
-                            type=cls.CP_TYPE_NAMES.get(cp_type_str, "unknown"),
-                        )
+            if in_short_summary and (match := re.match(short_pattern, line)):
+                cp_type_str = f"({match[5]},{match[6]})"
+                cps.append(
+                    CriticalPoint(
+                        index=int(match[1]),
+                        x=float(match[2]),
+                        y=float(match[3]),
+                        z=float(match[4]),
+                        type=cls.CP_TYPE_NAMES.get(cp_type_str, "unknown"),
                     )
+                )
 
         return cps
 
@@ -397,7 +395,7 @@ class CriticalPointParser(OutputParser):
         return None
 
     @staticmethod
-    def parse_bond_paths(stdout: str) -> list[TopologyPath]:
+    def parse_bond_paths(stdout: str) -> list[ParsedMultiwfnResult]:
         """Extract bond path information."""
         pattern = (
             rf"Bond path between atom\s+(\d+).*?and atom\s+(\d+).*?"
@@ -405,10 +403,12 @@ class CriticalPointParser(OutputParser):
         )
         return [
             TopologyPath(
-                atom1_id=int(match[1]),
-                atom2_id=int(match[2]),
-                bcp_id=int(match[3]),
-                path_length=float(match[4]),
+                path_id=int(match[3]),
+                bcp_index=int(match[1]),
+                bcp_type="unknown",
+                target_cp_index=int(match[2]),
+                target_cp_type="unknown",
+                length_bohr=float(match[4]),
             )
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
         ]
@@ -438,7 +438,7 @@ class CubeParser(OutputParser):
         return cls.parse(stdout)
 
     @classmethod
-    def parse(cls, stdout: str) -> list[Cube]:
+    def parse(cls, stdout: str) -> list[ParsedMultiwfnResult]:
         """Extract one ``Cube`` per exported cube file sequence."""
         # Split stdout into per-sequence chunks by cube file markers.
         file_pattern = r"(\S+\.cub[e]?)\s+in current folder"
@@ -456,7 +456,7 @@ class CubeParser(OutputParser):
             end = fm.end()
             chunks.append((stdout[start:end], fm[1]))
 
-        results: list[Cube] = []
+        results: list[ParsedMultiwfnResult] = []
         for chunk, file_name in chunks:
             results.append(cls._parse_chunk(chunk, file_name))
 
@@ -742,7 +742,7 @@ class WavefunctionParser(OutputParser):
                 for k, val in enumerate(vals):
                     if k < len(current_cols):
                         col_idx = current_cols[k]
-                        data[(row_idx, col_idx)] = val
+                        data[(row_idx, col_idx)] = float(val)
                         if row_idx > max_row:
                             max_row = row_idx
                         if col_idx > max_col:
@@ -1237,6 +1237,19 @@ class OrbitalCompositionParser(OutputParser):
     do not overwrite each other.
     """
 
+    _OC_METHOD: dict[Menu, str] = {
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_ALL: "mulliken",
+        Menu.ORBITAL_COMPOSITION_SCPA_ALL: "scpa",
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_ALL: "stout_politzer",
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_MULLIKEN: "mulliken",
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_STOUT: "stout_politzer",
+        Menu.ORBITAL_COMPOSITION_FRAGMENT_SCPA: "scpa",
+        Menu.ORBITAL_COMPOSITION_NAO: "nao",
+        Menu.ORBITAL_COMPOSITION_HIRSHFELD: "hirshfeld",
+        Menu.ORBITAL_COMPOSITION_BECKE: "becke",
+        Menu.LOBA_OXIDATION_STATE: "loba",
+    }
+
     @classmethod
     def parse_for_result(
         cls,
@@ -1246,15 +1259,17 @@ class OrbitalCompositionParser(OutputParser):
         if analysis == Menu.LOBA_OXIDATION_STATE:
             return cls._collect(stdout, [cls.parse_oxidation_states])
 
+        method = cls._OC_METHOD.get(analysis, "unknown")
+
         # Try full basis composition first
         basis_results = cls.parse_basis_compositions(stdout, method)
         if basis_results:
-            return basis_results
+            return list(basis_results)
 
         # Fall back to atom-only composition
         atom_results = cls.parse_atom_compositions(stdout, method)
         if atom_results:
-            return atom_results
+            return list(atom_results)
 
         return []
 
@@ -2143,13 +2158,23 @@ class SpectrumParser(OutputParser):
 class SurfaceParser(OutputParser):
     """Parser for molecular surface analysis output (Menu 12)."""
 
+    _SURFACE_PROPERTY: dict[Menu, str] = {
+        Menu.SURFACE_ANALYSIS_ESP: "esp",
+        Menu.SURFACE_ANALYSIS_ALIE: "alie",
+        Menu.SURFACE_AREA_VOLUME: "area_volume",
+        Menu.BECKE_SURFACE: "becke",
+        Menu.HIRSHFELD_SURFACE: "hirshfeld",
+        Menu.SURFACE_EXTREMA: "surface_extrema",
+        Menu.HIRSHFELD_SURFACE_FINGERPRINT: "hirshfeld_surface_fingerprint",
+    }
+
     @classmethod
     def parse_for_result(
         cls,
         analysis: Menu,
         stdout: str,
     ) -> list[ParsedMultiwfnResult]:
-        mapped_property = _SURFACE_PROPERTY.get(analysis, "unknown")
+        mapped_property = cls._SURFACE_PROPERTY.get(analysis, "unknown")
         result = cls.parse(stdout, mapped_property)
         return [result] if result is not None else []
 
@@ -2500,7 +2525,6 @@ _FUZZY_PROPERTY_FROM_NAME: dict[str, str] = {
     "FUZZY_INTEGRATE_ORB_OVERLAP_DR": "orb_overlap_dr",
     "FUZZY_INTEGRATE_DELTAG_PROMOLECULAR": "deltag_promolecular",
     "FUZZY_INTEGRATE_DELTAG_HIRSHFELD": "deltag_hirshfeld",
-    "FUZZY_INTEGRATE_IRI": "iri",
     "FUZZY_OVERLAP_EDENSITY": "edensity",
     "FUZZY_OVERLAP_NORM_RHO": "norm_rho",
     "FUZZY_OVERLAP_LAPLACIAN": "laplacian",
@@ -3769,7 +3793,7 @@ class CDFTParser(OutputParser):
         # Pattern for Fukui table rows
         # "     1(C )        0.14827        0.15436        0.15132"
         fukui_pat = re.compile(
-            rf"^\s+(\d+)\s*\([A-Za-z]+\s*\)\s+"
+            rf"^\s+(\d+)\s*\([A-Za-z]+)\s+"
             rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+"
             rf"({FLOAT_PATTERN})\s*$"
         )
@@ -3806,7 +3830,7 @@ class CDFTParser(OutputParser):
         results: list[DualDescriptor] = []
 
         dd_pat = re.compile(
-            rf"^\s+(\d+)\s*\([A-Za-z]+\s*\)\s+.*?"
+            rf"^\s+(\d+)\s*\([A-Za-z]+)\s+.*?"
             rf"({FLOAT_PATTERN})\s*$"
         )
 
@@ -4248,12 +4272,24 @@ class UtilityParser(OutputParser):
                 x=float(match[1]),
                 y=float(match[2]),
                 z=float(match[3]),
+                total=(
+                    float(match[1]) ** 2
+                    + float(match[2]) ** 2
+                    + float(match[3]) ** 2
+                )
+                ** 0.5,
             )
         if match := re.search(plain_triplet_pat, stdout, re.IGNORECASE):
             return DipoleMoment(
                 x=float(match[1]),
                 y=float(match[2]),
                 z=float(match[3]),
+                total=(
+                    float(match[1]) ** 2
+                    + float(match[2]) ** 2
+                    + float(match[3]) ** 2
+                )
+                ** 0.5,
             )
         return None
 

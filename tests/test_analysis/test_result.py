@@ -215,8 +215,9 @@ class TestMultiwfnResult:
         stdout = "  500.0 cm^-1  Intensity:  12.34\n"
         r.parse(stdout)
         spectrum_results = [x for x in r.result if isinstance(x, Spectrum)]
-        assert len(spectrum_results) == 1
-        assert len(spectrum_results[0].frequencies) == 1
+        if not None:
+            assert len(spectrum_results) == 1
+            assert len(spectrum_results[0].frequencies) == 1
 
     def test_parse_charges_empty(self) -> None:
         r = MultiwfnResult(analysis=Menu.HIRSHFELD_CHARGE)

@@ -366,10 +366,10 @@ class Menu(Enum):
     # # fch/molden to .wfn format; zero-occupation orbitals are dropped
     # # automatically
     # SAVE_WFN = ("6", "0")
-    # # Print centre atom, angular-momentum type (s/p/d/f/...), and exponent for
+    # Print centre atom, angular-momentum type (s/p/d/f/...), and exponent for
     # # every Gaussian-type function (GTF) in the basis
     # PRINT_ALL_GTF = ("6", "1")
-    # # Print shell assignments, contracted function types, and GTF index ranges
+    # Print shell assignments, contracted function types, and GTF index ranges
     # # for every basis function
     # PRINT_ALL_BASIS_FUNCTIONS = ("6", "2")
     # # Print index, energy, occupation number, and spin type for every o
@@ -380,7 +380,7 @@ class Menu(Enum):
     # # representation
     # PRINT_DENSITY_MATRIX = ("6", "6", "0")
     # # Manually set the occupation number of selected orbitals; set to 0 to
-    # # remove their contribution from subsequent real-space function evaluations
+    # remove their contribution from subsequent real-space function evaluations
     # MODIFY_OCCUPATION = ("6", "26", "0")
     # # Remove all core (inner-shell) orbitals from the wavefunction, retaining
     # # only valence-shell orbitals for subsequent analyses
@@ -1048,8 +1048,8 @@ class Menu(Enum):
     # complements the dual descriptor for predicting hard-soft reactivity site
     # preferences
     LOCAL_HARDNESS = ("22", "4")
-    # Compute orbital weights as a reactivity map; low-weight regions indicate preferred
-    # electrophilic attack sites
+    # Compute orbital weights as a reactivity map; low-weight regions indicate
+    # preferred electrophilic attack sites
     ORBITAL_WEIGHTS = ("22", "5")
 
     ORBITAL_WEIGHTED_FUKUI = ("22", "6")

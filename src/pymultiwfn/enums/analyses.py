@@ -538,7 +538,7 @@ class AnalysisClasses(Enum):
     @classmethod
     def find_category(
         cls,
-        menu: str,
+        menu: Menu,
     ) -> str | None:
         """Find which category a menu belongs to."""
         for analysis in cls:
