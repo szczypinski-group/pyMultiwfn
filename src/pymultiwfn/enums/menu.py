@@ -67,17 +67,17 @@ class Menu(Enum):
     def get_sequence(self) -> tuple[str, ...]:
         return self.value
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 0: Show molecular structure / view orbitals
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Display 3D molecular structure and orbital isosurfaces in the GUI;
     # prints atom coordinates to screen
     # Sequence: 0=Show molecular structure and view orbitals
     VIEW_STRUCTURE = ("0",)
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 1: Output all properties at a point
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Interactive only – prompts for a coordinate or atom index then
     # prints all supported real-space functions at that point (rho, ESP,
     # ELF, ...). INTERACTIVE ONLY - Ignore for now, output will not be
@@ -88,9 +88,9 @@ class Menu(Enum):
     # Sequence: 1=Output all properties at a point
     PROPERTIES_AT_POINT = ("1",)
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 2: Topology analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Uses Newton iteration to locate critical points (CPs) of a chosen
     # real-space function, then traces gradient paths between them. CP
     # types: (3,-3) nuclear/max, (3,-1) bond, (3,+1) ring, (3,+3) cage.
@@ -181,9 +181,9 @@ class Menu(Enum):
     #           four atoms; -1=Set CP searching parameters
     TOPOLOGY_SEARCH_CCP = ("2", "5", "-1")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 3: Output / plot property along a line
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Evaluates a real-space function at 3000 points between two atoms or
     # coordinates and produces a curve map (line.txt exported on request).
     # or output expected results Plot total electrostatic potential (ESP)
@@ -252,9 +252,9 @@ class Menu(Enum):
     #           0.00000
     LINE_SOURCE_FUNCTION = ("3", "19")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 4: Output / plot property in a plane
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # The third tuple element encodes the plane-definition mode: "1" = XY
     # plane (input Z value) "2" = XZ plane (input Y value) "3" = YZ plane
     # (input X value) "4" = plane defined by three atom indices "5" =
@@ -429,9 +429,9 @@ class Menu(Enum):
     #           promolecule property
     PLANE_MAP_PROMOLECULAR_DENSITY = ("4", "-1")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 5: Cube / grid generation
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Evaluates a real-space function on a 3D grid and exports a Gaussian
     # .cube file compatible with VMD, GaussView, ChemCraft, Molekel, etc.
     # Grid quality codes: "1" ~ 50^3 points (low / preview) "2" ~ 80^3
@@ -681,9 +681,9 @@ class Menu(Enum):
     #           1728000 points in total; 0=return to the previous menu
     CUBE_ELF_HIGH = ("5", "9", "3", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 6: Check & modify wavefunction
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Provides subfunctions to inspect, edit, and save the loaded
     # wavefunction. "0" from the submenu returns to main menu.
     # Sequence: 6=Check & modify wavefunction; 5=Print coefficient matrix
@@ -783,9 +783,9 @@ class Menu(Enum):
     #                     arbitrary molecule
     MODIFY_OCCUPATION = ("6", "26", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 7: Population analysis & atomic charges
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Hirshfeld-family methods require atomic reference densities: "1" →
     # use Multiwfn's built-in sphericalised free-atom densities "n" → skip
     # writing the .chg output file to disk "0" → return to main menu after
@@ -941,9 +941,9 @@ class Menu(Enum):
     #           previous menu
     MBIS_CHARGE = ("7", "20", "1", "n", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 8: Orbital composition analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Decomposes each MO into percentage contributions from basis
     # functions, shells, atoms, or user-defined fragments.
     # Sequence: 8=Orbital composition analysis; 1=Orbital composition
@@ -1066,9 +1066,9 @@ class Menu(Enum):
     #           state by LOBA/mLOBA method; 0=return to the previous menu
     LOBA_OXIDATION_STATE = ("8", "100", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 9: Bond order analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Prints bond orders between all atom pairs above a threshold, plus
     # total and free valences for each atom. "0" returns to main menu.
     # INTERACTIVE - REQUIRES USER INPUT
@@ -1167,9 +1167,9 @@ class Menu(Enum):
     #           angular=110. Cost=1.0 x); 0=return to the previous menu
     IBSI_ANALYSIS = ("9", "10", "1", "1", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 10: Density of states
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Reads orbital energies from .fch/.molden/Gaussian-output/plain-text
     # and produces broadened TDOS, PDOS (per fragment), and OPDOS curves.
     # Plot Total Density of States (TDOS): broadened orbital energy
@@ -1188,9 +1188,9 @@ class Menu(Enum):
     #           current folder; 0=return to the previous menu
     PLOT_TDOS_OPDOS = ("10", "00", "2", "3", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 11: Spectra simulation
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Reads transition data from Gaussian/ORCA output or plain-text files
     # and broadens discrete transitions into simulated spectra using
     # Gaussian, Lorentzian, or pseudo-Voigt broadening functions. Simulate
@@ -1200,13 +1200,6 @@ class Menu(Enum):
     #           1=spectrum type 1: IR; 0=Plot spectrum! (compute and draw
     #           the curve); 1=Save graphical file of the spectrum in
     #           current folder
-    # INTERACTIVE ONLY -- requires vibrational frequency/intensity data (a
-    #                     Gaussian or ORCA frequency-job output) in the
-    #                     primary input file; crashes 'end-of-file during
-    #                     read' on the file itself when that data is
-    #                     absent, as in both bundled test files
-    #                     (coord.molden has no frequency job, tddft.out is
-    #                     a TD-DFT excited-state job with no Hessian)
     PLOT_IR_SPECTRUM = ("11", "1", "0", "1")
     # Simulate Raman spectrum from Raman activities; optionally converts
     # activities to intensities given a laser wavelength and temperature
@@ -1214,13 +1207,6 @@ class Menu(Enum):
     #           2=spectrum type 2: Raman (or pre-resonance Raman); 0=Plot
     #           spectrum! (compute and draw the curve); 1=Save graphical
     #           file of the spectrum in current folder
-    # INTERACTIVE ONLY -- requires vibrational frequency/intensity data (a
-    #                     Gaussian or ORCA frequency-job output) in the
-    #                     primary input file; crashes 'end-of-file during
-    #                     read' on the file itself when that data is
-    #                     absent, as in both bundled test files
-    #                     (coord.molden has no frequency job, tddft.out is
-    #                     a TD-DFT excited-state job with no Hessian)
     PLOT_RAMAN_SPECTRUM = ("11", "2", "0", "1")
     # Simulate UV-Vis absorption spectrum by broadening TD-DFT/CIS
     # excitation energies weighted by oscillator strengths; area
@@ -1257,13 +1243,6 @@ class Menu(Enum):
     #           6=spectrum type 6: ROA; 0=Plot spectrum! (compute and draw
     #           the curve); 1=Save graphical file of the spectrum in
     #           current folder
-    # INTERACTIVE ONLY -- requires vibrational frequency/intensity data (a
-    #                     Gaussian or ORCA frequency-job output) in the
-    #                     primary input file; crashes 'end-of-file during
-    #                     read' on the file itself when that data is
-    #                     absent, as in both bundled test files
-    #                     (coord.molden has no frequency job, tddft.out is
-    #                     a TD-DFT excited-state job with no Hessian)
     PLOT_ROA_SPECTRUM = ("11", "6", "0", "1")
     # Simulate NMR spectrum from calculated chemical shielding tensors;
     # convert to chemical shifts by subtracting a reference shielding
@@ -1295,9 +1274,9 @@ class Menu(Enum):
     #           to the previous menu
     PREDICT_COLOR = ("11", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 12: Quantitative molecular surface analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Generates the rho = 0.001 a.u. vdW isosurface via Marching
     # Tetrahedra, maps a chosen function onto it, and computes surface
     # statistical descriptors (V_S, sigma^2, Pi, etc.) and locates surface
@@ -1383,9 +1362,9 @@ class Menu(Enum):
     #           utility of Gaussian
     HIRSHFELD_SURFACE_FINGERPRINT = ("12", "5", "2")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 13: Process grid data
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Works on grid data already held in memory (from Menu 5 cube
     # generation) or loaded from an external .cube/.grd file at startup.
     # Export the current in-memory grid data to a Gaussian .cube file in
@@ -1569,9 +1548,9 @@ class Menu(Enum):
     #                     standalone zero-interaction action
     GRID_VISUALIZE_ISOSURFACE = ("13", "-2")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 14: Adaptive Natural Density Partitioning (AdNDP)
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Decomposes the electron density into n-centre two-electron (nc-2e)
     # bonding elements interactively; visualises results in Multiwfn GUI.
     # NEED SPECIFIC FILE Launch the AdNDP interactive interface to search
@@ -1587,9 +1566,9 @@ class Menu(Enum):
     #                     enabled Gaussian output instead
     ADNDP_ANALYSIS = ("14",)
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 15: Fuzzy atomic space analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Numerical integration of real-space functions in Becke or Hirshfeld
     # fuzzy atomic spaces; computes delocalization indices and
     # aromaticity.
@@ -1851,9 +1830,9 @@ class Menu(Enum):
     #           linear response index); q=quit / return without change
     PARA_LINEAR_RESPONSE = ("15", "10", "q")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 16: Charge Decomposition Analysis (CDA)
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Generalised CDA (GCDA): decomposes orbital interactions between two
     # or more fragments into donation, back-donation, repulsion, and
     # residual. INTERACTIVE Launch the CDA/GCDA: decompose charge transfer
@@ -1867,9 +1846,9 @@ class Menu(Enum):
     #                     filled with a fixed default
     CDA_ANALYSIS = ("16",)
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 17: Basin analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Locates attractors of a real-space function, builds gradient-
     # following basins, and integrates properties (rho, multipoles, DI)
     # within each.
@@ -2009,9 +1988,9 @@ class Menu(Enum):
     #           orbitals
     BASIN_ANALYSIS_CUSTOM = ("17", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 18: Electron excitation analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Analyses TD-DFT/CIS excited states loaded from Gaussian or ORCA
     # output. Analyse hole and electron density distributions for a TD-DFT
     # transition: compute centroid distance, t index, and Sr overlap
@@ -2091,9 +2070,9 @@ class Menu(Enum):
     #           polarization analysis based on electron excitations
     CONDITIONAL_DENSITY = ("18", "17")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 19: Orbital localization
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Transforms canonical delocalized MOs into spatially localised MOs
     # for chemical interpretation as bonds, lone pairs, and core orbitals.
     # Sequence: 19=Orbital localization analysis; 1=Localizing occupied
@@ -2153,9 +2132,9 @@ class Menu(Enum):
     #           orbitals separately
     BOYS_LOCALIZATION_ALL = ("19", "-6", "10", "2")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 20: Weak interaction analysis
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Methods based on the Reduced Density Gradient (RDG) and related
     # functions to visualise and quantify non-covalent interactions (NCI).
     # NCI analysis from wavefunction: generate RDG and sign(lambda2)*rho
@@ -2268,9 +2247,9 @@ class Menu(Enum):
     #           option here (redisplays the same menu; only -12/-10 exist)
     AMIGM_ANALYSIS = ("20", "-11")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 21: Energy Decomposition Analysis (EDA)
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Simple EDA using combined fragment wavefunctions: decomposes
     # interaction energy into electrostatic, Pauli exchange-repulsion,
     # polarisation, and dispersion components
@@ -2299,9 +2278,9 @@ class Menu(Enum):
     #           contribution to dispersion energy
     DISPERSION_ATOMIC_CONTRIBUTION = ("21", "4")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 22: Conceptual DFT (CDFT)
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Chemical reactivity descriptors derived from DFT response theory.
     # Launch the CDFT module: compute global reactivity indices including
     # chemical potential mu, chemical hardness eta, softness S, and
@@ -2359,9 +2338,9 @@ class Menu(Enum):
     #                     primary input
     CDFT_GRID_FUKUI_POTENTIAL = ("22", "9")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 23: ETS-NOCV
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Extended Transition State combined with Natural Orbitals for
     # Chemical Valence: energy-decomposed orbital interaction analysis.
     # ETS-NOCV: diagonalise the deformation density matrix to obtain NOCV
@@ -2374,9 +2353,9 @@ class Menu(Enum):
     #                     filled with a fixed default
     ETS_NOCV_ANALYSIS = ("23",)
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 24: Polarizability
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # INTERACTIVE Parse and print polarizability (alpha) and
     # hyperpolarizability (beta, gamma) tensors from a Gaussian frequency
     # or finite-field task output file
@@ -2404,9 +2383,9 @@ class Menu(Enum):
     #           representations
     UNIT_SPHERE_POLARIZABILITY = ("24", "5")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 25: Aromaticity
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Magnetic, geometric, and electronic indices for aromaticity
     # assessment. Anisotropy of the Induced Current Density: compute the
     # magnetically induced ring-current density and export as a 3D
@@ -2511,9 +2490,9 @@ class Menu(Enum):
     #           14=NICS-2D scan plane map
     NICS_2D_MAP = ("25", "14")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 100: Utilities Part 1
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # INTERACTIVE Plot a 2D scatter graph of two real-space functions
     # evaluated on the same grid and export both as .cube files; classic
     # use is RDG vs. sign(lambda2)*rho for the NCI scatter plot
@@ -2679,9 +2658,9 @@ class Menu(Enum):
     #           the default (press ENTER); 0=return to the previous menu
     GENERATE_CP2K_INPUT = ("100", "2", "25", "", "0")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 200: Utilities Part 2
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 1=electric dipole moment
     #           integral; 3=Between all orbitals
@@ -2944,9 +2923,9 @@ class Menu(Enum):
     #           orthogonalization between occupied orbitals
     LOWDIN_ORTHOGONALIZATION = ("200", "21")
 
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 300: Utilities Part 3
-    # ──────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     # Calculate the free void volume in a periodic unit cell not occupied
     # by atomic vdW spheres; relevant for porosity characterisation in
     # MOFs, zeolites, and porous organic cages
