@@ -37,6 +37,7 @@ from pymultiwfn.analysis.result import (
     Color,
     CondensedFukui,
     CoordinationNumber,
+    CorrelationIndex,
     CriticalPoint,
     Cube,
     DelocalizationIndex,
@@ -58,12 +59,17 @@ from pymultiwfn.analysis.result import (
     FuzzyIntegrationResult,
     GaussianTypeFunction,
     GridExtremum,
+    GridStatistics,
     HoleElectron,
     HOMOLUMOGap,
     IBSIAnalysis,
     IBSIEntry,
     LambdaIndex,
+    LineProfile,
+    LMOAtomContribution,
+    LocalizationConvergence,
     LocalizationIndex,
+    LocalizedOrbital,
     MolecularMultipole,
     MultiCenterBondOrder,
     NICSScan,
@@ -73,6 +79,7 @@ from pymultiwfn.analysis.result import (
     OrbitalBasisComposition,
     OrbitalBasisEntry,
     OrbitalEnergy,
+    OrbitalLocalizationResult,
     OrbitalShellEntry,
     OrbitalShellTypeComposition,
     OrbitalWeightDecomposition,
@@ -82,6 +89,7 @@ from pymultiwfn.analysis.result import (
     OverlapIntegrationMatrix,
     OxidationState,
     ParsedMultiwfnResult,
+    PlaneMap,
     PoincareHopfCounts,
     Polarizability,
     PolarizabilityTensor,
@@ -415,6 +423,141 @@ class CriticalPointParser(OutputParser):
 
 
 # =============================================================================
+# Menu 3: Property along a line
+# =============================================================================
+
+
+class LineParser(OutputParser):
+    """Parser for "output and plot property in a line" output (Menu 3).
+
+    Multiwfn does not print the full per-point curve to stdout (only
+    to the exported ``line.txt``/``curve*.txt`` files); it does print
+    the line endpoints, point count, and summary statistics, which is
+    what this parser extracts.
+    """
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        result = cls.parse(stdout)
+        return [result] if result is not None else []
+
+    @classmethod
+    def parse(cls, stdout: str) -> LineProfile | None:
+        profile = LineProfile()
+        found = False
+
+        origin_pat = (
+            rf"Original point in X,Y,Z:\s+({FLOAT_PATTERN})\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(origin_pat, stdout):
+            profile.origin_x_bohr = float(match[1])
+            profile.origin_y_bohr = float(match[2])
+            profile.origin_z_bohr = float(match[3])
+            found = True
+
+        end_pat = (
+            rf"End point in X,Y,Z:\s+({FLOAT_PATTERN})\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(end_pat, stdout):
+            profile.end_x_bohr = float(match[1])
+            profile.end_y_bohr = float(match[2])
+            profile.end_z_bohr = float(match[3])
+            found = True
+
+        if match := re.search(r"Number of points:\s+(\d+)", stdout):
+            profile.n_points = int(match[1])
+            found = True
+
+        minmax_pat = (
+            rf"Minimal/Maximum value:\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(minmax_pat, stdout):
+            profile.minimum = float(match[1])
+            profile.maximum = float(match[2])
+            found = True
+
+        sum_pat = (
+            rf"Summing up all values:\s+({FLOAT_PATTERN})\s+"
+            rf"Integration value:\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(sum_pat, stdout):
+            profile.sum_all_values = float(match[1])
+            profile.integration_value = float(match[2])
+            found = True
+
+        return profile if found else None
+
+
+# =============================================================================
+# Menu 4: Property in a plane
+# =============================================================================
+
+
+class PlaneParser(OutputParser):
+    """Parser for "output and plot property in a plane" output (Menu 4).
+
+    As with :class:`LineParser`, the full 2D grid is only ever written
+    to ``plane.txt``/a graphical file, never printed to stdout -- this
+    extracts the plane geometry and summary min/max that Multiwfn does
+    print.
+    """
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        result = cls.parse(stdout)
+        return [result] if result is not None else []
+
+    @classmethod
+    def parse(cls, stdout: str) -> PlaneMap | None:
+        plane = PlaneMap()
+        found = False
+
+        origin_pat = (
+            rf"[Xx]/Y/Z of origin of the plane:\s+({FLOAT_PATTERN})\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(origin_pat, stdout):
+            plane.origin_x_bohr = float(match[1])
+            plane.origin_y_bohr = float(match[2])
+            plane.origin_z_bohr = float(match[3])
+            found = True
+
+        end_pat = (
+            rf"[Xx]/Y/Z of end of the plane:\s+({FLOAT_PATTERN})\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(end_pat, stdout):
+            plane.end_x_bohr = float(match[1])
+            plane.end_y_bohr = float(match[2])
+            plane.end_z_bohr = float(match[3])
+            found = True
+
+        if match := re.search(
+            rf"[Tt]he minimum of data:\s+({FLOAT_PATTERN})", stdout
+        ):
+            plane.minimum = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"[Tt]he maximum of data:\s+({FLOAT_PATTERN})", stdout
+        ):
+            plane.maximum = float(match[1])
+            found = True
+
+        return plane if found else None
+
+
+# =============================================================================
 # Menu 5 / 13: Cube / grid operations
 # =============================================================================
 # ── parsers.py ──
@@ -557,6 +700,125 @@ class CubeParser(OutputParser):
             cube.integral_negative = float(match[1])
 
         return cube
+
+
+class GridParser(OutputParser):
+    """Parser for "process grid data" output (Menu 13).
+
+    Most Menu 13 sub-options just write ``output.txt`` (extracted
+    points/planes/averages) with little stdout beyond a menu re-print,
+    which is already recorded by path -- nothing to parse there. The
+    "show statistic data" sub-option is the one that prints a real
+    summary block, which this extracts.
+    """
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        result = cls.parse_statistics(stdout)
+        return [result] if result is not None else []
+
+    @classmethod
+    def parse_statistics(cls, stdout: str) -> GridStatistics | None:
+        stats = GridStatistics()
+        found = False
+
+        min_pat = (
+            rf"[Tt]he minimum value:\s+({FLOAT_PATTERN})\s+at\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(min_pat, stdout):
+            stats.minimum = float(match[1])
+            stats.minimum_x_bohr = float(match[2])
+            stats.minimum_y_bohr = float(match[3])
+            stats.minimum_z_bohr = float(match[4])
+            found = True
+
+        max_pat = (
+            rf"[Tt]he maximum value:\s+({FLOAT_PATTERN})\s+at\s+"
+            rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})"
+        )
+        if match := re.search(max_pat, stdout):
+            stats.maximum = float(match[1])
+            stats.maximum_x_bohr = float(match[2])
+            stats.maximum_y_bohr = float(match[3])
+            stats.maximum_z_bohr = float(match[4])
+            found = True
+
+        if match := re.search(rf"Average value:\s+({FLOAT_PATTERN})", stdout):
+            stats.average = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Root mean square \(RMS\):\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.rms = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Standard deviation:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.std_dev = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Volume of positive value space:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.volume_positive_bohr3 = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Volume of negative value space:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.volume_negative_bohr3 = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Volume of all space:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.volume_all_bohr3 = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Summing up positive values:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.sum_positive = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Summing up negative values:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.sum_negative = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Summing up all values:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.sum_all = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Integral of positive data:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.integral_positive = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Integral of negative data:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.integral_negative = float(match[1])
+            found = True
+
+        if match := re.search(
+            rf"Integral of all data:\s+({FLOAT_PATTERN})", stdout
+        ):
+            stats.integral_all = float(match[1])
+            found = True
+
+        return stats if found else None
 
 
 # =============================================================================
@@ -894,6 +1156,8 @@ class ChargeParser(OutputParser):
         Menu.RESP_CHARGE: "resp",
         Menu.GASTEIGER_CHARGE: "gasteiger",
         Menu.MBIS_CHARGE: "mbis",
+        Menu.MULLIKEN_DECOMPOSE_ATOMIC_POPULATION: "mulliken",
+        Menu.MULLIKEN_DECOMPOSE_BASIS_FUNCTION: "mulliken",
     }
     _HEADER_METHOD: list[tuple[re.Pattern[str], str]] = []
 
@@ -1248,6 +1512,20 @@ class OrbitalCompositionParser(OutputParser):
         Menu.ORBITAL_COMPOSITION_HIRSHFELD: "hirshfeld",
         Menu.ORBITAL_COMPOSITION_BECKE: "becke",
         Menu.LOBA_OXIDATION_STATE: "loba",
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_HOMO: "mulliken",
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_LUMO: "mulliken",
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_HOMO: "stout_politzer",
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_LUMO: "stout_politzer",
+        Menu.ORBITAL_COMPOSITION_SCPA_HOMO: "scpa",
+        Menu.ORBITAL_COMPOSITION_SCPA_LUMO: "scpa",
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_HOMO: "hirshfeld",
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_LUMO: "hirshfeld",
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_ALL: "hirshfeld",
+        Menu.ATOM_CONTRIBUTION_HIRSHFELD: "hirshfeld",
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_HOMO: "becke",
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_LUMO: "becke",
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_ALL: "becke",
+        Menu.ATOM_CONTRIBUTION_BECKE: "becke",
     }
 
     @classmethod
@@ -2166,6 +2444,14 @@ class SurfaceParser(OutputParser):
         Menu.HIRSHFELD_SURFACE: "hirshfeld",
         Menu.SURFACE_EXTREMA: "surface_extrema",
         Menu.HIRSHFELD_SURFACE_FINGERPRINT: "hirshfeld_surface_fingerprint",
+        Menu.QMSA_ESP: "esp",
+        Menu.QMSA_ALIE: "alie",
+        Menu.QMSA_LEA: "lea",
+        Menu.QMSA_LEAE: "leae",
+        Menu.QMSA_EDR: "edr",
+        Menu.QMSA_MAXEDR: "maxedr",
+        Menu.QMSA_EDENSITY: "edensity",
+        Menu.QMSA_LAMBDA2_RHO: "lambda2_rho",
     }
 
     @classmethod
@@ -3545,6 +3831,104 @@ class ExcitationParser(OutputParser):
 
 
 # =============================================================================
+# Menu 19: Orbital localization
+# =============================================================================
+
+
+class OrbitalLocalizationParser(OutputParser):
+    """Parser for orbital localization output (Menu 19).
+
+    Extracts the convergence history (cycle-by-cycle P value and
+    final convergence status). Per-LMO character output (single/two
+    -center classification with atom contributions) is not extracted:
+    it is printed only after a "Calculating orbital compositions..."
+    step that crashes this Multiwfn build for the Pipek-Mezey/Lowdin,
+    Pipek-Mezey/Becke, and Boys variants (a build bug, not a sequence
+    issue -- see the ``Menu`` enum's own notes), so no verified sample
+    of that section's real text format was available to build a
+    regex against.
+    """
+
+    _METHOD: dict[Menu, tuple[str, str | None, str]] = {
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED: (
+            "pipek_mezey", "hirshfeld", "occupied",
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL: (
+            "pipek_mezey", "hirshfeld", "all",
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED: (
+            "pipek_mezey", "lowdin", "occupied",
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_ALL: (
+            "pipek_mezey", "lowdin", "all",
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED: (
+            "pipek_mezey", "becke", "occupied",
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_ALL: (
+            "pipek_mezey", "becke", "all",
+        ),
+        Menu.BOYS_LOCALIZATION_OCCUPIED: ("boys", None, "occupied"),
+        Menu.BOYS_LOCALIZATION_ALL: ("boys", None, "all"),
+    }
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        method, population_scheme, orbital_set = cls._METHOD.get(
+            analysis, ("unknown", None, "")
+        )
+        convergence = cls.parse_convergence(stdout, orbital_set)
+        if not convergence:
+            return []
+        return [
+            OrbitalLocalizationResult(
+                method=method,
+                population_scheme=population_scheme,
+                orbital_set=orbital_set,
+                convergence=convergence,
+            )
+        ]
+
+    @staticmethod
+    def parse_convergence(
+        stdout: str, orbital_set: str
+    ) -> list[LocalizationConvergence]:
+        """Extract cycle-by-cycle convergence history.
+
+        Each "Localizing ... orbitals..." header starts a new run
+        (occupied, then unoccupied for "all" runs); each run ends at
+        its own "Successfully converged!" or a lack thereof.
+        """
+        runs: list[LocalizationConvergence] = []
+        cycle_pat = re.compile(
+            rf"Cycle:\s*(\d+)\s+P:\s*({FLOAT_PATTERN})\s+"
+            rf"Delta P:\s*({FLOAT_PATTERN})"
+        )
+
+        blocks = re.split(r"Localizing .*orbitals\.\.\.", stdout)
+        # blocks[0] is text before the first localization run.
+        for block in blocks[1:]:
+            cycles = cycle_pat.findall(block)
+            if not cycles:
+                continue
+            last_cycle, last_p, _ = cycles[-1]
+            converged = "Successfully converged" in block
+            runs.append(
+                LocalizationConvergence(
+                    orbital_set=orbital_set,
+                    n_cycles=int(last_cycle),
+                    final_p=float(last_p),
+                    converged=converged,
+                )
+            )
+        return runs
+
+
+# =============================================================================
 # Menu 20: Weak interaction analysis
 # =============================================================================
 
@@ -4194,6 +4578,7 @@ class UtilityParser(OutputParser):
                 cls.parse_quadrupole_moments,
             ],
             Menu.BLA_BOA_ANALYSIS: [cls.parse_bla_boa],
+            Menu.CORRELATION_INDEX: [cls.parse_correlation_index],
         }
         default = [
             cls.parse_bond_lengths,
@@ -4342,6 +4727,25 @@ class UtilityParser(OutputParser):
             boa = float(match[1])
 
         return BLA_BOA(bla=bla, boa=boa)
+
+    @staticmethod
+    def parse_correlation_index(stdout: str) -> CorrelationIndex | None:
+        """Extract nondynamic/dynamic/total correlation index (Menu 200)."""
+        non_pat = rf"[Nn]ondynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        dyn_pat = rf"(?<!non)[Dd]ynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        tot_pat = rf"[Tt]otal correlation index[=:\s]+({FLOAT_PATTERN})"
+
+        non_match = re.search(non_pat, stdout)
+        dyn_match = re.search(dyn_pat, stdout)
+        tot_match = re.search(tot_pat, stdout)
+        if not (non_match and dyn_match and tot_match):
+            return None
+
+        return CorrelationIndex(
+            nondynamic_correlation_index=float(non_match[1]),
+            dynamic_correlation_index=float(dyn_match[1]),
+            total_correlation_index=float(tot_match[1]),
+        )
 
     @staticmethod
     def parse_electric_multipole_moment_report(
@@ -4610,6 +5014,99 @@ class ParserRoute:
         Menu.TOPOLOGY_CP_REAL_SPACE_POINTS: CriticalPointParser,
         Menu.TOPOLOGY_CP_PATHS_3MINUS3_3MINUS1: CriticalPointParser,
         Menu.TOPOLOGY_CP_PATHS_3PLUS1_3PLUS3: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_CPS: CriticalPointParser,
+        Menu.TOPOLOGY_ANALYSIS_COMPLETE: CriticalPointParser,
+        Menu.TOPOLOGY_ESP_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_LOL_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_ELF_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_LAPLACIAN_ANALYSIS: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_BCP: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_RCP: CriticalPointParser,
+        Menu.TOPOLOGY_SEARCH_CCP: CriticalPointParser,
+        # Menu 3 — property along a line
+        Menu.LINE_ESP: LineParser,
+        Menu.LINE_ELECTRON_DENSITY: LineParser,
+        Menu.LINE_LAPLACIAN: LineParser,
+        Menu.LINE_ELF: LineParser,
+        Menu.LINE_LOL: LineParser,
+        Menu.LINE_RDG: LineParser,
+        Menu.LINE_SPIN_DENSITY: LineParser,
+        Menu.LINE_GRADIENT_NORM: LineParser,
+        Menu.LINE_KINETIC_G: LineParser,
+        Menu.LINE_KINETIC_K: LineParser,
+        Menu.LINE_ALIE: LineParser,
+        Menu.LINE_SOURCE_FUNCTION: LineParser,
+        # Menu 4 — property in a plane
+        Menu.PLANE_MAP_DENSITY: PlaneParser,
+        Menu.PLANE_MAP_ESP: PlaneParser,
+        Menu.PLANE_MAP_ELF: PlaneParser,
+        Menu.PLANE_MAP_LOL: PlaneParser,
+        Menu.PLANE_MAP_GRADIENT: PlaneParser,
+        Menu.PLANE_MAP_LAPLACIAN: PlaneParser,
+        Menu.PLANE_MAP_SPIN_DENSITY: PlaneParser,
+        Menu.PLANE_MAP_RDG: PlaneParser,
+        Menu.PLANE_MAP_SIGN_LAMBDA2_RHO: PlaneParser,
+        Menu.PLANE_MAP_ALIE: PlaneParser,
+        Menu.PLANE_MAP_KINETIC_G: PlaneParser,
+        Menu.PLANE_MAP_KINETIC_K: PlaneParser,
+        Menu.PLANE_MAP_SOURCE_FUNCTION: PlaneParser,
+        Menu.PLANE_MAP_ORBITAL_WAVEFUNCTION: PlaneParser,
+        Menu.PLANE_MAP_FUKUI_MINUS: PlaneParser,
+        Menu.PLANE_MAP_FUKUI_PLUS: PlaneParser,
+        Menu.PLANE_MAP_DUAL_DESCRIPTOR: PlaneParser,
+        Menu.PLANE_MAP_DEFORMATION_DENSITY: PlaneParser,
+        Menu.PLANE_MAP_PROMOLECULAR_DENSITY: PlaneParser,
+        # Menu 13 — process grid data
+        Menu.EXPORT_CUBE: GridParser,
+        Menu.EXPORT_GRID_ALL_POINTS: GridParser,
+        Menu.GRID_EXTRACT_PLANE_XY: GridParser,
+        Menu.GRID_EXTRACT_PLANE_XZ: GridParser,
+        Menu.GRID_EXTRACT_PLANE_YZ: GridParser,
+        Menu.GRID_AVERAGE_XY: GridParser,
+        Menu.GRID_AVERAGE_XZ: GridParser,
+        Menu.GRID_AVERAGE_YZ: GridParser,
+        Menu.GRID_EXTRACT_PLANE_3ATOMS: GridParser,
+        Menu.GRID_EXTRACT_PLANE_3POINTS: GridParser,
+        Menu.GRID_EXTRACT_VALUE_RANGE: GridParser,
+        Menu.GRID_MATH_OPERATIONS: GridParser,
+        Menu.GRID_MAP_TO_ISOSURFACE: GridParser,
+        Menu.GRID_SET_VALUE_DISTANCE: GridParser,
+        Menu.GRID_SET_VALUE_FRAGMENT: GridParser,
+        Menu.GRID_SET_VALUE_RANGE: GridParser,
+        Menu.GRID_SCALE_RANGE: GridParser,
+        Menu.GRID_STATISTIC_DATA: GridParser,
+        Menu.GRID_PLOT_INTEGRAL_CURVE: GridParser,
+        Menu.GRID_VISUALIZE_ISOSURFACE: GridParser,
+        # Menu 19 — orbital localization
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED: (
+            OrbitalLocalizationParser
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL: (
+            OrbitalLocalizationParser
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED: (
+            OrbitalLocalizationParser
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_ALL: OrbitalLocalizationParser,
+        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED: (
+            OrbitalLocalizationParser
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_ALL: OrbitalLocalizationParser,
+        Menu.BOYS_LOCALIZATION_OCCUPIED: OrbitalLocalizationParser,
+        Menu.BOYS_LOCALIZATION_ALL: OrbitalLocalizationParser,
+        # Menu 14/16/23 — AdNDP, CDA, and ETS-NOCV all require external
+        # resources (NPA data already present in the input file for
+        # AdNDP; separate fragment wavefunction files for CDA and
+        # ETS-NOCV) not available in this environment, so no real
+        # stdout sample was available to build a dedicated parser
+        # against. Routed to UtilityParser's generic fallback (bond
+        # length/angle/dihedral/dipole/coordination-number patterns) so
+        # they are not silently dropped, though it is unlikely to match
+        # much of their actual output -- a dedicated parser should
+        # replace this once real output is available.
+        Menu.ADNDP_ANALYSIS: UtilityParser,
+        Menu.CDA_ANALYSIS: UtilityParser,
+        Menu.ETS_NOCV_ANALYSIS: UtilityParser,
         # Menu 10 — density of states
         Menu.PLOT_TDOS: DOSParser,
         Menu.PLOT_TDOS_OPDOS: DOSParser,
@@ -4720,8 +5217,212 @@ class ParserRoute:
         Menu.CUBE_DENSITY_HIGH: CubeParser,
         Menu.CUBE_ESP_HIGH: CubeParser,
         Menu.CUBE_ELF_HIGH: CubeParser,
+        Menu.CUBE_LOCAL_INFORMATION_ENTROPY: CubeParser,
+        Menu.CUBE_ELECTROSTATIC_POTENTIAL_FROM_CHARGE: CubeParser,
+        Menu.CUBE_RDG_QUICK: CubeParser,
+        Menu.CUBE_CORRELATION_HOLE_ALPHA: CubeParser,
+        Menu.CUBE_EDR: CubeParser,
+        Menu.CUBE_DELTAG_PROMOLECULAR_APPROX: CubeParser,
+        Menu.CUBE_DELTAG_HIRSHFELD_PAER_APPROX: CubeParser,
+        Menu.CUBE_IRI: CubeParser,
+        Menu.CUBE_VDW_POTENTIAL: CubeParser,
+        # Menu 6 — wavefunction check/modify
+        Menu.PRINT_COEFFICIENT_MATRIX: WavefunctionParser,
+        Menu.PRINT_DENSITY_MATRIX: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_FOCK: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_OVERLAP: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_ELECTRIC_DIPOLE: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_MAGNETIC_DIPOLE: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_VELOCITY: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_EKINETIC: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_QUADRUPOLE: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_OCTOPOLE: WavefunctionParser,
+        Menu.PRINT_INTEGRAL_MATRIX_HEXADECAPOLE: WavefunctionParser,
+        # Menu 7 — charges (Mulliken decomposition variants)
+        Menu.MULLIKEN_DECOMPOSE_ATOMIC_POPULATION: ChargeParser,
+        Menu.MULLIKEN_DECOMPOSE_BASIS_FUNCTION: ChargeParser,
+        # Menu 8 — orbital composition (HOMO/LUMO and fragment variants)
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_HOMO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_MULLIKEN_LUMO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_HOMO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_STOUT_POLITZER_LUMO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_SCPA_HOMO: OrbitalCompositionParser,
+        Menu.ORBITAL_COMPOSITION_SCPA_LUMO: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_HOMO: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_LUMO: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_HIRSHFELD_ALL: OrbitalCompositionParser,
+        Menu.ATOM_CONTRIBUTION_HIRSHFELD: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_HOMO: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_LUMO: OrbitalCompositionParser,
+        Menu.FRAGMENT_CONTRIBUTION_BECKE_ALL: OrbitalCompositionParser,
+        Menu.ATOM_CONTRIBUTION_BECKE: OrbitalCompositionParser,
+        # Menu 12 — surface analysis (QMSA family)
+        Menu.QMSA_ESP: SurfaceParser,
+        Menu.QMSA_ALIE: SurfaceParser,
+        Menu.QMSA_LEA: SurfaceParser,
+        Menu.QMSA_LEAE: SurfaceParser,
+        Menu.QMSA_EDR: SurfaceParser,
+        Menu.QMSA_MAXEDR: SurfaceParser,
+        Menu.QMSA_EDENSITY: SurfaceParser,
+        Menu.QMSA_LAMBDA2_RHO: SurfaceParser,
+        # Menu 15 — fuzzy atomic space (remaining integrate/overlap variants)
+        Menu.FUZZY_INTEGRATE_NORM_RHO: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_LAPLACIAN: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ORB_WFN_HOMO: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ORB_WFN_LUMO: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ESPIN_DENSITY: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_KR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_GR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ESP_CHARGES: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ELF: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_LOL: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_LOCAL_ENTROPY: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ESP: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_RDG: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_RDG_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_LAMBDA2RHO: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_LAMBDA2RGO_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ALIE: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_EDR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_ORB_OVERLAP_DR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_DELTAG_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_DELTAG_HIRSHFELD: FuzzySpaceParser,
+        Menu.FUZZY_INTEGRATE_IRI: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_LAPLACIAN: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ORB_WFN_HOMO: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ORB_WFN_LUMO: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ESPIN_DENSITY: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_KR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_GR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ESP_CHARGES: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ELF: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_LOL: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_LOCAL_ENTROPY: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ESP: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_RDG: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_RDG_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_LAMBDA2RHO: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_LAMBDA2RGO_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ALIE: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_EDR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_ORB_OVERLAP_DR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_DELTAG_PROMOLECULAR: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_DELTAG_HIRSHFELD: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_IRI: FuzzySpaceParser,
+        Menu.CLRK_MATRIX: FuzzySpaceParser,
+        # Menu 17 — basin analysis (remaining property variants)
+        Menu.BASIN_ANALYSIS_RHO: BasinParser,
+        Menu.BASIN_EDENSITY: BasinParser,
+        Menu.BASIN_NORM_RHO: BasinParser,
+        Menu.BASIN_LAPLACIAN: BasinParser,
+        Menu.BASIN_ORB_WFN_HOMO: BasinParser,
+        Menu.BASIN_ORB_WFN_LUMO: BasinParser,
+        Menu.BASIN_ESPIN_DENSITY: BasinParser,
+        Menu.BASIN_KR: BasinParser,
+        Menu.BASIN_GR: BasinParser,
+        Menu.BASIN_ESP_CHARGES: BasinParser,
+        Menu.BASIN_ELF: BasinParser,
+        Menu.BASIN_LOL: BasinParser,
+        Menu.BASIN_LOCAL_ENTROPY: BasinParser,
+        Menu.BASIN_ESP: BasinParser,
+        Menu.BASIN_RDG: BasinParser,
+        Menu.BASIN_RDG_PROMOLECULAR: BasinParser,
+        Menu.BASIN_LAMBDA2RHO: BasinParser,
+        Menu.BASIN_LAMBDA2RGO_PROMOLECULAR: BasinParser,
+        Menu.BASIN_ALIE: BasinParser,
+        Menu.BASIN_EDR: BasinParser,
+        Menu.BASIN_ORB_OVERLAP_DR: BasinParser,
+        Menu.BASIN_DELTAG_PROMOLECULAR: BasinParser,
+        Menu.BASIN_DELTAG_HIRSHFELD: BasinParser,
+        Menu.BASIN_IRI: BasinParser,
+        # Menu 18 — electron excitation analysis (remaining variants)
+        Menu.TRANSITION_DENSITY_MATRIX: ExcitationParser,
+        Menu.TRANSITION_DIPOLE_MOMENTS: ExcitationParser,
+        Menu.GENERATE_NTO: ExcitationParser,
+        Menu.CONDITIONAL_DENSITY: ExcitationParser,
+        # Menu 22 — CDFT (remaining variants)
+        Menu.ORBITAL_WEIGHTS: CDFTParser,
+        Menu.SUPERDELOCALIZABILITIES_NUC_E: CDFTParser,
         # Menu 100 — utilities
         Menu.GEOMETRY_PROPERTIES: UtilityParser,
         Menu.ELECTRIC_MULTIPOLE_MOMENTS: UtilityParser,
         Menu.BLA_BOA_ANALYSIS: UtilityParser,
+        Menu.SCATTER_GRAPH_TWO_FUNCTIONS: UtilityParser,
+        Menu.EXPORT_VARIOUS_FILES: UtilityParser,
+        Menu.VDW_VOLUME: UtilityParser,
+        Menu.INTEGRATE_WHOLE_SPACE: UtilityParser,
+        Menu.ORBITAL_OVERLAP_INTEGRAL: UtilityParser,
+        Menu.MONITOR_SCF_CONVERGENCE: UtilityParser,
+        Menu.GAUSSIAN_INITIAL_GUESS: UtilityParser,
+        Menu.FRAGMENT_GUESS_INPUT: UtilityParser,
+        Menu.ATOMIC_COORDINATION: UtilityParser,
+        Menu.ORBITAL_OVERLAP_CENTROID: UtilityParser,
+        Menu.BIORTHOGONALIZATION: UtilityParser,
+        Menu.HOMA_BIRD_AROMATICITY: UtilityParser,
+        Menu.LOLIPOP_INDEX: UtilityParser,
+        Menu.INTERMOLECULAR_OVERLAP: UtilityParser,
+        Menu.GENERATE_FOCK_MATRIX: UtilityParser,
+        Menu.ELECTRON_TRANSPORT_ROUTE: UtilityParser,
+        Menu.COMBINE_FRAGMENTS: UtilityParser,
+        Menu.HELLMANN_FEYNMAN_FORCES: UtilityParser,
+        Menu.DETECT_PI_ORBITALS: UtilityParser,
+        Menu.FIT_FUNCTION_TO_ATOMS: UtilityParser,
+        Menu.NICS_ZZ_NONPLANAR: UtilityParser,
+        Menu.RING_AREA_PERIMETER: UtilityParser,
+        # Menu 200 — utilities part 2
+        Menu.ORBITAL_INTEGRAL_ELECTRIC_DIPOLE: UtilityParser,
+        Menu.ORBITAL_INTEGRAL_MAGNETIC_DIPOLE: UtilityParser,
+        Menu.ORBITAL_INTEGRAL_VELOCITY: UtilityParser,
+        Menu.ORBITAL_INTEGRAL_KINETIC_ENERGY: UtilityParser,
+        Menu.ORBITAL_INTEGRAL_OVERLAP: UtilityParser,
+        Menu.SPACIAL_DELOCALISATION_EDENSITY: UtilityParser,
+        Menu.SPACIAL_DELOCALISATIOn_NORM_RHO: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_LAPLACIAN: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ORB_WFN: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ESPIN_DENSITY: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_KR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_GR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ESP_CHARGES: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ELF: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_LOL: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_LOCAL_ENTROPY: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ESP_TOTAL: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_RDG: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_RDG_PROMOLECULAR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_LAMBDA2RHO: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_LAMBDA2RHO_PROMOLECULAR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ALIE: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_EDR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_ORB_OVERLAP_DR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_DELTAG_PROMOLECULAR: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_DELTAG_HIRSHFELD: UtilityParser,
+        Menu.SPATIAL_DELOCALISATION_IRI: UtilityParser,
+        Menu.CVB_INDEX: UtilityParser,
+        Menu.ATOMIC_BOND_DIPOLES: UtilityParser,
+        Menu.MULTIPLE_ORBITAL_CUBES: UtilityParser,
+        Menu.ICSS_CUBES: UtilityParser,
+        Menu.RADIAL_DISTRIBUTION: UtilityParser,
+        Menu.ORBITAL_CORRESPONDENCE: UtilityParser,
+        Menu.PARSE_POLARIZABILITY_GAUSSIAN: PolarizabilityParser,
+        Menu.SOS_HYPERPOLARIZABILITY: PolarizabilityParser,
+        Menu.AVERAGE_BOND_LENGTH: UtilityParser,
+        Menu.ORBITAL_INTEGRALS: UtilityParser,
+        Menu.FUNCTION_MOMENTS: UtilityParser,
+        Menu.ENERGY_INDEX: UtilityParser,
+        Menu.ORBITAL_CONTRIBUTIONS_TO_GRID: UtilityParser,
+        Menu.DOMAIN_ANALYSIS: UtilityParser,
+        Menu.NATURAL_ORBITALS: UtilityParser,
+        Menu.COULOMB_EXCHANGE_INTEGRALS: UtilityParser,
+        Menu.SPATIAL_DELOCALIZATION_INDEX: UtilityParser,
+        Menu.BOD_NADO_ANALYSIS: UtilityParser,
+        Menu.LOWDIN_ORTHOGONALIZATION: UtilityParser,
+        Menu.CORRELATION_INDEX: UtilityParser,
+        # Menu 300 — utilities part 3
+        Menu.FREE_VOLUME_IN_CELL: UtilityParser,
+        Menu.FIT_ATOMIC_RADIAL_DENSITY: UtilityParser,
+        Menu.STM_IMAGE: UtilityParser,
+        Menu.ORBITAL_ENERGIES_FROM_FOCK: UtilityParser,
+        Menu.GEOMETRY_OPERATIONS: UtilityParser,
+        Menu.SURFACE_DISTANCE_PROJECTION: UtilityParser,
+        Menu.DETERMINE_FERMI_LEVEL: UtilityParser,
     }
