@@ -3,6 +3,10 @@
 import logging
 from pathlib import Path
 
+from pymultiwfn.analysis.file_parsers import (
+    RAW_STDOUT_SUFFIX,
+    scan_output_directory,
+)
 from pymultiwfn.analysis.result import MultiwfnResult, ResultStore
 from pymultiwfn.api.exceptions import MultiwfnError
 from pymultiwfn.api.job import MultiwfnJob
@@ -45,20 +49,20 @@ class MultiwfnAnalysis:
         self._json_path: Path | None = (
             Path(json_path) if json_path is not None else None
         )
+        self._auto_json_path: Path | None = None
         self._store: ResultStore | None = None
 
     @property
     def json_path(self) -> Path | None:
-        """Path to the JSON output file, or ``None`` to disable.
+        """Path to the JSON output file.
 
-        When set to a :class:`~pathlib.Path`, every completed analysis
-        is persisted to that file.  When ``None`` (the default),
-        results are still cached in memory and retrievable via the
-        internal store, but no file is created on disk.
+        When left ``None`` (the default), results are written to
+        ``<output_dir>/<input_file_stem>.json`` inside the molecule's
+        own output directory (see :meth:`run`). Set this explicitly to
+        override that location.
 
-        Setting this from ``None`` to a ``Path`` after results have
-        already been collected will immediately flush all cached data
-        to that file.
+        Setting this after results have already been collected will
+        immediately flush all cached data to the new location.
         """
         return self._json_path
 
@@ -68,16 +72,30 @@ class MultiwfnAnalysis:
         # Propagate to an already-initialised store so that subsequent
         # (or deferred) writes respect the new setting immediately.
         if self._store is not None:
-            self._store.json_path = self._json_path
+            self._store.json_path = self._json_path or self._auto_json_path
+
+    def _output_dir(self, work_dir: Path | None) -> Path:
+        """Return this molecule's flat output directory.
+
+        Named ``<input_file_name>.output/`` -- the *full* input file
+        name (including its own extension), not just the stem, so
+        that e.g. ``coord.molden`` produces ``coord.molden.output/``.
+        """
+        base = work_dir if work_dir is not None else Path.cwd()
+        return base / f"{self.input_file.name}.output"
 
     def _get_store(self, work_dir: Path | None = None) -> ResultStore:
         """Lazily initialise or return the per-molecule result store."""
         if self._store is None:
-            wd = work_dir if work_dir is not None else Path.cwd()
+            output_dir = self._output_dir(work_dir)
+            json_path = self._json_path
+            if json_path is None:
+                json_path = output_dir / f"{self.input_file.stem}.json"
+                self._auto_json_path = json_path
             self._store = ResultStore(
                 input_file=self.input_file,
-                work_dir=wd,
-                json_path=self._json_path,
+                work_dir=output_dir,
+                json_path=json_path,
             )
         return self._store
 
@@ -90,11 +108,22 @@ class MultiwfnAnalysis:
     ) -> None:
         """Run all queued Multiwfn analyses across all input files.
 
-        A batch log file is automatically written into *work_dir* (or the
-        current directory if *work_dir* is None). Parsed results are
-        accumulated into a per-molecule ``.json`` file in the same
-        directory. After completion the log path is accessible via
-        :attr:`log_path`.
+        Every analysis for this molecule runs in one flat output
+        directory, ``<work_dir>/<input_file_name>.output/`` (*work_dir*
+        defaults to the current directory). Each analysis's stdout is
+        saved there as ``<ANALYSIS_NAME>.txt`` (named after the
+        ``Menu`` sequence that produced it), alongside every other
+        file it generated (cube files, exported structures, etc.).
+
+        Once every queued analysis has run, that directory is scanned:
+        each stdout file whose name matches a ``Menu`` member is
+        re-parsed from disk via the regular regex-based parsers. Every
+        other generated file (cube files, images, exported structures,
+        etc.) is only ever recorded by path — its content is never
+        opened or interpreted. The
+        combined result is written to a single per-molecule ``.json``
+        file inside the output directory (or wherever :attr:`json_path`
+        points, if set explicitly).
 
         Parameters
         ----------
@@ -139,6 +168,16 @@ class MultiwfnAnalysis:
                     verbose=verbose,
                 )
 
+        # Subsequent pass: scan the whole output directory from disk and
+        # merge both stdout-based and file-based results into the JSON.
+        output_dir = self._output_dir(work_dir)
+        if output_dir.exists():
+            exclude = (
+                {store.json_path} if store.json_path is not None else None
+            )
+            scan = scan_output_directory(output_dir, exclude=exclude)
+            store.store_scan(output_dir, scan)
+
     def _create_and_run(
         self,
         analysis: Menu,
@@ -147,13 +186,22 @@ class MultiwfnAnalysis:
         work_dir: Path | None = None,
         verbose: bool = False,
     ) -> None:
-        """Create and run a single MultiwfnJob with automatic logging."""
+        """Run a single MultiwfnJob in the molecule's output directory.
+
+        The job executes with its ``cwd`` set to the shared, flat output
+        directory for this molecule; its stdout is saved there as
+        ``<ANALYSIS_NAME>.txt`` (named after the ``Menu`` sequence)
+        so the whole directory can be (re-)parsed from disk
+        afterwards, independent of this run.
+        """
+        output_dir = self._output_dir(work_dir)
+
         job = MultiwfnJob(
             input_file=self.input_file,
             analysis=analysis,
             multiwfn=multiwfn,
             timeout=timeout,
-            work_dir=work_dir,
+            work_dir=output_dir,
             verbose=verbose,
         )
 
@@ -163,15 +211,16 @@ class MultiwfnAnalysis:
         except (MultiwfnError, Exception) as exc:
             error = exc
 
-        # Parse stdout into a MultiwfnResult.
+        # Keep an in-memory parsed result for immediate programmatic access.
         result = MultiwfnResult(analysis=analysis)
         result.parse(job.stdout)
         self.results.append(result)
         self.jobs.append(job)
 
-        # Persist parsed results to the per-molecule JSON file.
-        store = self._get_store(work_dir)
-        store.store(result)
+        if output_dir.exists():
+            raw_stdout_name = f"{analysis.name}{RAW_STDOUT_SUFFIX}"
+            raw_stdout_path = output_dir / raw_stdout_name
+            raw_stdout_path.write_text(job.stdout, encoding="utf-8")
 
         if error is not None:
             raise error
