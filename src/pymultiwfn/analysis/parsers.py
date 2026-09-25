@@ -66,10 +66,8 @@ from pymultiwfn.analysis.result import (
     IBSIEntry,
     LambdaIndex,
     LineProfile,
-    LMOAtomContribution,
     LocalizationConvergence,
     LocalizationIndex,
-    LocalizedOrbital,
     MolecularMultipole,
     MultiCenterBondOrder,
     NICSScan,
@@ -3851,22 +3849,34 @@ class OrbitalLocalizationParser(OutputParser):
 
     _METHOD: dict[Menu, tuple[str, str | None, str]] = {
         Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED: (
-            "pipek_mezey", "hirshfeld", "occupied",
+            "pipek_mezey",
+            "hirshfeld",
+            "occupied",
         ),
         Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL: (
-            "pipek_mezey", "hirshfeld", "all",
+            "pipek_mezey",
+            "hirshfeld",
+            "all",
         ),
         Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED: (
-            "pipek_mezey", "lowdin", "occupied",
+            "pipek_mezey",
+            "lowdin",
+            "occupied",
         ),
         Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_ALL: (
-            "pipek_mezey", "lowdin", "all",
+            "pipek_mezey",
+            "lowdin",
+            "all",
         ),
         Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED: (
-            "pipek_mezey", "becke", "occupied",
+            "pipek_mezey",
+            "becke",
+            "occupied",
         ),
         Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_ALL: (
-            "pipek_mezey", "becke", "all",
+            "pipek_mezey",
+            "becke",
+            "all",
         ),
         Menu.BOYS_LOCALIZATION_OCCUPIED: ("boys", None, "occupied"),
         Menu.BOYS_LOCALIZATION_ALL: ("boys", None, "all"),
@@ -4732,7 +4742,9 @@ class UtilityParser(OutputParser):
     def parse_correlation_index(stdout: str) -> CorrelationIndex | None:
         """Extract nondynamic/dynamic/total correlation index (Menu 200)."""
         non_pat = rf"[Nn]ondynamic correlation index[=:\s]+({FLOAT_PATTERN})"
-        dyn_pat = rf"(?<!non)[Dd]ynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        dyn_pat = (
+            rf"(?<!non)[Dd]ynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        )
         tot_pat = rf"[Tt]otal correlation index[=:\s]+({FLOAT_PATTERN})"
 
         non_match = re.search(non_pat, stdout)

@@ -3,17 +3,11 @@
 Notes
 -----
 Based on Multiwfn 3.8 (dev) manual.
-
-CANDIDATE FILE -- FOR MANUAL REVIEW, NOT YET MERGED
 ====================================================
 Every entry below was live-verified against the real bundled Multiwfn
 3.8(dev) binary (coord.molden for ground-state analyses, tddft.out for
 excitation/spectrum analyses that need real TD-DFT data) across two
-earlier audit passes (fixing/flagging sequences that didn't complete
-cleanly, then filling in functionality the catalog was missing). This
-pass only restructures and rewrites the comments -- no sequence tuple
-or entry was added, removed, or changed; every token in every Menu
-value here is byte-for-byte identical to the previous revision.
+audit passes
 
 Each entry's comment has up to three parts:
   - a short description of what the analysis computes and why you'd
@@ -58,6 +52,20 @@ class Menu(Enum):
       - "h" / "l" -> select the HOMO / LUMO at an orbital-index prompt
       - "a"  -> select all orbitals
     """
+
+    @classmethod
+    def search(cls, query: str) -> list["Menu"]:
+        """Search menu items by name (case-insensitive)."""
+        query_upper = query.upper()
+        return [item for item in cls if query_upper in item.name]
+
+    @classmethod
+    def list_all(cls) -> list[str]:
+        """Return names of all menu items."""
+        return [item.name for item in cls]
+
+    def get_sequence(self) -> tuple[str, ...]:
+        return self.value
 
     # ──────────────────────────────────────────────────────────────────────────
     # Main Menu 0: Show molecular structure / view orbitals
@@ -112,12 +120,10 @@ class Menu(Enum):
     # Sequence: 2=Topology analysis; 2=Search CPs from nuclear positions;
     #           3=Search CPs from midpoint of atomic pairs; 8=Generating
     #           the paths connecting (3,-3) and (3,-1) CPs
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('2', '8')
     TOPOLOGY_CP_PATHS_3MINUS3_3MINUS1 = ("2", "2", "3", "8")
     # Sequence: 2=Topology analysis; 2=Search CPs from nuclear positions;
     #           3=Search CPs from midpoint of atomic pairs; 9=Generating
     #           the paths connecting (3,+1) and (3,+3) CPs
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('2', '9')
     TOPOLOGY_CP_PATHS_3PLUS1_3PLUS3 = ("2", "2", "3", "9")
     # Search ALL critical points of rho starting from every nuclear
     # position; finds NCPs, BCPs, RCPs, and CCPs in one pass
@@ -126,8 +132,6 @@ class Menu(Enum):
     #           the paths connecting (3,-3) and (3,-1) CPs; 0=Print and
     #           visualize all generated CPs/paths/surfaces; -10=Return to
     #           main menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('2', '2',
-    #          '-1')
     TOPOLOGY_SEARCH_CPS = ("2", "2", "3", "8", "0", "-10")
     # Full AIM workflow in one sequence: search all CPs, generate bond
     # paths, then generate interbasin surfaces
@@ -945,56 +949,38 @@ class Menu(Enum):
     # Sequence: 8=Orbital composition analysis; 1=Orbital composition
     #           analysis with Mulliken partition; h=select the HOMO;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '1',
-    #          'h')
     ORBITAL_COMPOSITION_MULLIKEN_HOMO = ("8", "1", "h", "0")
     # Sequence: 8=Orbital composition analysis; 1=Orbital composition
     #           analysis with Mulliken partition; l=select the LUMO;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '1',
-    #          'l')
     ORBITAL_COMPOSITION_MULLIKEN_LUMO = ("8", "1", "l", "0")
     # Sequence: 8=Orbital composition analysis; 1=Orbital composition
     #           analysis with Mulliken partition; a=select all orbitals;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '1',
-    #          'a')
     ORBITAL_COMPOSITION_MULLIKEN_ALL = ("8", "1", "a", "0")
     # Sequence: 8=Orbital composition analysis; 2=Orbital composition
     #           analysis with Stout-Politzer partition; h=select the HOMO;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '2',
-    #          'h')
     ORBITAL_COMPOSITION_STOUT_POLITZER_HOMO = ("8", "2", "h", "0")
     # Sequence: 8=Orbital composition analysis; 2=Orbital composition
     #           analysis with Stout-Politzer partition; l=select the LUMO;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '2',
-    #          'l')
     ORBITAL_COMPOSITION_STOUT_POLITZER_LUMO = ("8", "2", "l", "0")
     # Sequence: 8=Orbital composition analysis; 2=Orbital composition
     #           analysis with Stout-Politzer partition; a=select all
     #           orbitals; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '2',
-    #          'a')
     ORBITAL_COMPOSITION_STOUT_POLITZER_ALL = ("8", "2", "a", "0")
     # Sequence: 8=Orbital composition analysis; 3=Orbital composition
     #           analysis with Ros-Schuit (SCPA) partition; h=select the
     #           HOMO; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '3',
-    #          'h')
     ORBITAL_COMPOSITION_SCPA_HOMO = ("8", "3", "h", "0")
     # Sequence: 8=Orbital composition analysis; 3=Orbital composition
     #           analysis with Ros-Schuit (SCPA) partition; l=select the
     #           LUMO; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '3',
-    #          'l')
     ORBITAL_COMPOSITION_SCPA_LUMO = ("8", "3", "l", "0")
     # Sequence: 8=Orbital composition analysis; 3=Orbital composition
     #           analysis with Ros-Schuit (SCPA) partition; a=select all
     #           orbitals; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('8', '3',
-    #          'a')
     ORBITAL_COMPOSITION_SCPA_ALL = ("8", "3", "a", "0")
     # Sequence: 8=Orbital composition analysis; 8=Calculate atom and
     #           fragment contributions by Hirshfeld method; 1=Orbital
@@ -1194,16 +1180,12 @@ class Menu(Enum):
     #           graph to image file in current folder; 3=Export curve and
     #           line data to plain text file in current folder; 0=return
     #           to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('10', '0',
-    #          '2')
     PLOT_TDOS = ("10", "0", "2", "3", "0")
     # Sequence: 10=Plot total DOS, PDOS, OPDOS, local DOS, COHP and
     #           photoelectron spectrum; 00=Draw TDOS and OPDOS between
     #           nearest atoms!; 2=Save the graph to image file in current
     #           folder; 3=Export curve and line data to plain text file in
     #           current folder; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('10', '00',
-    #          '2')
     PLOT_TDOS_OPDOS = ("10", "00", "2", "3", "0")
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -1365,7 +1347,6 @@ class Menu(Enum):
     # minima/maxima; outputs GIPF descriptors for property prediction
     # Sequence: 12=Quantitative analysis of molecular surface; 0=Start
     #           analysis now!
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('12', '1')
     SURFACE_ANALYSIS_ESP = ("12", "0")
     # Map ALIE onto the vdW surface; locate surface minima which predict
     # the most reactive electrophilic and radical attack sites
@@ -1376,7 +1357,6 @@ class Menu(Enum):
     # rho=0.001 isosurface
     # Sequence: 12=Quantitative analysis of molecular surface; 6=Start
     #           analysis without considering mapped function
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('12', '3')
     SURFACE_AREA_VOLUME = ("12", "6")
     # Becke-partition surface analysis: map a function onto each atomic
     # Becke surface and compute per-atom surface descriptors
@@ -2187,8 +2167,6 @@ class Menu(Enum):
     #           scatter points to output.txt in current folder; 3=Output
     #           cube files to func1.cub and func2.cub in current folder;
     #           0=Start analysis now!; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('20', '1',
-    #          '2', '1', '2')
     NCI_ANALYSIS = ("20", "1", "2", "2", "3", "0", "0")
     # Promolecular NCI: same as NCI but built from superposition of free-
     # atom densities; very fast and suitable for macromolecules and
@@ -2199,8 +2177,6 @@ class Menu(Enum):
     #           scatter points to output.txt in current folder; 3=export
     #           cube files to func1.cub/func2.cub; 0=Start analysis now!;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('20', '2',
-    #          '2', '1', '2')
     NCI_PROMOLECULAR = ("20", "2", "2", "2", "3", "0", "0")
     # Interaction Region Indicator (IRI): improved NCI variant that decays
     # smoothly at atomic cores and better resolves weak intermolecular
@@ -2212,8 +2188,6 @@ class Menu(Enum):
     #           2=Output scatter points to output.txt in current folder;
     #           3=export cube files to func1.cub/func2.cub; 0=Start
     #           analysis now!; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('20', '4',
-    #          '2', '1', '2')
     IRI_ANALYSIS = ("20", "4", "2", "1", "2", "3", "0", "0")
     # Density Overlap Regions Indicator (DORI): highlights regions where
     # two electron densities overlap, clearly revealing both covalent and
@@ -2224,8 +2198,6 @@ class Menu(Enum):
     #           (paired with EDR); 2=medium-quality grid; 3=export cube
     #           files to func1.cub/func2.cub; 0=Start analysis now!;
     #           0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('20', '5',
-    #          '2', '1', '2')
     DORI_ANALYSIS = ("20", "5", "2", "1", "2", "3", "0", "0")
     # Compute and visualise the van der Waals interaction potential
     # landscape around the molecule
@@ -2236,8 +2208,6 @@ class Menu(Enum):
     #           isosurface graph of dispersion potential; 3=Show
     #           isosurface graph of van der Waals potential; 0=Start
     #           analysis now!; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('20', '6',
-    #          '2', '1', '2')
     VDW_POTENTIAL = ("20", "6", "2", "1", "2", "3", "0", "0")
     # Averaged NCI (ANCI): NCI analysis averaged over an ensemble of MD
     # trajectory snapshots; reveals which non-covalent interactions
@@ -2560,7 +2530,6 @@ class Menu(Enum):
     # within the rho = 0.001 a.u. electron-density isosurface
     # Sequence: 12=Quantitative analysis of molecular surface; 6=Start
     #           analysis without considering mapped function
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('100', '3')
     VDW_VOLUME = ("12", "6")
     # Numerically integrate a chosen real-space function over all space
     # using Becke multi-centre quadrature; used to verify total electron
@@ -2609,7 +2578,6 @@ class Menu(Enum):
     # Sequence: 100=Other functions (Part 1); 9=Evaluate interatomic
     #           connectivity and atomic coordination number; =accept the
     #           default (press ENTER); y=yes
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('100', '9')
     ATOMIC_COORDINATION = ("100", "9", "", "y")
     # Calculate integral of |psi_i(r)| * |psi_j(r)| over all space;
     # measures how much two orbital densities spatially overlap without
@@ -2709,7 +2677,6 @@ class Menu(Enum):
     #           (mwfn/pdb/xyz/wfn/wfx/molden/fch/47/mkl...) or generate
     #           input file of quantum chemistry programs; 25=CP2K; =accept
     #           the default (press ENTER); 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('100', '2')
     GENERATE_CP2K_INPUT = ("100", "2", "25", "", "0")
 
     # ──────────────────────────────────────────────────────────────────────────
@@ -2754,8 +2721,6 @@ class Menu(Enum):
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 4=Value of
     #           orbital wavefunction; 0=return to the previous menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('200', '19',
-    #          '1', '4')
     SPATIAL_DELOCALISATION_ORB_WFN = ("200", "19", "1", "4", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
@@ -2866,7 +2831,6 @@ class Menu(Enum):
     # Sequence: 200=Other functions (Part 2); 3=Generate cube file for
     #           multiple orbital wavefunctions; 0=return to the previous
     #           menu
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('200', '3')
     MULTIPLE_ORBITAL_CUBES = ("200", "3", "0")
     # Generate 3D NMR shielding (ICSS) data as .cube files; visualise
     # magnetically induced ring-current effects as shielding isosurfaces
@@ -3030,12 +2994,9 @@ class Menu(Enum):
     #           projection map; 0=return to the previous menu; -2=Export
     #           plane data as distmap.txt in current folder; 1=Save the
     #           map as graphical file in current folder; -1=Return
-    # FIXED -- verified against real Multiwfn 3.8(dev), was ('300', '8',
-    #          '0')
     SURFACE_DISTANCE_PROJECTION = ("300", "8", "0", "-2", "1", "-1")
     # Determine the Fermi energy level from the orbital energy
     # distribution and occupation numbers; particularly useful for
     # periodic or large cluster systems
     # Sequence: 300=Other functions (Part 3); 9=Determine Fermi level
     DETERMINE_FERMI_LEVEL = ("300", "9")
-
