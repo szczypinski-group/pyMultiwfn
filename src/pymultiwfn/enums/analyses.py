@@ -144,6 +144,8 @@ class AnalysisClasses(Enum):
         Menu.LOCAL_HARDNESS,
         Menu.ORBITAL_WEIGHTS,
         Menu.SUPERDELOCALIZABILITIES_NUC_E,
+        Menu.CDFT_GENERATE_CHARGED_WFN,
+        Menu.CDFT_GRID_FUKUI_POTENTIAL,
     ]
 
     DOS = [
@@ -359,6 +361,12 @@ class AnalysisClasses(Enum):
         Menu.PRINT_INTEGRAL_MATRIX_OCTOPOLE,
         Menu.PRINT_INTEGRAL_MATRIX_HEXADECAPOLE,
         Menu.NATURAL_ORBITALS,
+        Menu.PRINT_ALL_GTF,
+        Menu.PRINT_ALL_BASIS_FUNCTIONS,
+        Menu.PRINT_ORBITAL_INFO,
+        Menu.SAVE_WFN,
+        Menu.DELETE_INNER_ORBITALS,
+        Menu.MODIFY_OCCUPATION,
     ]
 
     LINE_PLOTS = [
@@ -505,6 +513,7 @@ class AnalysisClasses(Enum):
         Menu.ELECTRON_TRANSPORT_ROUTE,
         Menu.INTERMOLECULAR_OVERLAP,
         Menu.ADNDP_ANALYSIS,
+        Menu.GENERATE_CP2K_INPUT,
     ]
 
     # =========================================================================

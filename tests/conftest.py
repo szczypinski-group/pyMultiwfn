@@ -39,7 +39,11 @@ def mock_wfn_file(temp_dir: Path) -> Path:
 @pytest.fixture
 def mock_executable(temp_dir: Path) -> Path:
     if platform.system() == "Windows":
-        exe_path = temp_dir / "Multiwfn.exe"
+        # subprocess/CreateProcess requires a real PE binary for a
+        # ``.exe`` path; a ``.bat`` file with the same content is one
+        # of the extensions Windows auto-routes through cmd.exe even
+        # without shell=True, so it can stand in as a fake executable.
+        exe_path = temp_dir / "Multiwfn.bat"
         exe_path.write_text("@echo mock")
     else:
         exe_path = temp_dir / "Multiwfn"

@@ -172,9 +172,7 @@ class MultiwfnAnalysis:
         # merge both stdout-based and file-based results into the JSON.
         output_dir = self._output_dir(work_dir)
         if output_dir.exists():
-            exclude = (
-                {store.json_path} if store.json_path is not None else None
-            )
+            exclude = {store.json_path} if store.json_path is not None else None
             scan = scan_output_directory(output_dir, exclude=exclude)
             store.store_scan(output_dir, scan)
 

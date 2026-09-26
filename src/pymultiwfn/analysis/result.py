@@ -237,15 +237,20 @@ class GaussianTypeFunction(ParsedMultiwfnResult):
 
 @dataclass
 class BasisFunction(ParsedMultiwfnResult):
-    """Single basis function mapping to shell and GTF range."""
+    """Single basis function mapping to shell and, where printed, GTF range.
+
+    The plain "list all basis functions" listing (Menu 6 -> 2) does not
+    print a GTF range, only shell/center/type -- ``gtf_start``/``gtf_end``
+    are only populated when the source listing includes it.
+    """
 
     basis_index: int
     shell_index: int
     center_atom_id: int
     center_element: str
     function_type: str
-    gtf_start: int
-    gtf_end: int
+    gtf_start: int | None = None
+    gtf_end: int | None = None
 
 
 @dataclass
@@ -1490,25 +1495,17 @@ class ElectricMultipoleMomentReport(ParsedMultiwfnResult):
     total_dipole_debye: tuple[float, float, float] | None = None
     dipole_magnitude_au: float | None = None
     dipole_magnitude_debye: float | None = None
-    quadrupole_standard_cartesian: dict[str, float] = field(
-        default_factory=dict
-    )
-    quadrupole_traceless_cartesian: dict[str, float] = field(
-        default_factory=dict
-    )
+    quadrupole_standard_cartesian: dict[str, float] = field(default_factory=dict)
+    quadrupole_traceless_cartesian: dict[str, float] = field(default_factory=dict)
     quadrupole_traceless_magnitude: float | None = None
-    quadrupole_spherical_harmonic: dict[str, float] = field(
-        default_factory=dict
-    )
+    quadrupole_spherical_harmonic: dict[str, float] = field(default_factory=dict)
     quadrupole_spherical_magnitude: float | None = None
     octopole_cartesian: dict[str, float] = field(default_factory=dict)
     octopole_spherical_harmonic: dict[str, float] = field(default_factory=dict)
     octopole_spherical_magnitude: float | None = None
     hexadecapole: dict[str, float] = field(default_factory=dict)
     electronic_spatial_extent_r2: float | None = None
-    electronic_spatial_extent_components: tuple[float, float, float] | None = (
-        None
-    )
+    electronic_spatial_extent_components: tuple[float, float, float] | None = None
 
 
 @dataclass
@@ -1707,9 +1704,7 @@ class ResultStore:
             "parsed": mwfn_result.to_dict(),
             "timestamp": datetime.now().isoformat(),
         }
-        self._data.setdefault("analyses", {})[mwfn_result.analysis.name] = (
-            entry
-        )
+        self._data.setdefault("analyses", {})[mwfn_result.analysis.name] = entry
         self._save()
 
     def store_scan(self, output_dir: Path, scan: dict[str, Any]) -> None:

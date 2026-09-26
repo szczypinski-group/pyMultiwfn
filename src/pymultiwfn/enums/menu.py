@@ -1334,9 +1334,9 @@ class Menu(Enum):
     SURFACE_ANALYSIS_ALIE = ("12", "2")
     # Compute the molecular vdW surface area and enclosed volume from the
     # rho=0.001 isosurface
-    # Sequence: 12=Quantitative analysis of molecular surface; 6=Start
-    #           analysis without considering mapped function
-    SURFACE_AREA_VOLUME = ("12", "6")
+    # Sequence: 12=Quantitative analysis of molecular surface; 3=Calculate
+    #           surface area and volume
+    SURFACE_AREA_VOLUME = ("12", "3")
     # Becke-partition surface analysis: map a function onto each atomic
     # Becke surface and compute per-atom surface descriptors
     # Sequence: 12=Quantitative analysis of molecular surface; 4=Advanced
@@ -2507,9 +2507,9 @@ class Menu(Enum):
     EXPORT_VARIOUS_FILES = ("100", "2")
     # Calculate the molecular van der Waals volume as the space enclosed
     # within the rho = 0.001 a.u. electron-density isosurface
-    # Sequence: 12=Quantitative analysis of molecular surface; 6=Start
-    #           analysis without considering mapped function
-    VDW_VOLUME = ("12", "6")
+    # Sequence: 100=Other functions (Part 1); 3=Calculate molecular van der
+    #           Waals volume
+    VDW_VOLUME = ("100", "3")
     # Numerically integrate a chosen real-space function over all space
     # using Becke multi-centre quadrature; used to verify total electron
     # count (integral of rho = N)
@@ -2979,3 +2979,24 @@ class Menu(Enum):
     # periodic or large cluster systems
     # Sequence: 300=Other functions (Part 3); 9=Determine Fermi level
     DETERMINE_FERMI_LEVEL = ("300", "9")
+
+
+def custom_sequence(seq: list[str]) -> list[str]:
+    """Create a custom menu sequence.
+
+    Parameters
+    ----------
+    seq : list of str
+        Menu choices
+
+    Returns
+    -------
+    list of str
+        Sequence with q appended if not present
+    """
+    if not isinstance(seq, list):
+        raise TypeError("seq must be a list of menu choices")
+    seq = list(seq)
+    if not seq or seq[-1] != "q":
+        seq.append("q")
+    return seq

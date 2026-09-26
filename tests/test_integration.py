@@ -47,9 +47,7 @@ _wfn_files = _find_wfn_files()
 
 # Skip the entire module if prerequisites are missing
 pytestmark = [
-    pytest.mark.skipif(
-        _exe_path is None, reason="Multiwfn executable not found"
-    ),
+    pytest.mark.skipif(_exe_path is None, reason="Multiwfn executable not found"),
     pytest.mark.skipif(
         len(_wfn_files) == 0,
         reason="No wavefunction files in tests/test_data/",
