@@ -299,7 +299,9 @@ class CriticalPointParser(OutputParser):
                 in_long_summary = True
                 cps.clear()
                 continue
-            if in_long_summary and ("number of critical points" in line.lower()):
+            if in_long_summary and (
+                "number of critical points" in line.lower()
+            ):
                 in_long_summary = False
                 continue
 
@@ -754,7 +756,9 @@ class GridParser(OutputParser):
             stats.rms = float(match[1])
             found = True
 
-        if match := re.search(rf"Standard deviation:\s+({FLOAT_PATTERN})", stdout):
+        if match := re.search(
+            rf"Standard deviation:\s+({FLOAT_PATTERN})", stdout
+        ):
             stats.std_dev = float(match[1])
             found = True
 
@@ -770,7 +774,9 @@ class GridParser(OutputParser):
             stats.volume_negative_bohr3 = float(match[1])
             found = True
 
-        if match := re.search(rf"Volume of all space:\s+({FLOAT_PATTERN})", stdout):
+        if match := re.search(
+            rf"Volume of all space:\s+({FLOAT_PATTERN})", stdout
+        ):
             stats.volume_all_bohr3 = float(match[1])
             found = True
 
@@ -804,7 +810,9 @@ class GridParser(OutputParser):
             stats.integral_negative = float(match[1])
             found = True
 
-        if match := re.search(rf"Integral of all data:\s+({FLOAT_PATTERN})", stdout):
+        if match := re.search(
+            rf"Integral of all data:\s+({FLOAT_PATTERN})", stdout
+        ):
             stats.integral_all = float(match[1])
             found = True
 
@@ -1033,7 +1041,9 @@ class WavefunctionParser(OutputParser):
         )
         col_header_pat = re.compile(r"^\s+(\d+(?:\s+\d+)*)\s*$")
         row_pat = re.compile(rf"^\s+(\d+)((?:\s+{FLOAT_PATTERN})+)\s*$")
-        trace_pat = re.compile(rf"Trace of density matrix:\s+({FLOAT_PATTERN})")
+        trace_pat = re.compile(
+            rf"Trace of density matrix:\s+({FLOAT_PATTERN})"
+        )
         trace_overlap_pat = re.compile(
             rf"Trace of density matrix multiplied by overlap matrix:\s+"
             rf"({FLOAT_PATTERN})"
@@ -1175,7 +1185,9 @@ class ChargeParser(OutputParser):
         return results
 
     @classmethod
-    def _detect_method_from_context(cls, context_lines: list[str]) -> str | None:
+    def _detect_method_from_context(
+        cls, context_lines: list[str]
+    ) -> str | None:
         """Scan recent context lines to detect the charge method."""
         for line in reversed(context_lines):
             for pat, method in cls._HEADER_METHOD:
@@ -1205,9 +1217,13 @@ class ChargeParser(OutputParser):
 
         # ── Header patterns ──
         final_header = re.compile(r"Final atomic charges:", re.I)
-        adc_header = re.compile(r"-+\s*(.*?(?:ADC|ADCH)\s+.*?charges)\s*-+", re.I)
+        adc_header = re.compile(
+            r"-+\s*(.*?(?:ADC|ADCH)\s+.*?charges)\s*-+", re.I
+        )
         cm5_header = re.compile(r"-+\s*(.*?CM5\s+charges)\s*-+", re.I)
-        resp_stage_pat = re.compile(r"\*+\s*(Stage\s+(\d+).*?RESP.*?)\s*$", re.I)
+        resp_stage_pat = re.compile(
+            r"\*+\s*(Stage\s+(\d+).*?RESP.*?)\s*$", re.I
+        )
         center_header = re.compile(r"^\s*Center\s+Charge\s*$", re.I)
         atom_header = re.compile(r"^\s*Atom\s+Charge\s*$", re.I)
         pop_atoms_header = re.compile(r"Population of atoms:", re.I)
@@ -1246,7 +1262,9 @@ class ChargeParser(OutputParser):
             rf"Total\s+charge)\s*:\s+({FLOAT_PATTERN})",
             re.I,
         )
-        sum_pat = re.compile(rf"Summing up all.*?charges:\s+({FLOAT_PATTERN})", re.I)
+        sum_pat = re.compile(
+            rf"Summing up all.*?charges:\s+({FLOAT_PATTERN})", re.I
+        )
 
         # State tracking
         in_center_block = False
@@ -1597,7 +1615,9 @@ class OrbitalCompositionParser(OutputParser):
 
         # Delocalization index:
         # "Orbital delocalization index:   24.69"
-        deloc_pat = re.compile(rf"Orbital delocalization index:\s+({FLOAT_PATTERN})")
+        deloc_pat = re.compile(
+            rf"Orbital delocalization index:\s+({FLOAT_PATTERN})"
+        )
 
         # "Composition of each shell" / "Composition of different types"
         # / "Composition of each atom:" are section markers
@@ -1714,7 +1734,10 @@ class OrbitalCompositionParser(OutputParser):
             if match := deloc_pat.search(line):
                 if current is not None:
                     current.delocalization_index = float(match[1])
-                    if current.basis_contributions or current.atom_contributions:
+                    if (
+                        current.basis_contributions
+                        or current.atom_contributions
+                    ):
                         results.append(current)
                     current = None
                     in_basis = False
@@ -1760,7 +1783,9 @@ class OrbitalCompositionParser(OutputParser):
         )
 
         # "Contributions after normalization:"
-        contrib_header = re.compile(r"Contributions after normalization:", re.I)
+        contrib_header = re.compile(
+            r"Contributions after normalization:", re.I
+        )
 
         # "Atom     1(C ) :      4.109 %"
         atom_pat = re.compile(
@@ -1769,7 +1794,9 @@ class OrbitalCompositionParser(OutputParser):
         )
 
         # Delocalization index
-        deloc_pat = re.compile(rf"Orbital delocalization index:\s+({FLOAT_PATTERN})")
+        deloc_pat = re.compile(
+            rf"Orbital delocalization index:\s+({FLOAT_PATTERN})"
+        )
 
         current: OrbitalAtomComposition | None = None
         in_contrib = False
@@ -2115,7 +2142,9 @@ class BondOrderParser(OutputParser):
         for match in re.finditer(pattern, stdout, re.IGNORECASE):
             atoms = [int(x) for x in match[1].split()]
             results.append(
-                MultiCenterBondOrder(atom_ids=atoms, bond_order=float(match[2]))
+                MultiCenterBondOrder(
+                    atom_ids=atoms, bond_order=float(match[2])
+                )
             )
         return results
 
@@ -2246,7 +2275,9 @@ class SpectrumParser(OutputParser):
     def _parse_spectrum_or_none(cls, stdout: str) -> Spectrum | None:
         """Return parsed spectrum only if it contains data."""
         s = cls.parse(stdout)
-        return s if (s.frequencies or s.wavelengths or s.atom_indices) else None
+        return (
+            s if (s.frequencies or s.wavelengths or s.atom_indices) else None
+        )
 
     @classmethod
     def parse_for_result(
@@ -2273,8 +2304,12 @@ class SpectrumParser(OutputParser):
             "intensities": [],
         }
 
-        pattern1 = rf"({FLOAT_PATTERN})\s+cm\^?-1.*?Intensity:\s+({FLOAT_PATTERN})"
-        pattern_uv = rf"({FLOAT_PATTERN})\s+nm.*?(?:f=|Str[.=])\s*({FLOAT_PATTERN})"
+        pattern1 = (
+            rf"({FLOAT_PATTERN})\s+cm\^?-1.*?Intensity:\s+({FLOAT_PATTERN})"
+        )
+        pattern_uv = (
+            rf"({FLOAT_PATTERN})\s+nm.*?(?:f=|Str[.=])\s*({FLOAT_PATTERN})"
+        )
         pattern_nmr = rf"Atom\s+(\d+)\s*\([^)]+\)\s+shift:\s+({FLOAT_PATTERN})"
         pattern2 = rf"^\s+({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s*$"
 
@@ -2452,7 +2487,12 @@ class SurfaceParser(OutputParser):
         statistics = cls.parse_statistics(stdout, mapped_property)
 
         # Only return if we found something meaningful
-        if geometry is None and not minima and not maxima and statistics is None:
+        if (
+            geometry is None
+            and not minima
+            and not maxima
+            and statistics is None
+        ):
             return None
 
         return SurfaceAnalysisResult(
@@ -2726,12 +2766,8 @@ class SurfaceParser(OutputParser):
             stats.nonpolar_area_pct = float(match[2])
             found = True
 
-        # Negative lookbehind so this doesn't also match "Nonpolar
-        # surface area ..." (a substring match on "Polar surface
-        # area" would otherwise silently duplicate the nonpolar
-        # values here).
         polar_pat = (
-            rf"(?<!Non)Polar surface area.*?:\s+"
+            rf"Polar surface area.*?:\s+"
             rf"({FLOAT_PATTERN})\s+Angstrom\^2\s+"
             rf"\(\s*({FLOAT_PATTERN})\s*%\s*\)"
         )
@@ -2932,10 +2968,14 @@ class FuzzySpaceParser(OutputParser):
         results: list[AtomicMultipole] = []
 
         # Section header: "*****  Atom     1(C )  *****"
-        atom_header = re.compile(r"\*+\s*Atom\s+(\d+)\s*\(([A-Za-z]+)\s*\)\s*\*+")
+        atom_header = re.compile(
+            r"\*+\s*Atom\s+(\d+)\s*\(([A-Za-z]+)\s*\)\s*\*+"
+        )
 
         charge_pat = re.compile(rf"Atomic charge:\s+({FLOAT_PATTERN})")
-        monopole_pat = re.compile(rf"Atomic monopole moment.*?:\s+({FLOAT_PATTERN})")
+        monopole_pat = re.compile(
+            rf"Atomic monopole moment.*?:\s+({FLOAT_PATTERN})"
+        )
         dipole_pat = re.compile(
             rf"X=\s+({FLOAT_PATTERN})\s+Y=\s+({FLOAT_PATTERN})\s+"
             rf"Z=\s+({FLOAT_PATTERN})\s+Norm=\s+({FLOAT_PATTERN})"
@@ -2953,7 +2993,9 @@ class FuzzySpaceParser(OutputParser):
             rf"Components of <r\^2>:\s+X=\s+({FLOAT_PATTERN})\s+"
             rf"Y=\s+({FLOAT_PATTERN})\s+Z=\s+({FLOAT_PATTERN})"
         )
-        octo_mag_pat = re.compile(rf"Magnitude:\s+\|Q_3\|=\s+({FLOAT_PATTERN})")
+        octo_mag_pat = re.compile(
+            rf"Magnitude:\s+\|Q_3\|=\s+({FLOAT_PATTERN})"
+        )
 
         current: AtomicMultipole | None = None
         in_dipole = False
@@ -2999,7 +3041,9 @@ class FuzzySpaceParser(OutputParser):
                 in_contrib = True
                 continue
 
-            if (in_dipole or in_contrib) and (match := dipole_pat.search(line)):
+            if (in_dipole or in_contrib) and (
+                match := dipole_pat.search(line)
+            ):
                 if in_dipole:
                     current.dipole_x = float(match[1])
                     current.dipole_y = float(match[2])
@@ -3111,7 +3155,9 @@ class FuzzySpaceParser(OutputParser):
             found = True
 
         # Traceless quadrupole
-        traceless_start = stdout.find("Molecular quadrupole moments (Traceless")
+        traceless_start = stdout.find(
+            "Molecular quadrupole moments (Traceless"
+        )
         if traceless_start != -1:
             block = stdout[traceless_start : traceless_start + 500]
             comp_pat = re.compile(rf"([XY][XYZ])=\s+({FLOAT_PATTERN})")
@@ -3226,7 +3272,9 @@ class FuzzySpaceParser(OutputParser):
         )
         col_header_pat = re.compile(r"^\s+(\d+(?:\s+\d+)*)\s*$")
         row_pat = re.compile(rf"^\s+(\d+)((?:\s+{FLOAT_PATTERN})+)\s*$")
-        li_pat = re.compile(rf"(\d+)\s*\(([A-Za-z]+)\s*\)\s*:\s+({FLOAT_PATTERN})")
+        li_pat = re.compile(
+            rf"(\d+)\s*\(([A-Za-z]+)\s*\)\s*:\s+({FLOAT_PATTERN})"
+        )
 
         in_matrix = False
         label = ""
@@ -3356,7 +3404,9 @@ class FuzzySpaceParser(OutputParser):
         )
         col_header_pat = re.compile(r"^\s+(\d+(?:\s+\d+)*)\s*$")
         row_pat = re.compile(rf"^\s+(\d+)((?:\s+{FLOAT_PATTERN})+)\s*$")
-        sum_diag_pat = re.compile(rf"Summing up diagonal.*?:\s+({FLOAT_PATTERN})")
+        sum_diag_pat = re.compile(
+            rf"Summing up diagonal.*?:\s+({FLOAT_PATTERN})"
+        )
         sum_nondiag_pat = re.compile(
             rf"Summing up non-diagonal.*?:\s+({FLOAT_PATTERN})"
         )
@@ -3466,9 +3516,13 @@ class FuzzySpaceParser(OutputParser):
             if not in_matrix:
                 continue
 
-            if match := col_header_pat.match(line):
-                current_cols = [int(v) for v in match[1].split()]
-                continue
+            # End on next section or blank
+            if line.strip() and not re.match(r"^\s+[\d-]", line):
+                if match := col_header_pat.match(line):
+                    current_cols = [int(v) for v in match[1].split()]
+                    continue
+                if data:
+                    break
 
             if current_cols and (match := row_pat.match(line)):
                 row_idx = int(match[1])
@@ -3481,13 +3535,6 @@ class FuzzySpaceParser(OutputParser):
                             max_idx = row_idx
                         if col_idx > max_idx:
                             max_idx = col_idx
-                continue
-
-            # End of matrix: any other non-blank line once rows have
-            # started (e.g. the next section header or a blank-line
-            # divider followed by unrelated text).
-            if data and line.strip():
-                break
 
         if data:
             return CLRKMatrix(n_atoms=max_idx, data=data)
@@ -3563,7 +3610,9 @@ class FuzzySpaceParser(OutputParser):
             if a1 > a2:
                 a1, a2 = a2, a1
             indices.append(
-                DelocalizationIndex(atom1_id=a1, atom2_id=a2, index=float(match[3]))
+                DelocalizationIndex(
+                    atom1_id=a1, atom2_id=a2, index=float(match[3])
+                )
             )
         return indices
 
@@ -3629,7 +3678,9 @@ class BasinParser(OutputParser):
     @staticmethod
     def parse_charges(stdout: str) -> list[Charge]:
         """Extract AIM/Bader charges from basin analysis."""
-        pattern = rf"(?:AIM|Bader)\s+charge.*?atom\s+(\d+).*?:\s+({FLOAT_PATTERN})"
+        pattern = (
+            rf"(?:AIM|Bader)\s+charge.*?atom\s+(\d+).*?:\s+({FLOAT_PATTERN})"
+        )
         return [
             Charge(atom_id=int(match[1]), charge=float(match[2]))
             for match in re.finditer(pattern, stdout, re.IGNORECASE)
@@ -3732,7 +3783,9 @@ class ExcitationParser(OutputParser):
         ct_amount: float | None = None
 
         ct_dist = rf"CT\s+distance[=:\s]+({FLOAT_PATTERN})"
-        ct_amt = rf"(?:transferred|CT)\s+(?:charge|amount)[=:\s]+({FLOAT_PATTERN})"
+        ct_amt = (
+            rf"(?:transferred|CT)\s+(?:charge|amount)[=:\s]+({FLOAT_PATTERN})"
+        )
 
         if match := re.search(ct_dist, stdout, re.IGNORECASE):
             ct_distance = float(match[1])
@@ -3947,7 +4000,9 @@ class WeakInteractionParser(OutputParser):
 
         if cubes := [
             match[1]
-            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+            for match in re.finditer(
+                r"(\S+\.cube)\s+has been generated", stdout
+            )
         ]:
             interaction.cube_names = cubes
 
@@ -3984,8 +4039,12 @@ class EDAParser(OutputParser):
         patterns: dict[str, str] = {
             "electrostatic": rf"[Ee]lectrostatic.*?[=:\s]+({FLOAT_PATTERN})",
             "exchange": rf"[Ee]xchange.*?[=:\s]+({FLOAT_PATTERN})",
-            "repulsion": (rf"(?:[Rr]epulsion|Pauli).*?[=:\s]+({FLOAT_PATTERN})"),
-            "polarization": (rf"[Pp]olari[sz]ation.*?[=:\s]+({FLOAT_PATTERN})"),
+            "repulsion": (
+                rf"(?:[Rr]epulsion|Pauli).*?[=:\s]+({FLOAT_PATTERN})"
+            ),
+            "polarization": (
+                rf"[Pp]olari[sz]ation.*?[=:\s]+({FLOAT_PATTERN})"
+            ),
             "dispersion": rf"[Dd]ispersion.*?[=:\s]+({FLOAT_PATTERN})",
             "orbital_interaction": (
                 rf"[Oo]rbital\s+interaction.*?[=:\s]+({FLOAT_PATTERN})"
@@ -4006,7 +4065,9 @@ class EDAParser(OutputParser):
         stdout: str,
     ) -> list[DispersionContribution]:
         """Extract per-atom dispersion energy contributions."""
-        pattern = rf"Atom\s+(\d+).*?(?:dispersion|D[34]).*?[=:\s]+({FLOAT_PATTERN})"
+        pattern = (
+            rf"Atom\s+(\d+).*?(?:dispersion|D[34]).*?[=:\s]+({FLOAT_PATTERN})"
+        )
         return [
             DispersionContribution(
                 atom_id=int(match[1]), contribution=float(match[2])
@@ -4082,9 +4143,13 @@ class CDFTParser(OutputParser):
             rf"(?:Chemical |Global )?[Ss]oftness:\s+"
             rf"({FLOAT_PATTERN})"
         )
-        electro_pat = re.compile(rf"[Ee]lectrophilicity.*?:\s+({FLOAT_PATTERN})")
+        electro_pat = re.compile(
+            rf"[Ee]lectrophilicity.*?:\s+({FLOAT_PATTERN})"
+        )
         nucleo_pat = re.compile(rf"[Nn]ucleophilicity.*?:\s+({FLOAT_PATTERN})")
-        ip_pat = re.compile(rf"[Ii]onization potential.*?:\s+({FLOAT_PATTERN})")
+        ip_pat = re.compile(
+            rf"[Ii]onization potential.*?:\s+({FLOAT_PATTERN})"
+        )
         ea_pat = re.compile(rf"[Ee]lectron affinity.*?:\s+({FLOAT_PATTERN})")
 
         if match := homo_pat.search(stdout):
@@ -4141,7 +4206,10 @@ class CDFTParser(OutputParser):
 
         in_fukui = False
         for line in stdout.split("\n"):
-            if re.search(r"Atom.*?f\+.*?f-.*?f0", line, re.I) and "OW" not in line:
+            if (
+                re.search(r"Atom.*?f\+.*?f-.*?f0", line, re.I)
+                and "OW" not in line
+            ):
                 in_fukui = True
                 continue
             if in_fukui:
@@ -4198,7 +4266,9 @@ class CDFTParser(OutputParser):
         stdout: str,
     ) -> SuperdelocalizabilityResult | None:
         """Extract superdelocalizability analysis."""
-        alpha_pat = re.compile(rf"alpha parameter:\s+({FLOAT_PATTERN})\s+Hartree")
+        alpha_pat = re.compile(
+            rf"alpha parameter:\s+({FLOAT_PATTERN})\s+Hartree"
+        )
         entry_pat = re.compile(
             rf"^\s+(\d+)\s*\(([A-Za-z]+)\s*\)\s+"
             rf"({FLOAT_PATTERN})\s+({FLOAT_PATTERN})\s+"
@@ -4321,14 +4391,18 @@ class CDFTParser(OutputParser):
         results: list[OrbitalWeightDecomposition] = []
 
         # "10 Highest weights in orbital-weighted f+"
-        header_pat = re.compile(r"Highest weights in orbital-weighted (f[+-])", re.I)
+        header_pat = re.compile(
+            r"Highest weights in orbital-weighted (f[+-])", re.I
+        )
         # "Orbital    22 (LUMO  )   Weight:  48.16 %   E_diff:     3.410 eV"
         entry_pat = re.compile(
             rf"Orbital\s+(\d+)\s+\(([^)]+)\)\s+Weight:\s+"
             rf"({FLOAT_PATTERN})\s+%\s+E_diff:\s+({FLOAT_PATTERN})\s+eV"
         )
         # "Total weight of above listed orbitals: 100.00 %"
-        total_pat = re.compile(rf"Total weight of above.*?:\s+({FLOAT_PATTERN})\s+%")
+        total_pat = re.compile(
+            rf"Total weight of above.*?:\s+({FLOAT_PATTERN})\s+%"
+        )
 
         current_type: str | None = None
         current_entries: list[OrbitalWeightEntry] = []
@@ -4681,7 +4755,9 @@ class UtilityParser(OutputParser):
     def parse_correlation_index(stdout: str) -> CorrelationIndex | None:
         """Extract nondynamic/dynamic/total correlation index (Menu 200)."""
         non_pat = rf"[Nn]ondynamic correlation index[=:\s]+({FLOAT_PATTERN})"
-        dyn_pat = rf"(?<!non)[Dd]ynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        dyn_pat = (
+            rf"(?<!non)[Dd]ynamic correlation index[=:\s]+({FLOAT_PATTERN})"
+        )
         tot_pat = rf"[Tt]otal correlation index[=:\s]+({FLOAT_PATTERN})"
 
         non_match = re.search(non_pat, stdout)
@@ -4704,7 +4780,9 @@ class UtilityParser(OutputParser):
         exported to <path>" confirmation (no trailing "in current
         folder", unlike the matrix/wavefunction export messages).
         """
-        match = re.search(r"(\S[^\n]*?) file has been exported to (\S+)", stdout)
+        match = re.search(
+            r"(\S[^\n]*?) file has been exported to (\S+)", stdout
+        )
         if not match:
             return None
         return ExportedMatrix(file_name=match[2], label=match[1].strip())
@@ -4714,7 +4792,10 @@ class UtilityParser(OutputParser):
         stdout: str,
     ) -> ElectricMultipoleMomentReport | None:
         """Extract Menu 300 electric multipole analysis report."""
-        if "Quadrupole moments" not in stdout and "Dipole moment" not in stdout:
+        if (
+            "Quadrupole moments" not in stdout
+            and "Dipole moment" not in stdout
+        ):
             return None
 
         def _vec(pattern: str) -> tuple[float, float, float] | None:
@@ -5040,10 +5121,16 @@ class ParserRoute:
         Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_OCCUPIED: (
             OrbitalLocalizationParser
         ),
-        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL: (OrbitalLocalizationParser),
-        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED: (OrbitalLocalizationParser),
+        Menu.PIPEK_MEZEY_LOCALIZATION_HIRSHFELD_ALL: (
+            OrbitalLocalizationParser
+        ),
+        Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_OCUPIED: (
+            OrbitalLocalizationParser
+        ),
         Menu.PIPEK_MEZEY_LOCALIZATION_LOWDIN_ALL: OrbitalLocalizationParser,
-        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED: (OrbitalLocalizationParser),
+        Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_OCCUPIED: (
+            OrbitalLocalizationParser
+        ),
         Menu.PIPEK_MEZEY_LOCALIZATION_BECKE_ALL: OrbitalLocalizationParser,
         Menu.BOYS_LOCALIZATION_OCCUPIED: OrbitalLocalizationParser,
         Menu.BOYS_LOCALIZATION_ALL: OrbitalLocalizationParser,
