@@ -116,6 +116,75 @@ class PoincareHopfCounts(ParsedMultiwfnResult):
     satisfied: bool = False
 
 
+# ── Menu 3: Property along a line ───────────────────────────────────────
+
+
+@dataclass
+class LineProfile(ParsedMultiwfnResult):
+    """Summary statistics for a real-space function sampled along a line."""
+
+    origin_x_bohr: float | None = None
+    origin_y_bohr: float | None = None
+    origin_z_bohr: float | None = None
+    end_x_bohr: float | None = None
+    end_y_bohr: float | None = None
+    end_z_bohr: float | None = None
+    n_points: int | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+    sum_all_values: float | None = None
+    integration_value: float | None = None
+
+
+# ── Menu 4: Property in a plane ─────────────────────────────────────────
+
+
+@dataclass
+class PlaneMap(ParsedMultiwfnResult):
+    """Summary statistics for a real-space function mapped onto a plane."""
+
+    origin_x_bohr: float | None = None
+    origin_y_bohr: float | None = None
+    origin_z_bohr: float | None = None
+    end_x_bohr: float | None = None
+    end_y_bohr: float | None = None
+    end_z_bohr: float | None = None
+    minimum: float | None = None
+    maximum: float | None = None
+
+
+# ── Menu 13: Process grid data ──────────────────────────────────────────
+
+
+@dataclass
+class GridStatistics(ParsedMultiwfnResult):
+    """Statistics of grid point values, optionally within a sub-region.
+
+    Produced by Menu 13's "Show statistic data of grid points" option.
+    """
+
+    minimum: float | None = None
+    minimum_x_bohr: float | None = None
+    minimum_y_bohr: float | None = None
+    minimum_z_bohr: float | None = None
+    maximum: float | None = None
+    maximum_x_bohr: float | None = None
+    maximum_y_bohr: float | None = None
+    maximum_z_bohr: float | None = None
+    average: float | None = None
+    rms: float | None = None
+    std_dev: float | None = None
+    volume_positive_bohr3: float | None = None
+    volume_negative_bohr3: float | None = None
+    volume_all_bohr3: float | None = None
+    sum_positive: float | None = None
+    sum_negative: float | None = None
+    sum_all: float | None = None
+    integral_positive: float | None = None
+    integral_negative: float | None = None
+    integral_all: float | None = None
+
+
 # ── Menu 5: Cube ────────────────────────────────────────────────────────
 
 
@@ -168,15 +237,20 @@ class GaussianTypeFunction(ParsedMultiwfnResult):
 
 @dataclass
 class BasisFunction(ParsedMultiwfnResult):
-    """Single basis function mapping to shell and GTF range."""
+    """Single basis function mapping to shell and, where printed, GTF range.
+
+    The plain "list all basis functions" listing (Menu 6 -> 2) does not
+    print a GTF range, only shell/center/type -- ``gtf_start``/``gtf_end``
+    are only populated when the source listing includes it.
+    """
 
     basis_index: int
     shell_index: int
     center_atom_id: int
     center_element: str
     function_type: str
-    gtf_start: int
-    gtf_end: int
+    gtf_start: int | None = None
+    gtf_end: int | None = None
 
 
 @dataclass
@@ -1421,25 +1495,17 @@ class ElectricMultipoleMomentReport(ParsedMultiwfnResult):
     total_dipole_debye: tuple[float, float, float] | None = None
     dipole_magnitude_au: float | None = None
     dipole_magnitude_debye: float | None = None
-    quadrupole_standard_cartesian: dict[str, float] = field(
-        default_factory=dict
-    )
-    quadrupole_traceless_cartesian: dict[str, float] = field(
-        default_factory=dict
-    )
+    quadrupole_standard_cartesian: dict[str, float] = field(default_factory=dict)
+    quadrupole_traceless_cartesian: dict[str, float] = field(default_factory=dict)
     quadrupole_traceless_magnitude: float | None = None
-    quadrupole_spherical_harmonic: dict[str, float] = field(
-        default_factory=dict
-    )
+    quadrupole_spherical_harmonic: dict[str, float] = field(default_factory=dict)
     quadrupole_spherical_magnitude: float | None = None
     octopole_cartesian: dict[str, float] = field(default_factory=dict)
     octopole_spherical_harmonic: dict[str, float] = field(default_factory=dict)
     octopole_spherical_magnitude: float | None = None
     hexadecapole: dict[str, float] = field(default_factory=dict)
     electronic_spatial_extent_r2: float | None = None
-    electronic_spatial_extent_components: tuple[float, float, float] | None = (
-        None
-    )
+    electronic_spatial_extent_components: tuple[float, float, float] | None = None
 
 
 @dataclass
@@ -1638,9 +1704,41 @@ class ResultStore:
             "parsed": mwfn_result.to_dict(),
             "timestamp": datetime.now().isoformat(),
         }
-        self._data.setdefault("analyses", {})[mwfn_result.analysis.name] = (
-            entry
-        )
+        self._data.setdefault("analyses", {})[mwfn_result.analysis.name] = entry
+        self._save()
+
+    def store_scan(self, output_dir: Path, scan: dict[str, Any]) -> None:
+        """Merge a directory scan into the store.
+
+        This is the counterpart to :meth:`store` for the file-based
+        parsing pipeline: rather than one analysis at a time, it merges
+        the *whole* result of scanning a molecule's flat output
+        directory (see
+        :func:`pymultiwfn.analysis.file_parsers.scan_output_directory`)
+        in a single call. Existing entries are updated rather than
+        replaced, so calling this repeatedly (e.g. across runs that
+        reuse cached analyses) only adds to what is already stored.
+
+        Parameters
+        ----------
+        output_dir
+            The molecule's flat output directory that was scanned.
+        scan
+            The dict returned by ``scan_output_directory`` for
+            *output_dir*.
+
+        """
+        self._data["output_dir"] = str(output_dir)
+
+        existing_files = set(self._data.get("generated_files", []))
+        existing_files.update(scan.get("generated_files", []))
+        self._data["generated_files"] = sorted(existing_files)
+
+        analyses = self._data.setdefault("analyses", {})
+        timestamp = datetime.now().isoformat()
+        for name, entry in scan.get("analyses", {}).items():
+            analyses[name] = {**entry, "timestamp": timestamp}
+
         self._save()
 
     def store_from_stdout(

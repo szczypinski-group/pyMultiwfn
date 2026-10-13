@@ -65,13 +65,9 @@ class TestJobInit:
             job = MultiwfnJob(input_file=mock_wfn_file, analysis=None)
             assert isinstance(job, MultiwfnJob)
         except MultiwfnError:
-            pytest.skip(
-                "Default executable is unavailable in this environment."
-            )
+            pytest.skip("Default executable is unavailable in this environment.")
 
-    def test_invalid_timeout(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_invalid_timeout(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         with pytest.raises(ValueError, match="positive"):
             MultiwfnJob(
                 input_file=mock_wfn_file,
@@ -80,9 +76,7 @@ class TestJobInit:
                 timeout=-1,
             )
 
-    def test_zero_timeout(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_zero_timeout(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         with pytest.raises(ValueError, match="positive"):
             MultiwfnJob(
                 input_file=mock_wfn_file,
@@ -107,9 +101,7 @@ class TestJobProperties:
         assert "7" in cmds  # charges menu
         assert isinstance(cmds, list)
 
-    def test_commands_is_copy(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_commands_is_copy(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob(
             input_file=mock_wfn_file,
             analysis=None,
@@ -133,9 +125,7 @@ class TestJobProperties:
         assert job.execution_time is None
         assert job.success is None
 
-    def test_timeout_property(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_timeout_property(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob(
             input_file=mock_wfn_file,
             analysis=None,
@@ -146,9 +136,7 @@ class TestJobProperties:
         job.timeout = 300
         assert job.timeout == 300
 
-    def test_verbose_property(
-        self, mock_wfn_file: Path, multiwfn: Multiwfn
-    ) -> None:
+    def test_verbose_property(self, mock_wfn_file: Path, multiwfn: Multiwfn) -> None:
         job = MultiwfnJob(
             input_file=mock_wfn_file,
             analysis=None,

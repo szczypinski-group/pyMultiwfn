@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pymultiwfn"
-version = "1.0.0"
+version = "2.0.0"
 description = "Python interface and automation toolkit for Multiwfn"
 requires-python = ">=3.12"
 authors = [
@@ -61,7 +61,7 @@ ignore-semiprivate         = true
 exclude                     = ["tests/**", "menu.py"]
 
 [tool.ruff]
-line-length = 79
+line-length = 85
 target-version = "py311"
 lint.select = [
     "E",   # pycodestyle
@@ -81,6 +81,7 @@ lint.ignore = [
     "D103",  # Missing docstring in public function (interrogate)
     "D105",
     "TD003",  # TODO GH issue links are not always possible
+    "E501"
 ]
 
     [tool.ruff.lint.pydocstyle]

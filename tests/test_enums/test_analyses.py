@@ -104,10 +104,7 @@ class TestFindCategory:
             AnalysisClasses.find_category(Menu.GRID_EXTRACT_PLANE_XY)
             == "GRID_PROCESSING"
         )
-        assert (
-            AnalysisClasses.find_category(Menu.GEOMETRY_PROPERTIES)
-            == "UTILITIES"
-        )
+        assert AnalysisClasses.find_category(Menu.GEOMETRY_PROPERTIES) == "UTILITIES"
         assert (
             AnalysisClasses.find_category(Menu.ORBITAL_OVERLAP_INTEGRAL)
             == "ORBITAL_ANALYSIS"
@@ -117,6 +114,5 @@ class TestFindCategory:
             == "SPATIAL_DELOCALIZATION"
         )
         assert (
-            AnalysisClasses.find_category(Menu.EXPORT_VARIOUS_FILES)
-            == "FILE_EXPORT"
+            AnalysisClasses.find_category(Menu.EXPORT_VARIOUS_FILES) == "FILE_EXPORT"
         )

@@ -36,6 +36,10 @@ print(analysis.results[0].to_dict())
 
 The `MultiwfnResult` dataclasses hold different types of parsed results, which can easily be serialised into JSON.
 
+## Tutorials
+
+Tutorials can be found in the tutorials folder, reflecting the case studies. These are complete with a set of expected results to compare against.
+
 ## Contributing
 
 We actively welcome contributions from the community.

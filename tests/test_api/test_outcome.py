@@ -40,9 +40,7 @@ class TestIsSuccessful:
     def test_success(self, success_outcome: MultiwfnJobOutcome) -> None:
         assert success_outcome.is_successful() is True
 
-    def test_failure_stderr_error(
-        self, failed_outcome: MultiwfnJobOutcome
-    ) -> None:
+    def test_failure_stderr_error(self, failed_outcome: MultiwfnJobOutcome) -> None:
         assert failed_outcome.is_successful() is False
 
     def test_failure_negative_rc(

@@ -129,12 +129,8 @@ class TestCube:
     def test_create_with_extrema(self) -> None:
         cube = Cube(
             file_name="test.cube",
-            minimum=GridExtremum(
-                value=0.001, x_bohr=1.0, y_bohr=2.0, z_bohr=3.0
-            ),
-            maximum=GridExtremum(
-                value=0.999, x_bohr=4.0, y_bohr=5.0, z_bohr=6.0
-            ),
+            minimum=GridExtremum(value=0.001, x_bohr=1.0, y_bohr=2.0, z_bohr=3.0),
+            maximum=GridExtremum(value=0.999, x_bohr=4.0, y_bohr=5.0, z_bohr=6.0),
         )
         assert cube.minimum.value == pytest.approx(0.001)
         assert cube.maximum.value == pytest.approx(0.999)
