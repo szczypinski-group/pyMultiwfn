@@ -1,5 +1,7 @@
 # pyMultiwfn
 
+[![DOI](https://zenodo.org/badge/1098975665.svg)](https://doi.org/10.5281/zenodo.23740372)
+
 A Python wrapper for automating [Multiwfn 3.8 (07/01/2026)](http://sobereva.com/multiwfn/) batch calculations.
 This project is currently in progress and is regularly maintained.
 Documentation for `pymultiwfn` can be found [here](https://szczypinski-group.github.io/pyMultiwfn/).
