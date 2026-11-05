@@ -1,0 +1,1682 @@
+{
+  "input_file": "kraken_ligand.molden",
+  "analyses": {
+    "QMSA_ALIE": {
+      "parsed": {
+        "analysis": "QMSA_ALIE",
+        "results": [
+          {
+            "mapped_property": "alie",
+            "geometry": {
+              "volume_bohr3": 3251.02923,
+              "volume_angstrom3": 481.75283,
+              "area_bohr2": 1503.71711,
+              "area_angstrom2": 421.08368,
+              "sphericity": 0.7058,
+              "density_g_cm3": 1.3354,
+              "n_vertices": 51575,
+              "n_edges": 154719,
+              "n_facets": 103146
+            },
+            "minima": [
+              {
+                "type": "min",
+                "index": 1,
+                "value_au": 0.38629259,
+                "value_eV": 10.511556,
+                "value_kcal_mol": 242.402461,
+                "x_angstrom": -5.909502,
+                "y_angstrom": 4.26772,
+                "z_angstrom": 0.695982,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 2,
+                "value_au": 0.27921888,
+                "value_eV": 7.597932,
+                "value_kcal_mol": 175.212638,
+                "x_angstrom": -5.110352,
+                "y_angstrom": -3.141195,
+                "z_angstrom": -2.584617,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 3,
+                "value_au": 0.38029329,
+                "value_eV": 10.348307,
+                "value_kcal_mol": 238.637845,
+                "x_angstrom": -4.753649,
+                "y_angstrom": -4.052981,
+                "z_angstrom": -5.296339,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 4,
+                "value_au": 0.28514416,
+                "value_eV": 7.759167,
+                "value_kcal_mol": 178.930809,
+                "x_angstrom": -4.496181,
+                "y_angstrom": 0.982413,
+                "z_angstrom": -0.690884,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 5,
+                "value_au": 0.28328643,
+                "value_eV": 7.708616,
+                "value_kcal_mol": 177.765066,
+                "x_angstrom": -4.373525,
+                "y_angstrom": 2.785179,
+                "z_angstrom": -2.586376,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 6,
+                "value_au": 0.27889423,
+                "value_eV": 7.589098,
+                "value_kcal_mol": 175.008919,
+                "x_angstrom": -4.056854,
+                "y_angstrom": -1.333423,
+                "z_angstrom": -1.099887,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 7,
+                "value_au": 0.38425325,
+                "value_eV": 10.456063,
+                "value_kcal_mol": 241.122757,
+                "x_angstrom": -4.117755,
+                "y_angstrom": 5.855252,
+                "z_angstrom": -2.437901,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 8,
+                "value_au": 0.28261289,
+                "value_eV": 7.690288,
+                "value_kcal_mol": 177.342415,
+                "x_angstrom": -3.845284,
+                "y_angstrom": -3.767282,
+                "z_angstrom": -0.34669,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 9,
+                "value_au": 0.38019742,
+                "value_eV": 10.345698,
+                "value_kcal_mol": 238.57768,
+                "x_angstrom": -3.882303,
+                "y_angstrom": -0.283204,
+                "z_angstrom": -4.807461,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 10,
+                "value_au": 0.390368,
+                "value_eV": 10.622453,
+                "value_kcal_mol": 244.959822,
+                "x_angstrom": -3.823335,
+                "y_angstrom": 0.91927,
+                "z_angstrom": 2.389349,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 11,
+                "value_au": 0.38303387,
+                "value_eV": 10.422882,
+                "value_kcal_mol": 240.357582,
+                "x_angstrom": -3.320998,
+                "y_angstrom": -6.64839,
+                "z_angstrom": -2.800218,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 12,
+                "value_au": 0.35321305,
+                "value_eV": 9.611416,
+                "value_kcal_mol": 221.644718,
+                "x_angstrom": -3.109302,
+                "y_angstrom": -0.603455,
+                "z_angstrom": 0.055468,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 13,
+                "value_au": 0.29367379,
+                "value_eV": 7.99127,
+                "value_kcal_mol": 184.283237,
+                "x_angstrom": -2.592716,
+                "y_angstrom": 1.402797,
+                "z_angstrom": -2.836337,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 14,
+                "value_au": 0.30180729,
+                "value_eV": 8.212594,
+                "value_kcal_mol": 189.387091,
+                "x_angstrom": -2.561427,
+                "y_angstrom": -1.971834,
+                "z_angstrom": 1.221324,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 15,
+                "value_au": 0.28572408,
+                "value_eV": 7.774947,
+                "value_kcal_mol": 179.294714,
+                "x_angstrom": -2.354515,
+                "y_angstrom": 3.422795,
+                "z_angstrom": 1.755097,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 16,
+                "value_au": 0.28320914,
+                "value_eV": 7.706513,
+                "value_kcal_mol": 177.716568,
+                "x_angstrom": -2.142549,
+                "y_angstrom": 5.221861,
+                "z_angstrom": -0.255557,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 17,
+                "value_au": 0.27922154,
+                "value_eV": 7.598005,
+                "value_kcal_mol": 175.214311,
+                "x_angstrom": -1.683715,
+                "y_angstrom": -3.436181,
+                "z_angstrom": -4.701626,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 18,
+                "value_au": 0.28305208,
+                "value_eV": 7.702239,
+                "value_kcal_mol": 177.618011,
+                "x_angstrom": -1.089708,
+                "y_angstrom": -0.214781,
+                "z_angstrom": 3.327922,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 19,
+                "value_au": 0.33238195,
+                "value_eV": 9.044573,
+                "value_kcal_mol": 208.572996,
+                "x_angstrom": -0.89727,
+                "y_angstrom": 1.297878,
+                "z_angstrom": 2.250772,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 20,
+                "value_au": 0.38490618,
+                "value_eV": 10.47383,
+                "value_kcal_mol": 241.532479,
+                "x_angstrom": -0.874394,
+                "y_angstrom": 4.16817,
+                "z_angstrom": -3.75366,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 21,
+                "value_au": 0.27756589,
+                "value_eV": 7.552952,
+                "value_kcal_mol": 174.175369,
+                "x_angstrom": -0.571783,
+                "y_angstrom": -1.558645,
+                "z_angstrom": -3.199361,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 22,
+                "value_au": 0.29263474,
+                "value_eV": 7.962996,
+                "value_kcal_mol": 183.631225,
+                "x_angstrom": -0.475882,
+                "y_angstrom": 3.696074,
+                "z_angstrom": -0.158255,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 23,
+                "value_au": 0.28127985,
+                "value_eV": 7.654014,
+                "value_kcal_mol": 176.505918,
+                "x_angstrom": -0.34886,
+                "y_angstrom": -4.113963,
+                "z_angstrom": -2.422928,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 24,
+                "value_au": 0.34909652,
+                "value_eV": 9.499399,
+                "value_kcal_mol": 219.061557,
+                "x_angstrom": 0.600911,
+                "y_angstrom": -2.712394,
+                "z_angstrom": -0.674646,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 25,
+                "value_au": 0.27619345,
+                "value_eV": 7.515606,
+                "value_kcal_mol": 173.314154,
+                "x_angstrom": 0.830143,
+                "y_angstrom": 0.269274,
+                "z_angstrom": 4.62138,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 26,
+                "value_au": 0.25133925,
+                "value_eV": 6.839289,
+                "value_kcal_mol": 157.71789,
+                "x_angstrom": 0.97468,
+                "y_angstrom": -0.201432,
+                "z_angstrom": -1.844069,
+                "is_global": true
+              },
+              {
+                "type": "min",
+                "index": 27,
+                "value_au": 0.28642878,
+                "value_eV": 7.794123,
+                "value_kcal_mol": 179.736924,
+                "x_angstrom": 1.227871,
+                "y_angstrom": -2.912543,
+                "z_angstrom": 1.128484,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 28,
+                "value_au": 0.30709734,
+                "value_eV": 8.356543,
+                "value_kcal_mol": 192.70665,
+                "x_angstrom": 1.818321,
+                "y_angstrom": 2.095648,
+                "z_angstrom": -1.581926,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 29,
+                "value_au": 0.31629624,
+                "value_eV": 8.606858,
+                "value_kcal_mol": 198.479056,
+                "x_angstrom": 2.48373,
+                "y_angstrom": 2.036983,
+                "z_angstrom": 2.982117,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 30,
+                "value_au": 0.27656132,
+                "value_eV": 7.525616,
+                "value_kcal_mol": 173.544993,
+                "x_angstrom": 2.826203,
+                "y_angstrom": -2.762008,
+                "z_angstrom": 2.794512,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 31,
+                "value_au": 0.30608433,
+                "value_eV": 8.328978,
+                "value_kcal_mol": 192.070975,
+                "x_angstrom": 2.859241,
+                "y_angstrom": 3.86172,
+                "z_angstrom": 1.90249,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 32,
+                "value_au": 0.38408142,
+                "value_eV": 10.451387,
+                "value_kcal_mol": 241.014933,
+                "x_angstrom": 3.29286,
+                "y_angstrom": -2.039092,
+                "z_angstrom": 0.950968,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 33,
+                "value_au": 0.30722051,
+                "value_eV": 8.359895,
+                "value_kcal_mol": 192.783945,
+                "x_angstrom": 3.912186,
+                "y_angstrom": 0.578393,
+                "z_angstrom": -1.491107,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 34,
+                "value_au": 0.40373116,
+                "value_eV": 10.986084,
+                "value_kcal_mol": 253.345343,
+                "x_angstrom": 4.837077,
+                "y_angstrom": 4.373555,
+                "z_angstrom": -1.369846,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 35,
+                "value_au": 0.3067978,
+                "value_eV": 8.348393,
+                "value_kcal_mol": 192.518689,
+                "x_angstrom": 5.025727,
+                "y_angstrom": 2.308906,
+                "z_angstrom": 2.018066,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 36,
+                "value_au": 0.41309165,
+                "value_eV": 11.240796,
+                "value_kcal_mol": 259.219144,
+                "x_angstrom": 5.621493,
+                "y_angstrom": -2.991358,
+                "z_angstrom": 2.071843,
+                "is_global": false
+              }
+            ],
+            "maxima": [
+              {
+                "type": "max",
+                "index": 1,
+                "value_au": 0.46503334,
+                "value_eV": 12.654201,
+                "value_kcal_mol": 291.813068,
+                "x_angstrom": -5.011078,
+                "y_angstrom": 2.793925,
+                "z_angstrom": 1.453729,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 2,
+                "value_au": 0.46346234,
+                "value_eV": 12.611452,
+                "value_kcal_mol": 290.827254,
+                "x_angstrom": -4.886509,
+                "y_angstrom": 5.004205,
+                "z_angstrom": -0.779685,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 3,
+                "value_au": 0.37903564,
+                "value_eV": 10.314084,
+                "value_kcal_mol": 237.848654,
+                "x_angstrom": -4.105868,
+                "y_angstrom": -2.770187,
+                "z_angstrom": -1.420727,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 4,
+                "value_au": 0.45865754,
+                "value_eV": 12.480706,
+                "value_kcal_mol": 287.812192,
+                "x_angstrom": -4.08742,
+                "y_angstrom": -2.192088,
+                "z_angstrom": -5.031919,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 5,
+                "value_au": 0.46048551,
+                "value_eV": 12.530448,
+                "value_kcal_mol": 288.959264,
+                "x_angstrom": -3.830754,
+                "y_angstrom": -5.254786,
+                "z_angstrom": -4.06507,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 6,
+                "value_au": 0.3833017,
+                "value_eV": 10.43017,
+                "value_kcal_mol": 240.525651,
+                "x_angstrom": -3.66836,
+                "y_angstrom": 1.707069,
+                "z_angstrom": -1.770854,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 7,
+                "value_au": 0.38070332,
+                "value_eV": 10.359464,
+                "value_kcal_mol": 238.895139,
+                "x_angstrom": -2.945995,
+                "y_angstrom": -1.129888,
+                "z_angstrom": 0.060969,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 8,
+                "value_au": 0.45663968,
+                "value_eV": 12.425798,
+                "value_kcal_mol": 286.545965,
+                "x_angstrom": -2.783075,
+                "y_angstrom": 0.090214,
+                "z_angstrom": -3.325765,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 9,
+                "value_au": 0.46291684,
+                "value_eV": 12.596608,
+                "value_kcal_mol": 290.484948,
+                "x_angstrom": -2.566629,
+                "y_angstrom": 4.8996,
+                "z_angstrom": -2.999182,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 10,
+                "value_au": 0.44482237,
+                "value_eV": 12.104232,
+                "value_kcal_mol": 279.130487,
+                "x_angstrom": -2.460219,
+                "y_angstrom": -1.016992,
+                "z_angstrom": 1.864627,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 11,
+                "value_au": 0.43365156,
+                "value_eV": 11.800259,
+                "value_kcal_mol": 272.120691,
+                "x_angstrom": -2.336279,
+                "y_angstrom": 1.137077,
+                "z_angstrom": 2.433769,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 12,
+                "value_au": 0.46183733,
+                "value_eV": 12.567233,
+                "value_kcal_mol": 289.807541,
+                "x_angstrom": -2.273722,
+                "y_angstrom": -5.929564,
+                "z_angstrom": -1.420727,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 13,
+                "value_au": 0.4327248,
+                "value_eV": 11.775041,
+                "value_kcal_mol": 271.539139,
+                "x_angstrom": -2.145261,
+                "y_angstrom": 0.482793,
+                "z_angstrom": 2.710564,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 14,
+                "value_au": 0.38313144,
+                "value_eV": 10.425537,
+                "value_kcal_mol": 240.418812,
+                "x_angstrom": -1.727415,
+                "y_angstrom": 3.843715,
+                "z_angstrom": 0.377111,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 15,
+                "value_au": 0.44955888,
+                "value_eV": 12.233119,
+                "value_kcal_mol": 282.10269,
+                "x_angstrom": -1.506453,
+                "y_angstrom": -3.777761,
+                "z_angstrom": 1.130545,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 16,
+                "value_au": 0.378447,
+                "value_eV": 10.298067,
+                "value_kcal_mol": 237.479279,
+                "x_angstrom": -1.039731,
+                "y_angstrom": -3.034926,
+                "z_angstrom": -3.275788,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 17,
+                "value_au": 0.47809549,
+                "value_eV": 13.00964,
+                "value_kcal_mol": 300.009703,
+                "x_angstrom": -0.361639,
+                "y_angstrom": -3.069575,
+                "z_angstrom": 4.188552,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 18,
+                "value_au": 0.46133441,
+                "value_eV": 12.553548,
+                "value_kcal_mol": 289.491956,
+                "x_angstrom": -0.322644,
+                "y_angstrom": 2.693986,
+                "z_angstrom": -2.805535,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 19,
+                "value_au": 0.44582154,
+                "value_eV": 12.131421,
+                "value_kcal_mol": 279.757474,
+                "x_angstrom": -0.137189,
+                "y_angstrom": -3.93345,
+                "z_angstrom": 0.644141,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 20,
+                "value_au": 0.3785421,
+                "value_eV": 10.300654,
+                "value_kcal_mol": 237.53895,
+                "x_angstrom": 0.176059,
+                "y_angstrom": -2.278962,
+                "z_angstrom": -1.630896,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 21,
+                "value_au": 0.42426256,
+                "value_eV": 11.544771,
+                "value_kcal_mol": 266.229,
+                "x_angstrom": 0.334132,
+                "y_angstrom": 0.505623,
+                "z_angstrom": 3.284011,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 22,
+                "value_au": 0.47776007,
+                "value_eV": 13.000513,
+                "value_kcal_mol": 299.799224,
+                "x_angstrom": 0.350881,
+                "y_angstrom": 3.421036,
+                "z_angstrom": 0.780624,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 23,
+                "value_au": 0.42584903,
+                "value_eV": 11.587941,
+                "value_kcal_mol": 267.224527,
+                "x_angstrom": 0.603659,
+                "y_angstrom": 1.344671,
+                "z_angstrom": 2.747199,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 24,
+                "value_au": 0.36673248,
+                "value_eV": 9.979298,
+                "value_kcal_mol": 230.128298,
+                "x_angstrom": 0.921166,
+                "y_angstrom": -2.364186,
+                "z_angstrom": -0.22081,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 25,
+                "value_au": 0.42139501,
+                "value_eV": 11.466741,
+                "value_kcal_mol": 264.429581,
+                "x_angstrom": 2.18708,
+                "y_angstrom": -2.209016,
+                "z_angstrom": 1.626847,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 26,
+                "value_au": 0.40617195,
+                "value_eV": 11.052501,
+                "value_kcal_mol": 254.876962,
+                "x_angstrom": 2.470081,
+                "y_angstrom": 0.874588,
+                "z_angstrom": -0.896271,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 27,
+                "value_au": 0.49049696,
+                "value_eV": 13.347101,
+                "value_kcal_mol": 307.791749,
+                "x_angstrom": 2.696444,
+                "y_angstrom": -1.447394,
+                "z_angstrom": 4.977275,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 28,
+                "value_au": 0.43699342,
+                "value_eV": 11.891196,
+                "value_kcal_mol": 274.21774,
+                "x_angstrom": 2.753765,
+                "y_angstrom": -1.314825,
+                "z_angstrom": 0.502493,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 29,
+                "value_au": 0.48160193,
+                "value_eV": 13.105055,
+                "value_kcal_mol": 302.210028,
+                "x_angstrom": 2.947515,
+                "y_angstrom": 4.50978,
+                "z_angstrom": -0.785714,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 30,
+                "value_au": 0.40555506,
+                "value_eV": 11.035714,
+                "value_kcal_mol": 254.489855,
+                "x_angstrom": 3.443693,
+                "y_angstrom": 2.464412,
+                "z_angstrom": 2.171246,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 31,
+                "value_au": 0.48529516,
+                "value_eV": 13.205553,
+                "value_kcal_mol": 304.527567,
+                "x_angstrom": 4.180841,
+                "y_angstrom": -1.24203,
+                "z_angstrom": -0.370901,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 32,
+                "value_au": 0.42757214,
+                "value_eV": 11.63483,
+                "value_kcal_mol": 268.305793,
+                "x_angstrom": 4.148681,
+                "y_angstrom": 0.086755,
+                "z_angstrom": 3.394321,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 33,
+                "value_au": 0.48258832,
+                "value_eV": 13.131896,
+                "value_kcal_mol": 302.828999,
+                "x_angstrom": 4.4987,
+                "y_angstrom": -2.131006,
+                "z_angstrom": 0.224041,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 34,
+                "value_au": 0.48905158,
+                "value_eV": 13.30777,
+                "value_kcal_mol": 306.884756,
+                "x_angstrom": 4.538143,
+                "y_angstrom": -2.272858,
+                "z_angstrom": 2.081842,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 35,
+                "value_au": 0.48642171,
+                "value_eV": 13.236208,
+                "value_kcal_mol": 305.234485,
+                "x_angstrom": 5.25827,
+                "y_angstrom": 0.351464,
+                "z_angstrom": 2.600448,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 36,
+                "value_au": 0.48242069,
+                "value_eV": 13.127334,
+                "value_kcal_mol": 302.723805,
+                "x_angstrom": 5.415186,
+                "y_angstrom": -0.893139,
+                "z_angstrom": 2.861622,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 37,
+                "value_au": 0.48538053,
+                "value_eV": 13.207876,
+                "value_kcal_mol": 304.581133,
+                "x_angstrom": 5.589511,
+                "y_angstrom": 2.792206,
+                "z_angstrom": -0.77838,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 38,
+                "value_au": 0.53176585,
+                "value_eV": 14.470085,
+                "value_kcal_mol": 333.688388,
+                "x_angstrom": 7.301923,
+                "y_angstrom": -1.210803,
+                "z_angstrom": 0.612079,
+                "is_global": true
+              }
+            ],
+            "statistics": {
+              "mapped_property": "alie",
+              "global_min_au": 0.251339,
+              "global_max_au": 0.531766,
+              "global_min_kcal_mol": null,
+              "global_max_kcal_mol": null,
+              "overall_area_bohr2": 1503.71711,
+              "overall_area_angstrom2": 421.08368,
+              "positive_area_bohr2": 1503.71711,
+              "positive_area_angstrom2": 421.08368,
+              "negative_area_bohr2": 0.0,
+              "negative_area_angstrom2": 0.0,
+              "overall_average_au": null,
+              "overall_average_kcal_mol": null,
+              "positive_average_au": null,
+              "positive_average_kcal_mol": null,
+              "negative_average_au": null,
+              "negative_average_kcal_mol": null,
+              "sigma2_total_au2": null,
+              "sigma2_total_kcal_mol2": null,
+              "positive_variance_au2": null,
+              "positive_variance_kcal_mol2": null,
+              "negative_variance_au2": null,
+              "negative_variance_kcal_mol2": null,
+              "nu": null,
+              "sigma2_tot_times_nu_au2": null,
+              "sigma2_tot_times_nu_kcal_mol2": null,
+              "pi_au": null,
+              "pi_kcal_mol": null,
+              "mpi_eV": null,
+              "mpi_kcal_mol": null,
+              "nonpolar_area_angstrom2": null,
+              "nonpolar_area_pct": null,
+              "polar_area_angstrom2": null,
+              "polar_area_pct": null,
+              "overall_skewness": -0.133638487,
+              "positive_skewness": -0.133638487,
+              "negative_skewness": null,
+              "negative_area_pct": null,
+              "positive_surface_volume": null,
+              "negative_surface_volume": null
+            }
+          }
+        ]
+      },
+      "raw_stdout_file": "QMSA_ALIE.txt",
+      "timestamp": "2026-10-16T12:02:42.581293"
+    },
+    "QMSA_ESP": {
+      "parsed": {
+        "analysis": "QMSA_ESP",
+        "results": [
+          {
+            "mapped_property": "esp",
+            "geometry": {
+              "volume_bohr3": 3249.83552,
+              "volume_angstrom3": 481.57594,
+              "area_bohr2": 1503.42186,
+              "area_angstrom2": 421.001,
+              "sphericity": 0.7057,
+              "density_g_cm3": 1.3359,
+              "n_vertices": 33009,
+              "n_edges": 99021,
+              "n_facets": 66014
+            },
+            "minima": [
+              {
+                "type": "min",
+                "index": 1,
+                "value_au": -0.03926857,
+                "value_eV": -1.068552,
+                "value_kcal_mol": -24.641418,
+                "x_angstrom": -4.423734,
+                "y_angstrom": -2.610696,
+                "z_angstrom": -1.765158,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 2,
+                "value_au": -0.0359468,
+                "value_eV": -0.978162,
+                "value_kcal_mol": -22.556974,
+                "x_angstrom": -4.05616,
+                "y_angstrom": 2.003845,
+                "z_angstrom": -1.923906,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 3,
+                "value_au": -0.03264842,
+                "value_eV": -0.888409,
+                "value_kcal_mol": -20.487209,
+                "x_angstrom": -1.931791,
+                "y_angstrom": 4.341479,
+                "z_angstrom": 0.293482,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 4,
+                "value_au": -0.03927455,
+                "value_eV": -1.068715,
+                "value_kcal_mol": -24.645171,
+                "x_angstrom": -1.191983,
+                "y_angstrom": -3.008467,
+                "z_angstrom": -3.749107,
+                "is_global": true
+              },
+              {
+                "type": "min",
+                "index": 5,
+                "value_au": -0.02692346,
+                "value_eV": -0.732625,
+                "value_kcal_mol": -16.894741,
+                "x_angstrom": -0.044057,
+                "y_angstrom": -0.068504,
+                "z_angstrom": 4.214068,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 6,
+                "value_au": -0.03607632,
+                "value_eV": -0.981687,
+                "value_kcal_mol": -22.638253,
+                "x_angstrom": 1.170079,
+                "y_angstrom": 0.050327,
+                "z_angstrom": -1.632398,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 7,
+                "value_au": -0.01886865,
+                "value_eV": -0.513442,
+                "value_kcal_mol": -11.840264,
+                "x_angstrom": 3.048093,
+                "y_angstrom": 3.272502,
+                "z_angstrom": 2.134979,
+                "is_global": false
+              },
+              {
+                "type": "min",
+                "index": 8,
+                "value_au": -0.03749095,
+                "value_eV": -1.020181,
+                "value_kcal_mol": -23.525945,
+                "x_angstrom": 3.156563,
+                "y_angstrom": -2.043094,
+                "z_angstrom": 1.694388,
+                "is_global": false
+              }
+            ],
+            "maxima": [
+              {
+                "type": "max",
+                "index": 1,
+                "value_au": 0.01562361,
+                "value_eV": 0.42514,
+                "value_kcal_mol": 9.803973,
+                "x_angstrom": -5.881134,
+                "y_angstrom": 4.271639,
+                "z_angstrom": 0.75189,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 2,
+                "value_au": 0.01063752,
+                "value_eV": 0.289462,
+                "value_kcal_mol": 6.675147,
+                "x_angstrom": -4.581515,
+                "y_angstrom": -4.130393,
+                "z_angstrom": -5.40021,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 3,
+                "value_au": 0.01364364,
+                "value_eV": 0.371262,
+                "value_kcal_mol": 8.561523,
+                "x_angstrom": -4.152605,
+                "y_angstrom": 5.8496,
+                "z_angstrom": -2.419035,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 4,
+                "value_au": 0.0089806,
+                "value_eV": 0.244375,
+                "value_kcal_mol": 5.635419,
+                "x_angstrom": -3.91335,
+                "y_angstrom": -0.494875,
+                "z_angstrom": -4.987536,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 5,
+                "value_au": 0.01394976,
+                "value_eV": 0.379592,
+                "value_kcal_mol": 8.753612,
+                "x_angstrom": -3.201538,
+                "y_angstrom": -6.66935,
+                "z_angstrom": -2.796939,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 6,
+                "value_au": 0.04607678,
+                "value_eV": 1.253813,
+                "value_kcal_mol": 28.913642,
+                "x_angstrom": -2.968287,
+                "y_angstrom": -0.054395,
+                "z_angstrom": 2.380028,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 7,
+                "value_au": 0.01488701,
+                "value_eV": 0.405096,
+                "value_kcal_mol": 9.341746,
+                "x_angstrom": -0.851578,
+                "y_angstrom": 4.26772,
+                "z_angstrom": -3.69009,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 8,
+                "value_au": 0.04722761,
+                "value_eV": 1.285129,
+                "value_kcal_mol": 29.635799,
+                "x_angstrom": -0.690686,
+                "y_angstrom": -4.013444,
+                "z_angstrom": 1.013488,
+                "is_global": true
+              },
+              {
+                "type": "max",
+                "index": 9,
+                "value_au": 0.00944669,
+                "value_eV": 0.257058,
+                "value_kcal_mol": 5.927893,
+                "x_angstrom": -0.323808,
+                "y_angstrom": 2.552051,
+                "z_angstrom": 2.073372,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 10,
+                "value_au": 0.00509446,
+                "value_eV": 0.138627,
+                "value_kcal_mol": 3.196822,
+                "x_angstrom": 0.206776,
+                "y_angstrom": 2.018717,
+                "z_angstrom": -2.622075,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 11,
+                "value_au": 0.0065156,
+                "value_eV": 0.177299,
+                "value_kcal_mol": 4.088604,
+                "x_angstrom": 0.471365,
+                "y_angstrom": 3.534136,
+                "z_angstrom": 0.941376,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 12,
+                "value_au": 0.02213123,
+                "value_eV": 0.602221,
+                "value_kcal_mol": 13.887565,
+                "x_angstrom": 1.132995,
+                "y_angstrom": -3.006549,
+                "z_angstrom": 5.773689,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 13,
+                "value_au": 0.01888527,
+                "value_eV": 0.513894,
+                "value_kcal_mol": 11.850697,
+                "x_angstrom": 1.529719,
+                "y_angstrom": 4.990927,
+                "z_angstrom": -0.512307,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 14,
+                "value_au": 0.02756022,
+                "value_eV": 0.749952,
+                "value_kcal_mol": 17.294316,
+                "x_angstrom": 4.001484,
+                "y_angstrom": -0.110529,
+                "z_angstrom": 4.440914,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 15,
+                "value_au": 0.02693159,
+                "value_eV": 0.732846,
+                "value_kcal_mol": 16.899843,
+                "x_angstrom": 4.966138,
+                "y_angstrom": 4.266138,
+                "z_angstrom": -1.363023,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 16,
+                "value_au": 0.0334102,
+                "value_eV": 0.909138,
+                "value_kcal_mol": 20.965237,
+                "x_angstrom": 6.639049,
+                "y_angstrom": -2.876172,
+                "z_angstrom": 1.787395,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 17,
+                "value_au": 0.03827737,
+                "value_eV": 1.04158,
+                "value_kcal_mol": 24.019435,
+                "x_angstrom": 6.662402,
+                "y_angstrom": 0.952568,
+                "z_angstrom": -0.195411,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 18,
+                "value_au": 0.03726114,
+                "value_eV": 1.013927,
+                "value_kcal_mol": 23.381735,
+                "x_angstrom": 7.306477,
+                "y_angstrom": -1.167744,
+                "z_angstrom": 0.59265,
+                "is_global": false
+              },
+              {
+                "type": "max",
+                "index": 19,
+                "value_au": 0.03386121,
+                "value_eV": 0.92141,
+                "value_kcal_mol": 21.248246,
+                "x_angstrom": 7.423484,
+                "y_angstrom": 0.636295,
+                "z_angstrom": 1.380425,
+                "is_global": false
+              }
+            ],
+            "statistics": {
+              "mapped_property": "esp",
+              "global_min_au": -0.039275,
+              "global_max_au": 0.047228,
+              "global_min_kcal_mol": -24.64517,
+              "global_max_kcal_mol": 29.6358,
+              "overall_area_bohr2": 1503.42186,
+              "overall_area_angstrom2": 421.001,
+              "positive_area_bohr2": 709.6057,
+              "positive_area_angstrom2": 198.70983,
+              "negative_area_bohr2": 793.81616,
+              "negative_area_angstrom2": 222.29117,
+              "overall_average_au": -0.00188752,
+              "overall_average_kcal_mol": -1.18444,
+              "positive_average_au": 0.01502432,
+              "positive_average_kcal_mol": 9.42791,
+              "negative_average_au": -0.0170053,
+              "negative_average_kcal_mol": -10.671,
+              "sigma2_total_au2": 0.00022233,
+              "sigma2_total_kcal_mol2": 87.54495,
+              "positive_variance_au2": 0.00011274,
+              "positive_variance_kcal_mol2": 44.39406,
+              "negative_variance_au2": 0.00010958,
+              "negative_variance_kcal_mol2": 43.15089,
+              "nu": 0.24994959,
+              "sigma2_tot_times_nu_au2": 5.557e-05,
+              "sigma2_tot_times_nu_kcal_mol2": 21.88182,
+              "pi_au": 0.01602377,
+              "pi_kcal_mol": 10.05508,
+              "mpi_eV": 0.43729478,
+              "mpi_kcal_mol": 10.08427,
+              "nonpolar_area_angstrom2": 227.9,
+              "nonpolar_area_pct": 54.13,
+              "polar_area_angstrom2": 193.1,
+              "polar_area_pct": 45.87,
+              "overall_skewness": 0.2242701133,
+              "positive_skewness": 0.6111597606,
+              "negative_skewness": -0.2247745006,
+              "negative_area_pct": null,
+              "positive_surface_volume": null,
+              "negative_surface_volume": null
+            }
+          }
+        ]
+      },
+      "raw_stdout_file": "QMSA_ESP.txt",
+      "timestamp": "2026-10-16T12:02:42.581293"
+    },
+    "VIEW_STRUCTURE": {
+      "parsed": {
+        "analysis": "VIEW_STRUCTURE",
+        "results": [
+          {
+            "atom_id": 1,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 10.598141,
+            "y_bohr": -1.64098,
+            "z_bohr": 1.904273
+          },
+          {
+            "atom_id": 2,
+            "element": "O",
+            "nuclear_charge": 8.0,
+            "x_bohr": 8.061306,
+            "y_bohr": -1.20394,
+            "z_bohr": 2.606586
+          },
+          {
+            "atom_id": 3,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 6.951611,
+            "y_bohr": 0.976484,
+            "z_bohr": 1.871766
+          },
+          {
+            "atom_id": 4,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 8.166506,
+            "y_bohr": 2.892077,
+            "z_bohr": 0.499897
+          },
+          {
+            "atom_id": 5,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 6.844527,
+            "y_bohr": 5.072837,
+            "z_bohr": -0.19989
+          },
+          {
+            "atom_id": 6,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 4.314083,
+            "y_bohr": 5.386512,
+            "z_bohr": 0.468492
+          },
+          {
+            "atom_id": 7,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 3.099413,
+            "y_bohr": 3.49673,
+            "z_bohr": 1.858406
+          },
+          {
+            "atom_id": 8,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 4.384177,
+            "y_bohr": 1.295843,
+            "z_bohr": 2.549519
+          },
+          {
+            "atom_id": 9,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": 3.104938,
+            "y_bohr": -0.645026,
+            "z_bohr": 3.89201
+          },
+          {
+            "atom_id": 10,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 3.83034,
+            "y_bohr": -1.591093,
+            "z_bohr": 6.198998
+          },
+          {
+            "atom_id": 11,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 2.043731,
+            "y_bohr": -3.327873,
+            "z_bohr": 6.984098
+          },
+          {
+            "atom_id": 12,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 0.160391,
+            "y_bohr": -3.443012,
+            "z_bohr": 5.078533
+          },
+          {
+            "atom_id": 13,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 0.843081,
+            "y_bohr": -1.771449,
+            "z_bohr": 3.160065
+          },
+          {
+            "atom_id": 14,
+            "element": "P",
+            "nuclear_charge": 15.0,
+            "x_bohr": -0.628121,
+            "y_bohr": -1.032971,
+            "z_bohr": 0.142386
+          },
+          {
+            "atom_id": 15,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": -2.136696,
+            "y_bohr": -3.946291,
+            "z_bohr": -0.153409
+          },
+          {
+            "atom_id": 16,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -3.476469,
+            "y_bohr": -4.697411,
+            "z_bohr": -2.287676
+          },
+          {
+            "atom_id": 17,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -4.38425,
+            "y_bohr": -2.927246,
+            "z_bohr": -4.060992
+          },
+          {
+            "atom_id": 18,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -5.732241,
+            "y_bohr": -3.740239,
+            "z_bohr": -6.177661
+          },
+          {
+            "atom_id": 19,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -6.23433,
+            "y_bohr": -6.303907,
+            "z_bohr": -6.573203
+          },
+          {
+            "atom_id": 20,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -5.355232,
+            "y_bohr": -8.063688,
+            "z_bohr": -4.806004
+          },
+          {
+            "atom_id": 21,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -3.990327,
+            "y_bohr": -7.281418,
+            "z_bohr": -2.692939
+          },
+          {
+            "atom_id": 22,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": -3.04713,
+            "y_bohr": 0.926622,
+            "z_bohr": 1.186956
+          },
+          {
+            "atom_id": 23,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -4.020477,
+            "y_bohr": 3.023415,
+            "z_bohr": -0.077496
+          },
+          {
+            "atom_id": 24,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -6.259719,
+            "y_bohr": 4.161834,
+            "z_bohr": 0.813585
+          },
+          {
+            "atom_id": 25,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -7.263788,
+            "y_bohr": 6.282364,
+            "z_bohr": -0.385334
+          },
+          {
+            "atom_id": 26,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -6.077977,
+            "y_bohr": 7.323328,
+            "z_bohr": -2.506123
+          },
+          {
+            "atom_id": 27,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -3.858208,
+            "y_bohr": 6.201387,
+            "z_bohr": -3.398873
+          },
+          {
+            "atom_id": 28,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -2.821809,
+            "y_bohr": 4.085572,
+            "z_bohr": -2.210795
+          },
+          {
+            "atom_id": 29,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 10.826153,
+            "y_bohr": -1.651314,
+            "z_bohr": -0.170021
+          },
+          {
+            "atom_id": 30,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 11.092861,
+            "y_bohr": -3.509685,
+            "z_bohr": 2.654192
+          },
+          {
+            "atom_id": 31,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 11.87897,
+            "y_bohr": -0.211086,
+            "z_bohr": 2.72386
+          },
+          {
+            "atom_id": 32,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 10.14276,
+            "y_bohr": 2.680793,
+            "z_bohr": -0.050178
+          },
+          {
+            "atom_id": 33,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 7.824536,
+            "y_bohr": 6.538128,
+            "z_bohr": -1.279065
+          },
+          {
+            "atom_id": 34,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 3.278504,
+            "y_bohr": 7.089682,
+            "z_bohr": -0.070578
+          },
+          {
+            "atom_id": 35,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 1.125441,
+            "y_bohr": 3.711741,
+            "z_bohr": 2.431028
+          },
+          {
+            "atom_id": 36,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 5.560802,
+            "y_bohr": -0.927585,
+            "z_bohr": 7.088269
+          },
+          {
+            "atom_id": 37,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 2.089591,
+            "y_bohr": -4.389865,
+            "z_bohr": 8.746814
+          },
+          {
+            "atom_id": 38,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -1.533214,
+            "y_bohr": -4.617014,
+            "z_bohr": 5.099709
+          },
+          {
+            "atom_id": 39,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -1.496352,
+            "y_bohr": -5.368914,
+            "z_bohr": 0.963821
+          },
+          {
+            "atom_id": 40,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -4.053471,
+            "y_bohr": -0.905964,
+            "z_bohr": -3.778162
+          },
+          {
+            "atom_id": 41,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -6.413902,
+            "y_bohr": -2.330988,
+            "z_bohr": -7.528795
+          },
+          {
+            "atom_id": 42,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -7.302501,
+            "y_bohr": -6.922474,
+            "z_bohr": -8.229744
+          },
+          {
+            "atom_id": 43,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -5.726972,
+            "y_bohr": -10.080137,
+            "z_bohr": -5.076801
+          },
+          {
+            "atom_id": 44,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -3.299345,
+            "y_bohr": -8.676396,
+            "z_bohr": -1.328395
+          },
+          {
+            "atom_id": 45,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -4.051481,
+            "y_bohr": 0.365099,
+            "z_bohr": 2.731026
+          },
+          {
+            "atom_id": 46,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -7.212646,
+            "y_bohr": 3.355831,
+            "z_bohr": 2.464455
+          },
+          {
+            "atom_id": 47,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -9.004208,
+            "y_bohr": 7.12471,
+            "z_bohr": 0.348401
+          },
+          {
+            "atom_id": 48,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -6.870932,
+            "y_bohr": 8.982486,
+            "z_bohr": -3.447141
+          },
+          {
+            "atom_id": 49,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -2.897268,
+            "y_bohr": 6.986853,
+            "z_bohr": -5.053655
+          },
+          {
+            "atom_id": 50,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -1.072797,
+            "y_bohr": 3.247632,
+            "z_bohr": -2.924217
+          },
+          {
+            "homo_index": 102,
+            "homo_energy_au": -0.174393,
+            "homo_energy_eV": -4.745465,
+            "lumo_index": 103,
+            "lumo_energy_au": -0.051845,
+            "lumo_energy_eV": -1.410762,
+            "gap_au": 0.122548,
+            "gap_eV": 3.334702,
+            "gap_kJ_mol": 321.749949
+          }
+        ]
+      },
+      "raw_stdout_file": "VIEW_STRUCTURE.txt",
+      "timestamp": "2026-10-16T12:02:42.581293"
+    }
+  },
+  "output_dir": "tutorial_results\\kraken_ligand.molden.output",
+  "generated_files": [
+    "QMSA_ALIE.txt",
+    "QMSA_ESP.txt",
+    "SURFACE_AREA_VOLUME.txt",
+    "VIEW_STRUCTURE.txt",
+    "surf.cub"
+  ]
+}
