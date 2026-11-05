@@ -298,6 +298,7 @@ class AnalysisClasses(Enum):
         Menu.FUZZY_INTEGRATE_IRI,
         Menu.FUZZY_MULTIPOLE,
         Menu.FUZZY_OVERLAP_EDENSITY,
+        Menu.FUZZY_OVERLAP_NORM_RHO,
         Menu.FUZZY_OVERLAP_LAPLACIAN,
         Menu.FUZZY_OVERLAP_ORB_WFN_HOMO,
         Menu.FUZZY_OVERLAP_ORB_WFN_LUMO,

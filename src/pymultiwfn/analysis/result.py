@@ -1430,6 +1430,15 @@ class NICSScan(ParsedMultiwfnResult):
 
 
 @dataclass
+class MolecularVolume(ParsedMultiwfnResult):
+    """Molecular van der Waals volume (Monte Carlo isosurface integration)."""
+
+    volume_bohr3: float
+    volume_angstrom3: float | None = None
+    volume_cm3_mol: float | None = None
+
+
+@dataclass
 class BondLength(ParsedMultiwfnResult):
     """Result for bond length analysis."""
 
@@ -1531,6 +1540,31 @@ class BLA_BOA(ParsedMultiwfnResult):  # noqa: N801
 
     bla: float | None = None
     boa: float | None = None
+
+
+@dataclass
+class OrbitalIntegralMatrix(ParsedMultiwfnResult):
+    """Integral matrix between orbitals (Menu 200 -> 10).
+
+    Rows and columns are both orbital indices. Stored as a flat dict
+    mapping ``(row, col)`` to the integral value, to avoid importing
+    numpy. ``label`` distinguishes Cartesian components (e.g. "x",
+    "y", "z") for vector-valued integrals (dipole, velocity).
+    """
+
+    label: str = ""
+    n_orbitals: int = 0
+    data: dict[tuple[int, int], float] = field(default_factory=dict)
+
+
+@dataclass
+class SpatialDelocalizationIndex(ParsedMultiwfnResult):
+    """Spatial delocalization index (SDI).
+
+    For a real-space function or orbital (Menu 200 -> 19).
+    """
+
+    value: float
 
 
 # ═════════════════════════════════════════════════════════════════════════════
