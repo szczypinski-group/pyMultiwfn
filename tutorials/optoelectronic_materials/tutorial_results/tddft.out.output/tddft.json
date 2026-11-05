@@ -1,0 +1,561 @@
+{
+  "input_file": "tddft.out",
+  "analyses": {
+    "PLOT_UV_VIS_SPECTRUM": {
+      "parsed": {
+        "analysis": "PLOT_UV_VIS_SPECTRUM",
+        "results": [
+          {
+            "extrema": [
+              {
+                "kind": "maximum",
+                "index": 1,
+                "x": 623.6161,
+                "value": 21739.9931
+              }
+            ]
+          }
+        ]
+      },
+      "raw_stdout_file": "PLOT_UV_VIS_SPECTRUM.txt",
+      "timestamp": "2026-10-16T12:09:12.842467"
+    },
+    "VIEW_STRUCTURE": {
+      "parsed": {
+        "analysis": "VIEW_STRUCTURE",
+        "results": [
+          {
+            "atom_id": 1,
+            "element": "O",
+            "nuclear_charge": 8.0,
+            "x_bohr": 1.843388,
+            "y_bohr": -0.63758,
+            "z_bohr": 4.046909
+          },
+          {
+            "atom_id": 2,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 0.913601,
+            "y_bohr": 0.10752,
+            "z_bohr": 2.08704
+          },
+          {
+            "atom_id": 3,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": -1.742018,
+            "y_bohr": 0.3535,
+            "z_bohr": 1.669469
+          },
+          {
+            "atom_id": 4,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -2.335231,
+            "y_bohr": 1.361472,
+            "z_bohr": -0.668821
+          },
+          {
+            "atom_id": 5,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -4.891592,
+            "y_bohr": 1.886464,
+            "z_bohr": -1.526381
+          },
+          {
+            "atom_id": 6,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -7.129691,
+            "y_bohr": 0.649879,
+            "z_bohr": -0.524316
+          },
+          {
+            "atom_id": 7,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -7.073251,
+            "y_bohr": -1.491098,
+            "z_bohr": 1.038478
+          },
+          {
+            "atom_id": 8,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -9.288741,
+            "y_bohr": -2.608468,
+            "z_bohr": 1.987414
+          },
+          {
+            "atom_id": 9,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": -9.054757,
+            "y_bohr": -4.685865,
+            "z_bohr": 3.506566
+          },
+          {
+            "atom_id": 10,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -11.128026,
+            "y_bohr": -5.705871,
+            "z_bohr": 4.404598
+          },
+          {
+            "atom_id": 11,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -13.617476,
+            "y_bohr": -4.797909,
+            "z_bohr": 3.898061
+          },
+          {
+            "atom_id": 12,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -13.905742,
+            "y_bohr": -2.727956,
+            "z_bohr": 2.359718
+          },
+          {
+            "atom_id": 13,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -11.713324,
+            "y_bohr": -1.548166,
+            "z_bohr": 1.329976
+          },
+          {
+            "atom_id": 14,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -11.796052,
+            "y_bohr": 0.521787,
+            "z_bohr": -0.316652
+          },
+          {
+            "atom_id": 15,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -9.583873,
+            "y_bohr": 1.616644,
+            "z_bohr": -1.290392
+          },
+          {
+            "atom_id": 16,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -9.727365,
+            "y_bohr": 3.611518,
+            "z_bohr": -3.09628
+          },
+          {
+            "atom_id": 17,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -7.569587,
+            "y_bohr": 4.596967,
+            "z_bohr": -4.162277
+          },
+          {
+            "atom_id": 18,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -5.166472,
+            "y_bohr": 3.744543,
+            "z_bohr": -3.374272
+          },
+          {
+            "atom_id": 19,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": -0.04123,
+            "y_bohr": 1.813249,
+            "z_bohr": -1.905292
+          },
+          {
+            "atom_id": 20,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 1.031046,
+            "y_bohr": 2.614672,
+            "z_bohr": -4.317794
+          },
+          {
+            "atom_id": 21,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": 3.656648,
+            "y_bohr": 2.094191,
+            "z_bohr": -3.993549
+          },
+          {
+            "atom_id": 22,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 4.238104,
+            "y_bohr": 1.17674,
+            "z_bohr": -1.611865
+          },
+          {
+            "atom_id": 23,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 6.796833,
+            "y_bohr": 0.470115,
+            "z_bohr": -0.84418
+          },
+          {
+            "atom_id": 24,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 8.330529,
+            "y_bohr": -1.08465,
+            "z_bohr": -2.422867
+          },
+          {
+            "atom_id": 25,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 10.847296,
+            "y_bohr": -1.766331,
+            "z_bohr": -1.623951
+          },
+          {
+            "atom_id": 26,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 12.308302,
+            "y_bohr": -3.304997,
+            "z_bohr": -3.284688
+          },
+          {
+            "atom_id": 27,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 11.270338,
+            "y_bohr": -4.127699,
+            "z_bohr": -5.51663
+          },
+          {
+            "atom_id": 28,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": 8.85157,
+            "y_bohr": -3.613455,
+            "z_bohr": -6.228613
+          },
+          {
+            "atom_id": 29,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 7.470545,
+            "y_bohr": -2.179323,
+            "z_bohr": -4.750562
+          },
+          {
+            "atom_id": 30,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 11.752331,
+            "y_bohr": -0.961512,
+            "z_bohr": 0.730434
+          },
+          {
+            "atom_id": 31,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 10.255948,
+            "y_bohr": 0.533806,
+            "z_bohr": 2.32109
+          },
+          {
+            "atom_id": 32,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 7.763021,
+            "y_bohr": 1.297847,
+            "z_bohr": 1.524758
+          },
+          {
+            "atom_id": 33,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 6.437097,
+            "y_bohr": 2.99925,
+            "z_bohr": 3.168256
+          },
+          {
+            "atom_id": 34,
+            "element": "N",
+            "nuclear_charge": 7.0,
+            "x_bohr": 7.289828,
+            "y_bohr": 3.785857,
+            "z_bohr": 5.355818
+          },
+          {
+            "atom_id": 35,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 9.58594,
+            "y_bohr": 2.934716,
+            "z_bohr": 6.14894
+          },
+          {
+            "atom_id": 36,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 11.110416,
+            "y_bohr": 1.387667,
+            "z_bohr": 4.729644
+          },
+          {
+            "atom_id": 37,
+            "element": "C",
+            "nuclear_charge": 6.0,
+            "x_bohr": 1.972844,
+            "y_bohr": 1.014125,
+            "z_bohr": -0.298276
+          },
+          {
+            "atom_id": 38,
+            "element": "O",
+            "nuclear_charge": 8.0,
+            "x_bohr": 0.153147,
+            "y_bohr": 3.576033,
+            "z_bohr": -6.220417
+          },
+          {
+            "atom_id": 39,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -2.993543,
+            "y_bohr": 0.097701,
+            "z_bohr": 3.098561
+          },
+          {
+            "atom_id": 40,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -5.31456,
+            "y_bohr": -2.449669,
+            "z_bohr": 1.522131
+          },
+          {
+            "atom_id": 41,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -10.889428,
+            "y_bohr": -7.36965,
+            "z_bohr": 5.624012
+          },
+          {
+            "atom_id": 42,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -15.24687,
+            "y_bohr": -5.759054,
+            "z_bohr": 4.728314
+          },
+          {
+            "atom_id": 43,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -15.776624,
+            "y_bohr": -1.970606,
+            "z_bohr": 1.9048
+          },
+          {
+            "atom_id": 44,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -13.629903,
+            "y_bohr": 1.283485,
+            "z_bohr": -0.900638
+          },
+          {
+            "atom_id": 45,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -11.5944,
+            "y_bohr": 4.308714,
+            "z_bohr": -3.647693
+          },
+          {
+            "atom_id": 46,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -7.690095,
+            "y_bohr": 6.082548,
+            "z_bohr": -5.592563
+          },
+          {
+            "atom_id": 47,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": -3.475244,
+            "y_bohr": 4.585526,
+            "z_bohr": -4.211961
+          },
+          {
+            "atom_id": 48,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 4.950546,
+            "y_bohr": 2.622677,
+            "z_bohr": -5.307162
+          },
+          {
+            "atom_id": 49,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 14.235057,
+            "y_bohr": -3.831603,
+            "z_bohr": -2.751882
+          },
+          {
+            "atom_id": 50,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 12.365929,
+            "y_bohr": -5.299457,
+            "z_bohr": -6.82758
+          },
+          {
+            "atom_id": 51,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 5.515394,
+            "y_bohr": -1.861477,
+            "z_bohr": -5.358857
+          },
+          {
+            "atom_id": 52,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 13.650786,
+            "y_bohr": -1.514472,
+            "z_bohr": 1.337227
+          },
+          {
+            "atom_id": 53,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 4.60602,
+            "y_bohr": 3.752794,
+            "z_bohr": 2.563914
+          },
+          {
+            "atom_id": 54,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 10.196972,
+            "y_bohr": 3.599892,
+            "z_bohr": 8.013605
+          },
+          {
+            "atom_id": 55,
+            "element": "H",
+            "nuclear_charge": 1.0,
+            "x_bohr": 12.975619,
+            "y_bohr": 0.814971,
+            "z_bohr": 5.412474
+          }
+        ]
+      },
+      "raw_stdout_file": "VIEW_STRUCTURE.txt",
+      "timestamp": "2026-10-16T12:09:12.842467"
+    },
+    "QMSA_ESP": {
+      "parsed": {
+        "analysis": "QMSA_ESP",
+        "results": [
+          {
+            "mapped_property": "esp",
+            "geometry": {
+              "volume_bohr3": 4172.27799,
+              "volume_angstrom3": 618.26781,
+              "area_bohr2": 1769.40909,
+              "area_angstrom2": 495.48501,
+              "sphericity": 0.7083,
+              "density_g_cm3": 1.3201,
+              "n_vertices": 38818,
+              "n_edges": 116448,
+              "n_facets": 77632
+            },
+            "minima": [
+              {
+                "type": "min",
+                "index": 2,
+                "value_au": 15.51628881,
+                "value_eV": 422.21969,
+                "value_kcal_mol": 9736.62639,
+                "x_angstrom": -9.302313,
+                "y_angstrom": -3.809494,
+                "z_angstrom": 3.084046,
+                "is_global": true
+              }
+            ],
+            "maxima": [],
+            "statistics": {
+              "mapped_property": "esp",
+              "global_min_au": 15.516289,
+              "global_max_au": 30.907696,
+              "global_min_kcal_mol": 9736.62639,
+              "global_max_kcal_mol": 19394.88828,
+              "overall_area_bohr2": 1769.40909,
+              "overall_area_angstrom2": 495.48501,
+              "positive_area_bohr2": 1769.40909,
+              "positive_area_angstrom2": 495.48501,
+              "negative_area_bohr2": 0.0,
+              "negative_area_angstrom2": 0.0,
+              "overall_average_au": 23.03834227,
+              "overall_average_kcal_mol": 14456.79016,
+              "positive_average_au": 23.03834227,
+              "positive_average_kcal_mol": 14456.79016,
+              "negative_average_au": null,
+              "negative_average_kcal_mol": null,
+              "sigma2_total_au2": null,
+              "sigma2_total_kcal_mol2": null,
+              "positive_variance_au2": 13.94793752,
+              "positive_variance_kcal_mol2": 5492262.6217,
+              "negative_variance_au2": 0.0,
+              "negative_variance_kcal_mol2": 0.0,
+              "nu": 0.0,
+              "sigma2_tot_times_nu_au2": 0.0,
+              "sigma2_tot_times_nu_kcal_mol2": 0.0,
+              "pi_au": 3.21233276,
+              "pi_kcal_mol": 2015.77093,
+              "mpi_eV": 626.90517372,
+              "mpi_kcal_mol": 14456.79016,
+              "nonpolar_area_angstrom2": 0.0,
+              "nonpolar_area_pct": 0.0,
+              "polar_area_angstrom2": 495.49,
+              "polar_area_pct": 100.0,
+              "overall_skewness": 0.0734430554,
+              "positive_skewness": 0.0734430554,
+              "negative_skewness": null,
+              "negative_area_pct": null,
+              "positive_surface_volume": null,
+              "negative_surface_volume": null
+            }
+          }
+        ]
+      },
+      "raw_stdout_file": "QMSA_ESP.txt",
+      "timestamp": "2026-10-16T12:09:12.842467"
+    }
+  },
+  "output_dir": "tutorial_results\\tddft.out.output",
+  "generated_files": [
+    "HOLE_ELECTRON_ANALYSIS.txt",
+    "PLOT_UV_VIS_SPECTRUM.txt",
+    "QMSA_ESP.txt",
+    "VIEW_STRUCTURE.txt",
+    "dislin.png",
+    "surf.cub"
+  ]
+}
