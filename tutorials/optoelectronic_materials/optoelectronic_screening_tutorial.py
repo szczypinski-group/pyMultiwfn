@@ -161,11 +161,7 @@ def _(mo):
 def _(Menu, MultiwfnAnalysis, Path):
     dye_analysis = MultiwfnAnalysis(
         "tddft.out",
-        analyses=[
-            Menu.VIEW_STRUCTURE,
-            Menu.PLOT_UV_VIS_SPECTRUM,
-            Menu.QMSA_ESP
-        ],
+        analyses=[Menu.VIEW_STRUCTURE, Menu.PLOT_UV_VIS_SPECTRUM, Menu.QMSA_ESP],
     )
     dye_analysis.run(work_dir=Path("tutorial_results"))
     return (dye_analysis,)
@@ -189,9 +185,7 @@ def _(dye_analysis, mo):
         for a in dye_analysis.results[0].to_dict()["results"]
         if "atom_id" in a
     }
-    spectrum_extrema = dye_analysis.results[1].to_dict()["results"][0][
-        "extrema"
-    ]
+    spectrum_extrema = dye_analysis.results[1].to_dict()["results"][0]["extrema"]
     peak = max(spectrum_extrema, key=lambda e: e["value"])
 
     mo.md(

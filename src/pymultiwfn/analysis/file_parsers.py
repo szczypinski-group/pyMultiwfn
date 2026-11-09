@@ -28,7 +28,7 @@ import math
 from collections import deque
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from pymultiwfn.analysis.result import MultiwfnResult, NCISpike
 from pymultiwfn.enums.menu import Menu
@@ -47,13 +47,127 @@ NCI_DENSITY_CUTOFF = 0.05
 NCI_VDW_THRESHOLD = 0.01
 NCI_MIN_POINTS = 5
 BOHR_PER_ANGSTROM = 1.0 / 0.529177210903
-_ELEMENTS = (
-    "X H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe "
-    "Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn "
-    "Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W "
-    "Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf "
-    "Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
-).split()
+_ELEMENTS = [
+    "X",
+    "H",
+    "He",
+    "Li",
+    "Be",
+    "B",
+    "C",
+    "N",
+    "O",
+    "F",
+    "Ne",
+    "Na",
+    "Mg",
+    "Al",
+    "Si",
+    "P",
+    "S",
+    "Cl",
+    "Ar",
+    "K",
+    "Ca",
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Ga",
+    "Ge",
+    "As",
+    "Se",
+    "Br",
+    "Kr",
+    "Rb",
+    "Sr",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "In",
+    "Sn",
+    "Sb",
+    "Te",
+    "I",
+    "Xe",
+    "Cs",
+    "Ba",
+    "La",
+    "Ce",
+    "Pr",
+    "Nd",
+    "Pm",
+    "Sm",
+    "Eu",
+    "Gd",
+    "Tb",
+    "Dy",
+    "Ho",
+    "Er",
+    "Tm",
+    "Yb",
+    "Lu",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+    "Tl",
+    "Pb",
+    "Bi",
+    "Po",
+    "At",
+    "Rn",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+    "Rf",
+    "Db",
+    "Sg",
+    "Bh",
+    "Hs",
+    "Mt",
+    "Ds",
+    "Rg",
+    "Cn",
+    "Nh",
+    "Fl",
+    "Mc",
+    "Lv",
+    "Ts",
+    "Og",
+]
 
 
 def scan_output_directory(
@@ -140,7 +254,7 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
     # Columns: X, Y, Z (Angstrom), sign(lambda2)rho, RDG (a.u.).
     points: list[tuple[float, float, float, float, float]] = []
     try:
-        with open(directory / scatter, encoding="utf-8") as fh:
+        with Path.open(directory / scatter, encoding="utf-8") as fh:
             for line in fh:
                 fields = line.split()
                 if len(fields) < 5:
@@ -157,7 +271,10 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
     # they share a sign or both lie in the van der Waals band, so the
     # attractive and repulsive parts of one contact stay separate.
     cells = [
-        tuple(round((p[i] * BOHR_PER_ANGSTROM - origin[i]) / spacing[i]) for i in range(3))
+        tuple(
+            round((p[i] * BOHR_PER_ANGSTROM - origin[i]) / spacing[i])
+            for i in range(3)
+        )
         for p in points
     ]
     index = {cell: n for n, cell in enumerate(cells)}
@@ -203,6 +320,7 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
         region = [points[n] for n in members]
         low = min(region, key=lambda p: p[4])
         value = low[3]
+        kind: Literal["attractive", "repulsive", "van_der_waals"]
         if value < -NCI_VDW_THRESHOLD:
             kind = "attractive"
         elif value > NCI_VDW_THRESHOLD:
@@ -210,7 +328,11 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
         else:
             kind = "van_der_waals"
         nearest = sorted(
-            (math.dist([c * BOHR_PER_ANGSTROM for c in low[:3]], xyz) / BOHR_PER_ANGSTROM, name)
+            (
+                math.dist([c * BOHR_PER_ANGSTROM for c in low[:3]], xyz)
+                / BOHR_PER_ANGSTROM,
+                name,
+            )
             for name, xyz in atoms
         )[:2]
         spikes.append(
@@ -226,7 +348,8 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
                 volume_bohr3=round(len(region) * cell_volume, 6),
                 min_position_angstrom=list(low[:3]),
                 centroid_angstrom=[
-                    round(sum(p[i] for p in region) / len(region), 6) for i in range(3)
+                    round(sum(p[i] for p in region) / len(region), 6)
+                    for i in range(3)
                 ],
                 nearest_atoms=[
                     {"atom": name, "distance_angstrom": round(d, 4)}
@@ -242,7 +365,7 @@ def _nci_spikes(entry: dict[str, Any], directory: Path) -> list[dict] | None:
 def _cube_atoms(cube_path: Path) -> list[tuple[str, list[float]]]:
     """Read atom labels (e.g. ``"Se1"``) and Bohr positions from a cube header."""
     try:
-        with open(cube_path, encoding="utf-8") as fh:
+        with Path.open(cube_path, encoding="utf-8") as fh:
             lines = [fh.readline() for _ in range(6)]
             n_atoms = abs(int(lines[2].split()[0]))
             atoms = []

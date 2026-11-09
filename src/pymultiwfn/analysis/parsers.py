@@ -70,6 +70,7 @@ from pymultiwfn.analysis.result import (
     LocalizationIndex,
     MolecularMultipole,
     MultiCenterBondOrder,
+    NCIAnalysis,
     NICSScan,
     Orbital,
     OrbitalAtomComposition,
@@ -104,7 +105,6 @@ from pymultiwfn.analysis.result import (
     SurfaceStatistics,
     TopologyPath,
     Transition,
-    NCIAnalysis,
     Valence,
     WeakInteraction,
 )

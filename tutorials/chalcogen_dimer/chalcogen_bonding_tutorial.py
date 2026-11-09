@@ -136,9 +136,7 @@ def _(dimer_analysis, mo):
         & {"Se", "S"}
     ]
 
-    esp_statistics = dimer_analysis.results[3].to_dict()["results"][0][
-        "statistics"
-    ]
+    esp_statistics = dimer_analysis.results[3].to_dict()["results"][0]["statistics"]
     nci_result = dimer_analysis.results[1].to_dict()["results"]
 
     chalcogen_lines = "\n".join(
