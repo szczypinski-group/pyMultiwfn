@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use pyMultiwfn, please cite the software using these metadata."
+
+title: "pyMultiwfn"
+type: software
+
+authors:
+  - family-names: "Valero"
+    given-names: "Pierre-Louis"
+  - family-names: "Szczypinski"
+    given-names: "Filip T."
+
+version: "2.0.1"
+date-released: "2026-10-28"
+
+abstract: >-
+  pyMultiwfn is a Python interface and automation toolkit for Multiwfn.
+
+keywords:
+  - computational chemistry
+  - quantum chemistry
+  - wavefunction analysis
+  - Multiwfn
+  - Python
+  - automation
+
+repository-code: "https://github.com/szczypinski-group/pyMultiwfn/"
+url: "https://pypi.org/project/pymultiwfn/"
