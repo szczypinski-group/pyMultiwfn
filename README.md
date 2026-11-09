@@ -38,7 +38,43 @@ The `MultiwfnResult` dataclasses hold different types of parsed results, which c
 
 ## Tutorials
 
-Tutorials can be found in the tutorials folder, reflecting the case studies. These are complete with a set of expected results to compare against.
+The `tutorials` folder holds three [marimo](https://marimo.io/) notebooks, one per case study.
+Each runs a small batch of analyses on a real input file and walks through the results.
+They are complete with a set of expected results to compare against.
+
+| Tutorial | Input file | Analyses | Run time (approx.) |
+|---|---|---|---|
+| `chalcogen_dimer/chalcogen_bonding_tutorial.py` | `coord.molden` | `NCI_ANALYSIS` | 20 s |
+| `kraken_ligand/kraken_ligand_tutorial.py` | `kraken_ligand.molden` | `VIEW_STRUCTURE`, `SURFACE_AREA_VOLUME`, `QMSA_ALIE`, `QMSA_ESP` | 2 min |
+| `optoelectronic_materials/optoelectronic_screening_tutorial.py` | `optoelectronic.molden` | `VIEW_STRUCTURE` | a few seconds |
+
+### Running a tutorial
+
+The tutorials live in this repository, not in the PyPI package, and marimo is not installed with `pymultiwfn`.
+From a clone of the repository (see [Development](#development)), open a tutorial with:
+
+```
+uv run --with marimo marimo edit tutorials/chalcogen_dimer/chalcogen_bonding_tutorial.py
+```
+
+This opens the notebook in your browser and runs it.
+Use `marimo run` instead of `marimo edit` to view it as a read-only app.
+If you installed `pymultiwfn` with `pip`, install marimo alongside it and open the notebook the same way:
+
+```
+pip install marimo
+marimo edit tutorials/chalcogen_dimer/chalcogen_bonding_tutorial.py
+```
+
+You can launch a tutorial from any folder: each notebook finds its input file and writes its results relative to its own location.
+
+### Tutorial results
+
+Each tutorial writes its output to `tutorial_results/<input_file_name>.output/` inside its own folder: the captured Multiwfn output for every analysis, any files Multiwfn generated (such as cube files), and one JSON summary that the notebook reads its results from.
+The copies committed to the repository are the expected results.
+
+Analyses are cached: when a tutorial finds its results already in `tutorial_results/`, it reuses them instead of running Multiwfn again.
+To recalculate and compare against the expected results, move that folder aside and run the tutorial again.
 
 ## Contributing
 

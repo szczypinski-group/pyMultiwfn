@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pymultiwfn"
 version = "2.1.0"
 description = "Python interface and automation toolkit for Multiwfn"
-requires-python = ">=3.12"
+requires-python = ">=3.12, <3.15"
 authors = [
     { name = "Pierre-Louis Valero", email = "ypkh17@durham.ac.uk" },
     { name = "Filip T. Szczypiński", email = "filip.t.szczypinski@durham.ac.uk" },
