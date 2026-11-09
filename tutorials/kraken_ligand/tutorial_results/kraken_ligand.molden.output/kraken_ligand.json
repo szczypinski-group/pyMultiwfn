@@ -1,5 +1,5 @@
 {
-  "input_file": "kraken_ligand.molden",
+  "input_file": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\kraken_ligand\\kraken_ligand.molden",
   "analyses": {
     "QMSA_ALIE": {
       "parsed": {
@@ -882,7 +882,7 @@
         ]
       },
       "raw_stdout_file": "QMSA_ALIE.txt",
-      "timestamp": "2026-10-16T12:02:42.581293"
+      "timestamp": "2026-11-09T15:19:04.094869"
     },
     "QMSA_ESP": {
       "parsed": {
@@ -1248,7 +1248,74 @@
         ]
       },
       "raw_stdout_file": "QMSA_ESP.txt",
-      "timestamp": "2026-10-16T12:02:42.581293"
+      "timestamp": "2026-11-09T15:19:04.094869"
+    },
+    "SURFACE_AREA_VOLUME": {
+      "parsed": {
+        "analysis": "SURFACE_AREA_VOLUME",
+        "results": [
+          {
+            "mapped_property": "area_volume",
+            "geometry": {
+              "volume_bohr3": 3249.83552,
+              "volume_angstrom3": 481.57594,
+              "area_bohr2": 1503.42186,
+              "area_angstrom2": 421.001,
+              "sphericity": 0.7057,
+              "density_g_cm3": 1.3359,
+              "n_vertices": 33009,
+              "n_edges": 99021,
+              "n_facets": 66014
+            },
+            "minima": [],
+            "maxima": [],
+            "statistics": {
+              "mapped_property": "area_volume",
+              "global_min_au": null,
+              "global_max_au": null,
+              "global_min_kcal_mol": null,
+              "global_max_kcal_mol": null,
+              "overall_area_bohr2": 1503.42186,
+              "overall_area_angstrom2": 421.001,
+              "positive_area_bohr2": null,
+              "positive_area_angstrom2": null,
+              "negative_area_bohr2": null,
+              "negative_area_angstrom2": null,
+              "overall_average_au": null,
+              "overall_average_kcal_mol": null,
+              "positive_average_au": null,
+              "positive_average_kcal_mol": null,
+              "negative_average_au": null,
+              "negative_average_kcal_mol": null,
+              "sigma2_total_au2": null,
+              "sigma2_total_kcal_mol2": null,
+              "positive_variance_au2": null,
+              "positive_variance_kcal_mol2": null,
+              "negative_variance_au2": null,
+              "negative_variance_kcal_mol2": null,
+              "nu": null,
+              "sigma2_tot_times_nu_au2": null,
+              "sigma2_tot_times_nu_kcal_mol2": null,
+              "pi_au": null,
+              "pi_kcal_mol": null,
+              "mpi_eV": null,
+              "mpi_kcal_mol": null,
+              "nonpolar_area_angstrom2": null,
+              "nonpolar_area_pct": null,
+              "polar_area_angstrom2": null,
+              "polar_area_pct": null,
+              "overall_skewness": null,
+              "positive_skewness": null,
+              "negative_skewness": null,
+              "negative_area_pct": null,
+              "positive_surface_volume": null,
+              "negative_surface_volume": null
+            }
+          }
+        ]
+      },
+      "raw_stdout_file": "SURFACE_AREA_VOLUME.txt",
+      "timestamp": "2026-11-09T15:19:04.094869"
     },
     "VIEW_STRUCTURE": {
       "parsed": {
@@ -1668,10 +1735,10 @@
         ]
       },
       "raw_stdout_file": "VIEW_STRUCTURE.txt",
-      "timestamp": "2026-10-16T12:02:42.581293"
+      "timestamp": "2026-11-09T15:19:04.094869"
     }
   },
-  "output_dir": "tutorial_results\\kraken_ligand.molden.output",
+  "output_dir": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\kraken_ligand\\tutorial_results\\kraken_ligand.molden.output",
   "generated_files": [
     "QMSA_ALIE.txt",
     "QMSA_ESP.txt",

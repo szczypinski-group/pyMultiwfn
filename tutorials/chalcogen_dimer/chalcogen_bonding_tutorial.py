@@ -10,7 +10,7 @@ def _():
 
     mo.md(
         r"""
-    # QTAIM, ESP, and NCI descriptors for chalcogen-bonded systems
+    # NCI analysis for chalcogen-bonded systems
 
     Benchmarking DFT methods — functionals, dispersion corrections, basis
     sets — against high-level reference data is how computational chemists
@@ -21,19 +21,20 @@ def _():
     through a σ-hole or a π-hole, with over 1,000 single-point calculations
     per dimer.
 
-    Chalcogen bonds — a group 14–17 atom bound to an electron-withdrawing
-    group acting as a Lewis-acid center — show up throughout supramolecular
-    and biological chemistry: they steer crystal packing and help stabilize
+    In a chalcogen bond, a group 16 atom (O, S, Se, Te) acts as the
+    Lewis acid, through an electron-deficient σ- or π-hole, towards a
+    Lewis base. These contacts show up throughout supramolecular and
+    biological chemistry: they steer crystal packing and help stabilize
     protein structure. Understanding *why* a given system binds the way it
-    does, beyond just the interaction energy, means characterizing the bond
-    critical point at the chalcogen contact (QTAIM), locating the σ- or
-    π-hole that drives the interaction (ESP), and mapping the noncovalent
-    interaction region itself (NCI) — all of which Multiwfn can compute, and
-    `pyMultiwfn` can batch.
+    does, beyond just the interaction energy, starts with seeing where the
+    noncovalent interaction actually is and how strong it is — which is
+    what NCI (non-covalent interaction, or reduced density gradient)
+    analysis shows, and what Multiwfn can compute and `pyMultiwfn` can
+    batch.
 
-    This notebook runs that descriptor trio on a real selenium/sulfur-
-    containing molecule (`coord.molden`) to see what each one actually
-    reports.
+    This notebook runs NCI analysis on a real selenium/sulfur-containing
+    molecule (`coord.molden`) and reads off the interaction regions it
+    finds.
     """
     )
     return (mo,)
@@ -49,29 +50,21 @@ def _(mo):
       and Multiwfn *can* get at it, through the sobEDA method. But sobEDA
       needs an external interfacing script that `pyMultiwfn` does not
       currently wrap, so it's out of scope for this notebook. What follows
-      covers the structural and electronic descriptors around the bond —
-      QTAIM, ESP, NCI — not the energetics.
-    - **QTAIM via bond critical points, not a full topology menu.** The
-      source material for this notebook listed `Menu.PLOT_UV_VIS_SPECTRUM`
-      here, which computes a UV-Vis spectrum, not anything to do with bond
-      critical points — a leftover from a different case study. The actual
-      QTAIM descriptor this section needs is `Menu.TOPOLOGY_SEARCH_CPS`,
-      which searches for every critical point (nuclear, bond, ring, cage)
-      and is what's used below instead.
-    - **Frontier orbitals aren't re-derived here.** The paragraph this
-      notebook is based on also calls out frontier orbitals as relevant to
-      CB character. That's the same ALIE/orbital-composition territory the
-      Kraken ligand tutorial already covers (`Menu.QMSA_ALIE`, and
-      `Menu.HOLE_ELECTRON_ANALYSIS` from the optoelectronic tutorial) rather
-      than something new — add either `Menu` entry to the list below if you
-      want it alongside QTAIM/ESP/NCI for a given system.
+      maps the interaction, not its energy.
+    - **What NCI analysis produces.** Multiwfn evaluates the reduced
+      density gradient (RDG) and sign(λ₂)ρ on a grid around the molecule
+      and writes them to a scatter file (`output.txt`) and two cube files
+      (`func1.cub` for sign(λ₂)ρ, `func2.cub` for RDG). `pyMultiwfn` reads
+      the scatter file and reports each interaction region ("spike") it
+      finds: low RDG at low density. The sign of sign(λ₂)ρ says whether a
+      region is attractive (negative), van der Waals (near zero) or
+      repulsive (positive), and its magnitude says how strong it is.
     - **One molecule, not a non-covalent dimer.** `coord.molden` is a single
       8-atom molecule — a Se(O)₃ group bonded through sulfur to an
       N–C fragment — not two separate monomers held together across a
-      gap. The chalcogen-relevant bond critical points below (Se···S and
-      S···N) are real QTAIM bond paths *within* this one molecule, not an
-      intermolecular contact. For an actual CHAL336-style dimer, the same
-      four `Menu` entries apply unchanged — just point the path below at a
+      gap. The Se···S contact found below is *within* this one molecule,
+      not an intermolecular contact. For an actual CHAL336-style dimer, the
+      same `Menu` entry applies unchanged — just point the path below at a
       real two-monomer geometry.
     """)
     return
@@ -80,7 +73,7 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## The descriptor batch
+    ## Running the NCI analysis
 
     Point this at `coord.molden` (or your own dimer's `.molden`/`.wfn`/
     `.wfx` file) and run the cell below.
@@ -89,22 +82,21 @@ def _(mo):
 
 
 @app.cell
-def _():
-    from pathlib import Path
+def _(mo):
+    import json
 
     from pymultiwfn import Menu, MultiwfnAnalysis
 
+    # Paths are relative to this notebook's folder, wherever marimo is
+    # launched from.
+    notebook_dir = mo.notebook_dir()
+
     dimer_analysis = MultiwfnAnalysis(
-        "coord.molden",
-        analyses=[
-            Menu.VIEW_STRUCTURE,
-            Menu.NCI_ANALYSIS,
-            Menu.TOPOLOGY_SEARCH_CPS,
-            Menu.QMSA_ESP,
-        ],
+        notebook_dir / "coord.molden",
+        analyses=[Menu.NCI_ANALYSIS],
     )
-    dimer_analysis.run(work_dir=Path("tutorial_results"))
-    return (dimer_analysis,)
+    dimer_analysis.run(work_dir=notebook_dir / "tutorial_results")
+    return dimer_analysis, json, notebook_dir
 
 
 @app.cell(hide_code=True)
@@ -112,66 +104,75 @@ def _(mo):
     mo.md(r"""
     ## Reading the results
 
-    `dimer_analysis.results` holds one parsed result per analysis, in the
-    order requested.
+    Every run writes one JSON summary per molecule, inside
+    `tutorial_results/<input_file_name>.output/`. It is rebuilt from that
+    folder on every run, so it holds the same data whether the analysis was
+    just computed or loaded from the cache — read results from there.
     """)
     return
 
 
 @app.cell
-def _(dimer_analysis, mo):
-    atoms = dimer_analysis.results[0].to_dict()["results"]
-    elements = {a["atom_id"]: a["element"] for a in atoms if "atom_id" in a}
-
-    topo_results = dimer_analysis.results[2].to_dict()["results"]
-    bond_cps = [cp for cp in topo_results if cp.get("type") == "bond"]
-    poincare_hopf = next(r for r in topo_results if "satisfied" in r)
-    chalcogen_bonds = [
-        cp
-        for cp in bond_cps
-        if {
-            elements.get(cp["bonded_atom1_id"]),
-            elements.get(cp["bonded_atom2_id"]),
-        }
-        & {"Se", "S"}
-    ]
-
-    esp_statistics = dimer_analysis.results[3].to_dict()["results"][0]["statistics"]
-    nci_result = dimer_analysis.results[1].to_dict()["results"]
-
-    chalcogen_lines = "\n".join(
-        f"  - {elements.get(cp['bonded_atom1_id'], '?')}"
-        f"{cp['bonded_atom1_id']}–"
-        f"{elements.get(cp['bonded_atom2_id'], '?')}{cp['bonded_atom2_id']}"
-        for cp in chalcogen_bonds
+def _(dimer_analysis, json, mo, notebook_dir):
+    dimer_summary_path = (
+        notebook_dir
+        / "tutorial_results"
+        / f"{dimer_analysis.input_file.name}.output"
+        / f"{dimer_analysis.input_file.stem}.json"
     )
+    dimer_summary = json.loads(dimer_summary_path.read_text())
+    nci = dimer_summary["analyses"]["NCI_ANALYSIS"]["parsed"]["results"][0]
 
-    mo.md(
-        f"""
-    - **QTAIM bond critical points**: `Menu.TOPOLOGY_SEARCH_CPS` found
-      {len(bond_cps)} (3,-1) bond critical points in total. Filtering for
-      ones touching Se or S — the chalcogen atoms this whole analysis is
-      about — narrows that down to the bonds that actually matter here:
-    {chalcogen_lines}
-      The Poincaré–Hopf check is
-      {"satisfied" if poincare_hopf["satisfied"] else "**not** satisfied"}
-      ({poincare_hopf["nuclear"]} nuclear + {poincare_hopf["bond"]} bond +
-      {poincare_hopf["ring"]} ring + {poincare_hopf["cage"]} cage critical
-      points), confirming the topology search didn't miss any.
-    - **σ-hole proxy** (most positive ESP on the surface):
-      {esp_statistics["global_max_kcal_mol"]:.2f} kcal/mol — the surface
-      site most likely to act as an electrophilic chalcogen-bond donor,
-      from `Menu.QMSA_ESP`'s surface statistics. The most negative value,
-      {esp_statistics["global_min_kcal_mol"]:.2f} kcal/mol, marks the most
-      nucleophilic site instead — a candidate Lewis-base acceptor region.
-    - **NCI analysis**: `Menu.NCI_ANALYSIS` produced
-      {nci_result[0]["cube_names"] if nci_result else "no cube files"} —
-      the sign(λ₂)ρ and reduced-density-gradient grids that define the NCI
-      isosurface. Open those two `.cub` files in VMD (or any other
-      isosurface viewer) to see the actual noncovalent interaction region;
-      `pyMultiwfn` parses the file names but doesn't attempt to reconstruct
-      the 3D isosurface itself.
+    spike_rows = []
+    for spike in nci["spikes"]:
+        contacts = ", ".join(
+            f"{atom['atom']} ({atom['distance_angstrom']:.2f} Å)"
+            for atom in spike["nearest_atoms"] or []
+        )
+        spike_rows.append(
+            f"| {spike['interaction_type']} "
+            f"| {spike['sign_lambda2_rho_at_min']:+.4f} "
+            f"| {spike['rdg_min']:.3f} "
+            f"| {spike['n_points']} "
+            f"| {contacts} |"
+        )
+    spike_table = "\n".join(
+        [
+            "| Type | sign(λ₂)ρ at lowest RDG (a.u.) | Lowest RDG "
+            "| Grid points | Nearest atoms |",
+            "|---|---|---|---|---|",
+            *spike_rows,
+        ]
+    )
+    grid = " × ".join(str(n) for n in nci["grid_points_xyz"])
+
+    mo.vstack(
+        [
+            mo.md(
+                f"""
+    `Menu.NCI_ANALYSIS` evaluated RDG and sign(λ₂)ρ on a {grid} grid
+    ({nci["grid_points_total"]:,} points, {nci["grid_spacing_bohr"][0]:.3f}
+    Bohr spacing) for {nci["total_electrons"]:.0f} electrons, and found
+    these interaction regions:
     """
+            ),
+            mo.md(spike_table),
+            mo.md(
+                f"""
+    The attractive region sits between Se1 and S5: that is the Se···S
+    chalcogen contact. Its sign(λ₂)ρ of about −0.04 a.u. is the electron
+    density at the contact, well above typical van der Waals values (below
+    about 0.01 a.u.), so this is a strong, partly covalent interaction. The
+    weaker repulsive regions alongside it are the steric part of the same
+    contact.
+
+    To see the interaction region in 3D, open `{nci["rdg_cube"]}` (RDG) as
+    an isosurface coloured by `{nci["sign_lambda2_rho_cube"]}`
+    (sign(λ₂)ρ) in VMD or any other cube viewer. Both are in
+    `{dimer_summary_path.parent.relative_to(notebook_dir)}`.
+    """
+            ),
+        ]
     )
     return
 
@@ -182,23 +183,26 @@ def _(mo):
     ## Scaling this to a benchmark set like CHAL336
 
     CHAL336 is 336 dimers with 1,000+ single-point calculations each — the
-    descriptors above are one call per dimer, not per single-point:
+    NCI analysis above is one call per dimer, not per single-point:
 
     - **Loop over dimer geometries, one `MultiwfnAnalysis` each.** Just like
       the ligand-screening case study, every dimer writes to its own
       `<input_file_name>.output/`, so results never collide.
     - **Caching matters here too.** `MultiwfnAnalysis` is cached by default
       (`cached=True`) — re-running the batch after adding one more `Menu`
-      entry reads the stored JSON for everything already computed instead
-      of recomputing all 336 dimers from scratch.
+      entry reuses everything already computed instead of recomputing all
+      336 dimers from scratch. Read the results from each molecule's JSON
+      summary, as above, so cached and freshly computed analyses look the
+      same.
     - **Interaction energies still need sobEDA run separately.** Whatever
-      DFT-method comparison this descriptor set is feeding into, remember
-      the energetics themselves come from outside this pipeline — the
-      descriptors here explain *why* a bond behaves as it does, not how
-      strong it is.
-    - For the full set of QTAIM, ESP, and NCI-family menus Multiwfn
-      exposes (promolecular NCI, IRI, DORI, IGM and its variants among
-      them), see the `Menu` docstrings in `pymultiwfn.enums.menu`, or the
+      DFT-method comparison this feeds into, remember the energetics
+      themselves come from outside this pipeline — NCI analysis shows
+      *where* the interaction is and how it is distributed, not how strong
+      it is energetically.
+    - For the other weak-interaction menus Multiwfn exposes (promolecular
+      NCI, IRI, DORI, IGM and its variants among them), and for QTAIM and
+      ESP descriptors, see the `Menu` docstrings in
+      `pymultiwfn.enums.menu`, or the
       [Multiwfn manual](http://sobereva.com/multiwfn) for what each one
       means chemically.
     """)

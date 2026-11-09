@@ -6,7 +6,7 @@
  Multiwfn official website: http://sobereva.com/multiwfn
  Multiwfn English forum: http://sobereva.com/wfnbbs
  Multiwfn Chinese forum: http://bbs.keinsci.com/wfn
- ( Number of parallel threads:   4  Current date: 2026-10-16  Time: 12:01:44 )
+ ( Number of parallel threads:   4  Current date: 2026-11-09  Time: 15:17:22 )
  
  Both following papers ***MUST BE CITED IN MAIN TEXT*** if Multiwfn is used:
   Tian Lu, Feiwu Chen, J. Comput. Chem., 33, 580 (2012) DOI: 10.1002/jcc.22885

@@ -53,14 +53,13 @@ def _(mo):
       scaling slope or a second optimized molecule in the same solvent just
       to calibrate against). The four descriptors here only need the one
       ligand geometry/wavefunction file.
-    - **Two of these can't run to completion on their own.** The Pauli
-      potential and V<sub>S,min</sub> calculations both stop at an
-      interactive prompt in plain Multiwfn, rather than running
-      non-interactively. The workaround, and what `pyMultiwfn` does under
-      the hood, is to export the surface grid data to a `.cube` file
-      instead — that `.cube` file is what a *second*, separate analysis
-      would then read to get the final number, rather than trying to force
-      one interactive calculation to behave non-interactively.
+    - **The Pauli potential is not computed here.** It stops at an
+      interactive prompt in plain Multiwfn rather than running
+      non-interactively. The surface analyses below export their grid data
+      to a `.cube` file (`surf.cub`), which is what a *second*, separate
+      analysis would read for a Pauli-repulsion-style potential.
+      V<sub>S,min</sub>, by contrast, comes straight out of
+      `Menu.QMSA_ESP`'s surface analysis with no extra step.
     - **Steric and electronic descriptors in the same call.** Unlike the
       optoelectronic case study, every descriptor here reads from the same
       plain `.molden`/`.wfn`/`.wfx` geometry — no excited-state output
@@ -82,13 +81,17 @@ def _(mo):
 
 
 @app.cell
-def _():
-    from pathlib import Path
+def _(mo):
+    import json
 
     from pymultiwfn import Menu, MultiwfnAnalysis
 
+    # Paths are relative to this notebook's folder, wherever marimo is
+    # launched from.
+    notebook_dir = mo.notebook_dir()
+
     ligand_analysis = MultiwfnAnalysis(
-        "kraken_ligand.molden",
+        notebook_dir / "kraken_ligand.molden",
         analyses=[
             Menu.VIEW_STRUCTURE,
             Menu.SURFACE_AREA_VOLUME,
@@ -96,8 +99,8 @@ def _():
             Menu.QMSA_ESP,
         ],
     )
-    ligand_analysis.run(work_dir=Path("tutorial_results"))
-    return (ligand_analysis,)
+    ligand_analysis.run(work_dir=notebook_dir / "tutorial_results")
+    return json, ligand_analysis, notebook_dir
 
 
 @app.cell(hide_code=True)
@@ -105,17 +108,54 @@ def _(mo):
     mo.md(r"""
     ## Reading the results
 
-    `ligand_analysis.results` holds one parsed result per analysis, in the
-    order requested.
+    Every run writes one JSON summary per molecule, inside
+    `tutorial_results/<input_file_name>.output/`. It is rebuilt from that
+    folder on every run, so it holds the same data whether an analysis was
+    just computed or loaded from the cache — read results from there.
     """)
     return
 
 
 @app.cell
-def _(ligand_analysis, mo):
-    area_volume_result = ligand_analysis.results[1].to_dict()["results"][0]
-    esp_result = ligand_analysis.results[3].to_dict()["results"][0]
-    geometry = area_volume_result["geometry"]
+def _(json, ligand_analysis, mo, notebook_dir):
+    ligand_summary_path = (
+        notebook_dir
+        / "tutorial_results"
+        / f"{ligand_analysis.input_file.name}.output"
+        / f"{ligand_analysis.input_file.stem}.json"
+    )
+    ligand_results = {
+        name: entry["parsed"]["results"]
+        for name, entry in json.loads(ligand_summary_path.read_text())[
+            "analyses"
+        ].items()
+    }
+    geometry = ligand_results["SURFACE_AREA_VOLUME"][0]["geometry"]
+    esp_result = ligand_results["QMSA_ESP"][0]
+    alie_result = ligand_results["QMSA_ALIE"][0]
+
+    # The P lone pair: the ESP surface minimum closest to phosphorus.
+    bohr_to_angstrom = 0.529177210903
+    phosphorus = next(
+        atom
+        for atom in ligand_results["VIEW_STRUCTURE"]
+        if atom.get("element") == "P"
+    )
+    p_xyz = [
+        phosphorus[axis] * bohr_to_angstrom
+        for axis in ("x_bohr", "y_bohr", "z_bohr")
+    ]
+
+    def distance_to_p(point: dict) -> float:
+        return (
+            sum(
+                (point[f"{axis}_angstrom"] - p) ** 2
+                for axis, p in zip("xyz", p_xyz, strict=True)
+            )
+            ** 0.5
+        )
+
+    p_lone_pair = min(esp_result["minima"], key=distance_to_p)
 
     mo.md(
         f"""
@@ -123,13 +163,21 @@ def _(ligand_analysis, mo):
       {geometry["volume_angstrom3"]:.2f} Å<sup>3</sup> enclosed by
       {geometry["area_angstrom2"]:.2f} Å<sup>2</sup> of surface — the
       steric descriptor pair, straight from `Menu.SURFACE_AREA_VOLUME`.
-    - **V<sub>S,min</sub>** (most negative ESP on the surface):
-      {esp_result["statistics"]["global_min_kcal_mol"]:.2f} kcal/mol — read
-      off `Menu.QMSA_ESP`'s surface statistics, no separate `.cube` step
-      needed for this particular quantity.
-    - The full ALIE and ESP surface analyses (`results[2]` and `results[3]`)
-      also carry every surface minimum/maximum and the area/polarity
-      statistics — not just the one headline number above.
+    - **V<sub>S,min</sub> at the phosphorus lone pair**:
+      {p_lone_pair["value_kcal_mol"]:.2f} kcal/mol, at the ESP surface
+      minimum {distance_to_p(p_lone_pair):.2f} Å from P
+      (P{phosphorus["atom_id"]}). For ligand design this is the
+      V<sub>S,min</sub> that matters: it describes the lone pair that
+      donates to the metal.
+    - **Global V<sub>S,min</sub>** (most negative ESP anywhere on the
+      surface): {esp_result["statistics"]["global_min_kcal_mol"]:.2f}
+      kcal/mol. In this ligand it is *not* at phosphorus, so always check
+      where a minimum sits before using it as a descriptor.
+    - **ALIE minimum**: {alie_result["statistics"]["global_min_au"]:.4f}
+      a.u. — the most easily ionized electrons on the surface.
+    - The full ALIE and ESP surface analyses also carry every surface
+      minimum/maximum (with positions) and the area/polarity statistics —
+      not just the headline numbers above.
     """
     )
     return

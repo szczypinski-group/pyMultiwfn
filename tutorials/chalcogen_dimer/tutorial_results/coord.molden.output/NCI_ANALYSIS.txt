@@ -6,7 +6,7 @@
  Multiwfn official website: http://sobereva.com/multiwfn
  Multiwfn English forum: http://sobereva.com/wfnbbs
  Multiwfn Chinese forum: http://bbs.keinsci.com/wfn
- ( Number of parallel threads:   4  Current date: 2026-11-06  Time: 10:11:00 )
+ ( Number of parallel threads:   4  Current date: 2026-11-09  Time: 15:11:18 )
  
  Both following papers ***MUST BE CITED IN MAIN TEXT*** if Multiwfn is used:
   Tian Lu, Feiwu Chen, J. Comput. Chem., 33, 580 (2012) DOI: 10.1002/jcc.22885
@@ -208,7 +208,7 @@
  Progress: [#################################################-]    99.0 %     /
  Progress: [##################################################]   100.0 %     -
  
- Calculation of grid data took up wall clock time         5 s
+ Calculation of grid data took up wall clock time         4 s
  Note: Previous orbital information has been restored
  
  -3 Set RDG value where value of sign(lambda2)rho is out of a certain range
