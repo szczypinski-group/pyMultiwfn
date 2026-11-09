@@ -200,7 +200,7 @@
         ]
       },
       "raw_stdout_file": "QMSA_ESP.txt",
-      "timestamp": "2026-10-16T11:50:38.104740"
+      "timestamp": "2026-11-06T10:11:10.279140"
     },
     "TOPOLOGY_SEARCH_CPS": {
       "parsed": {
@@ -493,7 +493,7 @@
         ]
       },
       "raw_stdout_file": "TOPOLOGY_SEARCH_CPS.txt",
-      "timestamp": "2026-10-16T11:50:38.104740"
+      "timestamp": "2026-11-06T10:11:10.279140"
     },
     "VIEW_STRUCTURE": {
       "parsed": {
@@ -577,7 +577,7 @@
         ]
       },
       "raw_stdout_file": "VIEW_STRUCTURE.txt",
-      "timestamp": "2026-10-16T11:50:38.104740"
+      "timestamp": "2026-11-06T10:11:10.279140"
     }
   },
   "output_dir": "tutorial_results\\coord.molden.output",

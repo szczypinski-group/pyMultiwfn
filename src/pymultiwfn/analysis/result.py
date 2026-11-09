@@ -1211,6 +1211,51 @@ class WeakInteraction(ParsedMultiwfnResult):
     cube_names: list[str] | None = None
 
 
+@dataclass
+class NCISpike(ParsedMultiwfnResult):
+    """One NCI interaction region (a low-RDG "spike" in the scatter plot).
+
+    Built from a spatially connected set of grid points with low RDG and
+    low density. ``sign_lambda2_rho_at_min`` is the spike's position on
+    the sign(lambda2)rho axis, read at the point of lowest RDG.
+    """
+
+    interaction_type: Literal["attractive", "van_der_waals", "repulsive"]
+    sign_lambda2_rho_at_min: float
+    rdg_min: float
+    sign_lambda2_rho_range: list[float]
+    n_points: int
+    volume_bohr3: float
+    min_position_angstrom: list[float]
+    centroid_angstrom: list[float]
+    nearest_atoms: list[dict[str, Any]] | None = None
+
+
+@dataclass
+class NCIAnalysis(ParsedMultiwfnResult):
+    """Result for NCI (RDG) analysis (``Menu.NCI_ANALYSIS``).
+
+    Multiwfn prints no NCI numbers to stdout; the RDG / sign(lambda2)rho
+    data live in the scatter file and cube files. This records the grid
+    the analysis was run on and where each output was written; the
+    spikes are added from the scatter file when the output directory is
+    scanned (see ``pymultiwfn.analysis.file_parsers``).
+    """
+
+    total_electrons: float | None = None
+    grid_origin_bohr: list[float] | None = None
+    grid_end_bohr: list[float] | None = None
+    grid_spacing_bohr: list[float] | None = None
+    grid_points_xyz: list[int] | None = None
+    grid_points_total: int | None = None
+    wall_time_s: float | None = None
+    scatter_file: str | None = None
+    sign_lambda2_rho_cube: str | None = None
+    rdg_cube: str | None = None
+    # Filled from the scatter file by scan_output_directory.
+    spikes: list[NCISpike] | None = None
+
+
 # ── Menu 21: EDA ────────────────────────────────────────────────────────
 
 
@@ -1430,15 +1475,6 @@ class NICSScan(ParsedMultiwfnResult):
 
 
 @dataclass
-class MolecularVolume(ParsedMultiwfnResult):
-    """Molecular van der Waals volume (Monte Carlo isosurface integration)."""
-
-    volume_bohr3: float
-    volume_angstrom3: float | None = None
-    volume_cm3_mol: float | None = None
-
-
-@dataclass
 class BondLength(ParsedMultiwfnResult):
     """Result for bond length analysis."""
 
@@ -1540,31 +1576,6 @@ class BLA_BOA(ParsedMultiwfnResult):  # noqa: N801
 
     bla: float | None = None
     boa: float | None = None
-
-
-@dataclass
-class OrbitalIntegralMatrix(ParsedMultiwfnResult):
-    """Integral matrix between orbitals (Menu 200 -> 10).
-
-    Rows and columns are both orbital indices. Stored as a flat dict
-    mapping ``(row, col)`` to the integral value, to avoid importing
-    numpy. ``label`` distinguishes Cartesian components (e.g. "x",
-    "y", "z") for vector-valued integrals (dipole, velocity).
-    """
-
-    label: str = ""
-    n_orbitals: int = 0
-    data: dict[tuple[int, int], float] = field(default_factory=dict)
-
-
-@dataclass
-class SpatialDelocalizationIndex(ParsedMultiwfnResult):
-    """Spatial delocalization index (SDI).
-
-    For a real-space function or orbital (Menu 200 -> 19).
-    """
-
-    value: float
 
 
 # ═════════════════════════════════════════════════════════════════════════════

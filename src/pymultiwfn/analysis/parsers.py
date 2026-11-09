@@ -69,7 +69,6 @@ from pymultiwfn.analysis.result import (
     LocalizationConvergence,
     LocalizationIndex,
     MolecularMultipole,
-    MolecularVolume,
     MultiCenterBondOrder,
     NICSScan,
     Orbital,
@@ -78,7 +77,6 @@ from pymultiwfn.analysis.result import (
     OrbitalBasisComposition,
     OrbitalBasisEntry,
     OrbitalEnergy,
-    OrbitalIntegralMatrix,
     OrbitalLocalizationResult,
     OrbitalShellEntry,
     OrbitalShellTypeComposition,
@@ -95,7 +93,6 @@ from pymultiwfn.analysis.result import (
     PolarizabilityTensor,
     QuadrupoleMoment,
     Reactivity,
-    SpatialDelocalizationIndex,
     Spectrum,
     SpectrumCurveExtrema,
     SpectrumExtremum,
@@ -107,6 +104,7 @@ from pymultiwfn.analysis.result import (
     SurfaceStatistics,
     TopologyPath,
     Transition,
+    NCIAnalysis,
     Valence,
     WeakInteraction,
 )
@@ -1175,11 +1173,6 @@ class ChargeParser(OutputParser):
         results.extend(cls.parse_charge_sets(stdout, base_method))
         if (dipole := cls.parse_dipole(stdout)) is not None:
             results.append(dipole)
-        if analysis in (
-            Menu.MULLIKEN_DECOMPOSE_ATOMIC_POPULATION,
-            Menu.MULLIKEN_DECOMPOSE_BASIS_FUNCTION,
-        ):
-            results.extend(WavefunctionParser.parse_exported_matrices(stdout))
         return results
 
     @classmethod
@@ -3910,6 +3903,67 @@ class OrbitalLocalizationParser(OutputParser):
 # =============================================================================
 
 
+class NCIParser(OutputParser):
+    """Parser for NCI (RDG) analysis output (``Menu.NCI_ANALYSIS``)."""
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        result = cls.parse(stdout)
+        return [result] if result is not None else []
+
+    @staticmethod
+    def parse(stdout: str) -> NCIAnalysis | None:
+        """Extract grid setup and output file locations from NCI output."""
+        f = FLOAT_PATTERN
+        xyz = rf"\s+({f})\s+({f})\s+({f})\s+Bohr"
+
+        def vec(pattern: str) -> list[float] | None:
+            m = re.search(pattern, stdout)
+            return [float(m[i]) for i in (1, 2, 3)] if m else None
+
+        grid_points = re.search(
+            r"Number of points in X,Y,Z is\s+(\d+)\s+(\d+)\s+(\d+)"
+            r"\s+Total:\s+(\d+)",
+            stdout,
+        )
+        # Only count an NCI run as parsed once its grid has been set up.
+        if grid_points is None:
+            return None
+
+        result = NCIAnalysis(
+            grid_origin_bohr=vec(r"Coordinate of origin in X,Y,Z is" + xyz),
+            grid_end_bohr=vec(r"Coordinate of end point in X,Y,Z is" + xyz),
+            grid_spacing_bohr=vec(
+                rf"Grid spacing in X,Y,Z is\s+({f})\s+({f})\s+({f})"
+            ),
+            grid_points_xyz=[int(grid_points[i]) for i in (1, 2, 3)],
+            grid_points_total=int(grid_points[4]),
+        )
+
+        if m := re.search(rf"Total/Alpha/Beta electrons:\s+({f})", stdout):
+            result.total_electrons = float(m[1])
+        if m := re.search(
+            rf"Calculation of grid data took up wall clock time\s+({f})\s*s",
+            stdout,
+        ):
+            result.wall_time_s = float(m[1])
+        if m := re.search(r"Outputting (\S+) in current folder", stdout):
+            result.scatter_file = m[1]
+        if m := re.search(
+            r"cube file of sign\(lambda2\)rho has been exported to (\S+)",
+            stdout,
+        ):
+            result.sign_lambda2_rho_cube = m[1]
+        if m := re.search(r"cube file of RDG has been exported to (\S+)", stdout):
+            result.rdg_cube = m[1]
+
+        return result
+
+
 class WeakInteractionParser(OutputParser):
     """Parser for weak interaction analysis output."""
 
@@ -3942,18 +3996,7 @@ class WeakInteractionParser(OutputParser):
             if match := re.search(pat, stdout, re.IGNORECASE):
                 vals[key] = float(match[1])
 
-        cubes = [
-            match[1]
-            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
-        ]
-
-        # FIXED - delta_g_inter/delta_g_intra are NCI-specific; IRI, DORI,
-        # VDW_POTENTIAL, IGM/IGMH/AIGM/MIGM/AMIGM analyses never print
-        # them and were previously discarded entirely (returning None)
-        # even though they successfully generated cube files. Now any
-        # evidence of a completed run (delta_g values or exported cubes)
-        # produces a result.
-        if "delta_g_inter" not in vals and "delta_g_intra" not in vals and not cubes:
+        if "delta_g_inter" not in vals and "delta_g_intra" not in vals:
             return None
 
         interaction = WeakInteraction(
@@ -3964,7 +4007,10 @@ class WeakInteractionParser(OutputParser):
         if "isosurface_integral" in vals:
             interaction.isosurface_integral = vals["isosurface_integral"]
 
-        if cubes:
+        if cubes := [
+            match[1]
+            for match in re.finditer(r"(\S+\.cube)\s+has been generated", stdout)
+        ]:
             interaction.cube_names = cubes
 
         return interaction
@@ -4544,72 +4590,6 @@ class UtilityParser(OutputParser):
             Menu.BLA_BOA_ANALYSIS: [cls.parse_bla_boa],
             Menu.CORRELATION_INDEX: [cls.parse_correlation_index],
             Menu.GENERATE_CP2K_INPUT: [cls.parse_export_confirmation],
-            Menu.VDW_VOLUME: [cls.parse_molecular_volume],
-            Menu.ORBITAL_INTEGRAL_ELECTRIC_DIPOLE: [cls.parse_orbital_integral],
-            Menu.ORBITAL_INTEGRAL_MAGNETIC_DIPOLE: [cls.parse_orbital_integral],
-            Menu.ORBITAL_INTEGRAL_VELOCITY: [cls.parse_orbital_integral],
-            Menu.ORBITAL_INTEGRAL_KINETIC_ENERGY: [cls.parse_orbital_integral],
-            Menu.ORBITAL_INTEGRAL_OVERLAP: [cls.parse_orbital_integral],
-            Menu.ORBITAL_INTEGRALS: [cls.parse_orbital_integral],
-            Menu.SPATIAL_DELOCALIZATION_INDEX: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_LAPLACIAN: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ORB_WFN: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ESPIN_DENSITY: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_KR: [cls.parse_spatial_delocalization_index],
-            Menu.SPATIAL_DELOCALISATION_GR: [cls.parse_spatial_delocalization_index],
-            Menu.SPATIAL_DELOCALISATION_ESP_CHARGES: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ELF: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_LOL: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_LOCAL_ENTROPY: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ESP_TOTAL: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_RDG: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_RDG_PROMOLECULAR: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_LAMBDA2RHO: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_LAMBDA2RHO_PROMOLECULAR: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ALIE: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_EDR: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_ORB_OVERLAP_DR: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_DELTAG_PROMOLECULAR: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_DELTAG_HIRSHFELD: [
-                cls.parse_spatial_delocalization_index
-            ],
-            Menu.SPATIAL_DELOCALISATION_IRI: [
-                cls.parse_spatial_delocalization_index
-            ],
         }
         default = [
             cls.parse_bond_lengths,
@@ -4636,106 +4616,6 @@ class UtilityParser(OutputParser):
             )
             for match in re.finditer(bl_pattern, stdout, re.IGNORECASE)
         ]
-
-    @staticmethod
-    def parse_molecular_volume(stdout: str) -> MolecularVolume | None:
-        """Extract the Monte Carlo van der Waals volume result."""
-        vol_pat = (
-            rf"Molecular volume:\s*({FLOAT_PATTERN})\s*Bohr\^3"
-            rf"(?:,\s*({FLOAT_PATTERN})\s*Angstrom\^3"
-            rf"(?:,\s*({FLOAT_PATTERN})\s*cm\^3/mol)?)?"
-        )
-        match = re.search(vol_pat, stdout, re.IGNORECASE)
-        if not match:
-            return None
-        return MolecularVolume(
-            volume_bohr3=float(match[1]),
-            volume_angstrom3=float(match[2]) if match[2] else None,
-            volume_cm3_mol=float(match[3]) if match[3] else None,
-        )
-
-    @staticmethod
-    def parse_orbital_integral(stdout: str) -> list[OrbitalIntegralMatrix]:
-        """Extract integral matrices between orbitals (Menu 200 -> 10).
-
-        Printed in the same blocked-matrix format as the MO
-        coefficient matrix: a row of column (orbital) indices,
-        followed by rows of a leading row index and one float per
-        column. Vector-valued integrals (dipole, velocity) print one
-        block per Cartesian component, each preceded by an
-        "X/Y/Z component" header line.
-        """
-        results: list[OrbitalIntegralMatrix] = []
-        col_header_pat = re.compile(r"^\s+(\d+(?:\s+\d+)+)\s*$")
-        row_pat = re.compile(rf"^\s+(\d+)((?:\s+{FLOAT_PATTERN})+)\s*$")
-        component_pat = re.compile(r"(X|Y|Z)\s+component", re.IGNORECASE)
-
-        current_cols: list[int] = []
-        data: dict[tuple[int, int], float] = {}
-        max_col = 0
-        current_label = "integral"
-
-        def _flush() -> None:
-            nonlocal data, max_col
-            if data:
-                results.append(
-                    OrbitalIntegralMatrix(
-                        label=current_label,
-                        n_orbitals=max_col,
-                        data=dict(data),
-                    )
-                )
-            data = {}
-            max_col = 0
-
-        for line in stdout.split("\n"):
-            if match := component_pat.search(line):
-                _flush()
-                current_label = match[1].lower()
-                current_cols = []
-                continue
-
-            if match := col_header_pat.match(line):
-                vals = match[1].split()
-                if len(vals) <= 10:
-                    try:
-                        cols = [int(v) for v in vals]
-                        if all(c > 0 for c in cols):
-                            current_cols = cols
-                            continue
-                    except ValueError:
-                        pass
-
-            if current_cols and (match := row_pat.match(line)):
-                row_idx = int(match[1])
-                row_vals = [float(v) for v in match[2].split()]
-                for k, row_val in enumerate(row_vals):
-                    if k < len(current_cols):
-                        col_idx = current_cols[k]
-                        data[(row_idx, col_idx)] = row_val
-                        if col_idx > max_col:
-                            max_col = col_idx
-
-        _flush()
-        return results
-
-    @staticmethod
-    def parse_spatial_delocalization_index(
-        stdout: str,
-    ) -> SpatialDelocalizationIndex | None:
-        """Extract the spatial delocalization index (SDI) value."""
-        # FIXED - the real Multiwfn output reads "Spatial delocalization
-        # index is    0.245185" (no ":" or "=" separator); verified
-        # against the real binary. Matches optional "is"/":"/"=" between
-        # the label and the number.
-        pat = (
-            rf"[Ss]patial delocalization index\s*(?:is|[:=])?\s*"
-            rf"({FLOAT_PATTERN})"
-        )
-        match = re.search(pat, stdout)
-        if not match:
-            return None
-        return SpatialDelocalizationIndex(value=float(match[1]))
 
     @staticmethod
     def parse_bond_angles(stdout: str) -> list[BondAngle]:
@@ -5275,35 +5155,6 @@ class ParserRoute:
         Menu.CONDENSED_LINEAR_RESPONSE: FuzzySpaceParser,
         Menu.PARA_LINEAR_RESPONSE: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_EDENSITY: FuzzySpaceParser,
-        # FIXED - the other 22 FUZZY_OVERLAP_* members were missing from
-        # this table entirely, so MultiwfnResult.parse() silently
-        # returned no results for them even though FuzzySpaceParser
-        # already handles every one generically via
-        # _FUZZY_PROPERTY_FROM_NAME. Verified against the real binary:
-        # FUZZY_OVERLAP_NORM_RHO produces a populated overlap-region
-        # matrix in stdout but parsed to zero results before this fix.
-        Menu.FUZZY_OVERLAP_NORM_RHO: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_LAPLACIAN: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ORB_WFN_HOMO: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ORB_WFN_LUMO: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ESPIN_DENSITY: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_KR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_GR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ESP_CHARGES: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ELF: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_LOL: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_LOCAL_ENTROPY: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ESP: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_RDG: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_RDG_PROMOLECULAR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_LAMBDA2RHO: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_LAMBDA2RGO_PROMOLECULAR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ALIE: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_EDR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_ORB_OVERLAP_DR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_DELTAG_PROMOLECULAR: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_DELTAG_HIRSHFELD: FuzzySpaceParser,
-        Menu.FUZZY_OVERLAP_IRI: FuzzySpaceParser,
         # Menu 17 — basin analysis
         Menu.BASIN_ANALYSIS_AIM: BasinParser,
         Menu.BASIN_ANALYSIS_ELF: BasinParser,
@@ -5320,7 +5171,7 @@ class ParserRoute:
         Menu.IFCT_ANALYSIS: ExcitationParser,
         Menu.CTS_ANALYSIS: ExcitationParser,
         # Menu 20 — weak interactions
-        Menu.NCI_ANALYSIS: WeakInteractionParser,
+        Menu.NCI_ANALYSIS: NCIParser,
         Menu.NCI_PROMOLECULAR: WeakInteractionParser,
         Menu.ANCI_ANALYSIS: WeakInteractionParser,
         Menu.IRI_ANALYSIS: WeakInteractionParser,
