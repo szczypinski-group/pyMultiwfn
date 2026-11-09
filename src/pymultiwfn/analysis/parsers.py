@@ -5320,6 +5320,7 @@ class ParserRoute:
         Menu.FUZZY_INTEGRATE_DELTAG_PROMOLECULAR: FuzzySpaceParser,
         Menu.FUZZY_INTEGRATE_DELTAG_HIRSHFELD: FuzzySpaceParser,
         Menu.FUZZY_INTEGRATE_IRI: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_NORM_RHO: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_LAPLACIAN: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_ORB_WFN_HOMO: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_ORB_WFN_LUMO: FuzzySpaceParser,
