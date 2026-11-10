@@ -1211,6 +1211,51 @@ class WeakInteraction(ParsedMultiwfnResult):
     cube_names: list[str] | None = None
 
 
+@dataclass
+class NCISpike(ParsedMultiwfnResult):
+    """One NCI interaction region (a low-RDG "spike" in the scatter plot).
+
+    Built from a spatially connected set of grid points with low RDG and
+    low density. ``sign_lambda2_rho_at_min`` is the spike's position on
+    the sign(lambda2)rho axis, read at the point of lowest RDG.
+    """
+
+    interaction_type: Literal["attractive", "van_der_waals", "repulsive"]
+    sign_lambda2_rho_at_min: float
+    rdg_min: float
+    sign_lambda2_rho_range: list[float]
+    n_points: int
+    volume_bohr3: float
+    min_position_angstrom: list[float]
+    centroid_angstrom: list[float]
+    nearest_atoms: list[dict[str, Any]] | None = None
+
+
+@dataclass
+class NCIAnalysis(ParsedMultiwfnResult):
+    """Result for NCI (RDG) analysis (``Menu.NCI_ANALYSIS``).
+
+    Multiwfn prints no NCI numbers to stdout; the RDG / sign(lambda2)rho
+    data live in the scatter file and cube files. This records the grid
+    the analysis was run on and where each output was written; the
+    spikes are added from the scatter file when the output directory is
+    scanned (see ``pymultiwfn.analysis.file_parsers``).
+    """
+
+    total_electrons: float | None = None
+    grid_origin_bohr: list[float] | None = None
+    grid_end_bohr: list[float] | None = None
+    grid_spacing_bohr: list[float] | None = None
+    grid_points_xyz: list[int] | None = None
+    grid_points_total: int | None = None
+    wall_time_s: float | None = None
+    scatter_file: str | None = None
+    sign_lambda2_rho_cube: str | None = None
+    rdg_cube: str | None = None
+    # Filled from the scatter file by scan_output_directory.
+    spikes: list[NCISpike] | None = None
+
+
 # ── Menu 21: EDA ────────────────────────────────────────────────────────
 
 

@@ -70,6 +70,7 @@ from pymultiwfn.analysis.result import (
     LocalizationIndex,
     MolecularMultipole,
     MultiCenterBondOrder,
+    NCIAnalysis,
     NICSScan,
     Orbital,
     OrbitalAtomComposition,
@@ -3902,6 +3903,67 @@ class OrbitalLocalizationParser(OutputParser):
 # =============================================================================
 
 
+class NCIParser(OutputParser):
+    """Parser for NCI (RDG) analysis output (``Menu.NCI_ANALYSIS``)."""
+
+    @classmethod
+    def parse_for_result(
+        cls,
+        analysis: Menu,
+        stdout: str,
+    ) -> list[ParsedMultiwfnResult]:
+        result = cls.parse(stdout)
+        return [result] if result is not None else []
+
+    @staticmethod
+    def parse(stdout: str) -> NCIAnalysis | None:
+        """Extract grid setup and output file locations from NCI output."""
+        f = FLOAT_PATTERN
+        xyz = rf"\s+({f})\s+({f})\s+({f})\s+Bohr"
+
+        def vec(pattern: str) -> list[float] | None:
+            m = re.search(pattern, stdout)
+            return [float(m[i]) for i in (1, 2, 3)] if m else None
+
+        grid_points = re.search(
+            r"Number of points in X,Y,Z is\s+(\d+)\s+(\d+)\s+(\d+)"
+            r"\s+Total:\s+(\d+)",
+            stdout,
+        )
+        # Only count an NCI run as parsed once its grid has been set up.
+        if grid_points is None:
+            return None
+
+        result = NCIAnalysis(
+            grid_origin_bohr=vec(r"Coordinate of origin in X,Y,Z is" + xyz),
+            grid_end_bohr=vec(r"Coordinate of end point in X,Y,Z is" + xyz),
+            grid_spacing_bohr=vec(
+                rf"Grid spacing in X,Y,Z is\s+({f})\s+({f})\s+({f})"
+            ),
+            grid_points_xyz=[int(grid_points[i]) for i in (1, 2, 3)],
+            grid_points_total=int(grid_points[4]),
+        )
+
+        if m := re.search(rf"Total/Alpha/Beta electrons:\s+({f})", stdout):
+            result.total_electrons = float(m[1])
+        if m := re.search(
+            rf"Calculation of grid data took up wall clock time\s+({f})\s*s",
+            stdout,
+        ):
+            result.wall_time_s = float(m[1])
+        if m := re.search(r"Outputting (\S+) in current folder", stdout):
+            result.scatter_file = m[1]
+        if m := re.search(
+            r"cube file of sign\(lambda2\)rho has been exported to (\S+)",
+            stdout,
+        ):
+            result.sign_lambda2_rho_cube = m[1]
+        if m := re.search(r"cube file of RDG has been exported to (\S+)", stdout):
+            result.rdg_cube = m[1]
+
+        return result
+
+
 class WeakInteractionParser(OutputParser):
     """Parser for weak interaction analysis output."""
 
@@ -5109,7 +5171,7 @@ class ParserRoute:
         Menu.IFCT_ANALYSIS: ExcitationParser,
         Menu.CTS_ANALYSIS: ExcitationParser,
         # Menu 20 — weak interactions
-        Menu.NCI_ANALYSIS: WeakInteractionParser,
+        Menu.NCI_ANALYSIS: NCIParser,
         Menu.NCI_PROMOLECULAR: WeakInteractionParser,
         Menu.ANCI_ANALYSIS: WeakInteractionParser,
         Menu.IRI_ANALYSIS: WeakInteractionParser,
@@ -5258,6 +5320,7 @@ class ParserRoute:
         Menu.FUZZY_INTEGRATE_DELTAG_PROMOLECULAR: FuzzySpaceParser,
         Menu.FUZZY_INTEGRATE_DELTAG_HIRSHFELD: FuzzySpaceParser,
         Menu.FUZZY_INTEGRATE_IRI: FuzzySpaceParser,
+        Menu.FUZZY_OVERLAP_NORM_RHO: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_LAPLACIAN: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_ORB_WFN_HOMO: FuzzySpaceParser,
         Menu.FUZZY_OVERLAP_ORB_WFN_LUMO: FuzzySpaceParser,

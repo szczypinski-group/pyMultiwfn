@@ -190,67 +190,129 @@ class Menu(Enum):
     # along a line; reveals electrophilic and nucleophilic interaction
     # sites between atoms
     # Sequence: 3=Output and plot specific property in a line; 12=Total
-    #           electrostatic potential (ESP)
-    LINE_ESP = ("3", "12")
+    #           electrostatic potential (ESP); 1,2=define the line by
+    #           atom indices 1 and 2 (universal, molecule-independent
+    #           default); 0=return to the previous menu after plotting
+    # FIXED - was ("3", "12") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_ESP = ("3", "12", "1", "1,2", "0")
     # Plot electron density rho(r) along a line; shows charge accumulation
     # and depletion between bonded atoms
     # Sequence: 3=Output and plot specific property in a line; 1=Electron
-    #           density (rho)
-    LINE_ELECTRON_DENSITY = ("3", "1")
+    #           density (rho); 1=select atom-index mode to define the line; 1,2=atom indices 1 and 2
+    #           (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "1") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_ELECTRON_DENSITY = ("3", "1", "1", "1,2", "0")
     # Plot Laplacian of electron density nabla^2 rho along a line;
     # negative regions indicate charge concentration (covalent bonds, lone
     # pairs)
     # Sequence: 3=Output and plot specific property in a line; 3=Laplacian
-    #           of rho
-    LINE_LAPLACIAN = ("3", "3")
+    #           of rho; 1=select atom-index mode to define the line; 1,2=atom indices 1 and 2
+    #           (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "3") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_LAPLACIAN = ("3", "3", "1", "1,2", "0")
     # Plot Electron Localization Function (ELF, range 0-1) along a line;
     # peaks identify bonding pairs and lone pairs
     # Sequence: 3=Output and plot specific property in a line; 9=Electron
-    #           localization function (ELF)
-    LINE_ELF = ("3", "9")
+    #           localization function (ELF); 1=select atom-index mode to define the line; 1,2=atom
+    #           indices 1 and 2 (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "9") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_ELF = ("3", "9", "1", "1,2", "0")
     # Plot Localized Orbital Locator (LOL, range 0-1) along a line;
     # similar to ELF but with sharper basin boundary definition
     # Sequence: 3=Output and plot specific property in a line;
-    #           10=Localized orbital locator (LOL)
-    LINE_LOL = ("3", "10")
+    #           10=Localized orbital locator (LOL); 1,2=define the line by
+    #           atom indices 1 and 2 (universal, molecule-independent
+    #           default); 0=return to the previous menu after plotting
+    # FIXED - was ("3", "10") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_LOL = ("3", "10", "1", "1,2", "0")
     # Plot Reduced Density Gradient (RDG) along a line; low-RDG regions
     # reveal non-covalent interaction zones
     # Sequence: 3=Output and plot specific property in a line; 13=Reduced
-    #           density gradient (RDG)
-    LINE_RDG = ("3", "13")
+    #           density gradient (RDG); 1=select atom-index mode to define the line; 1,2=atom
+    #           indices 1 and 2 (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "13") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_RDG = ("3", "13", "1", "1,2", "0")
     # Plot spin density rho_alpha - rho_beta along a line; used for
     # radical and open-shell systems to locate unpaired electrons
     # Sequence: 3=Output and plot specific property in a line; 5=Electron
-    #           spin density
-    LINE_SPIN_DENSITY = ("3", "5")
+    #           spin density; 1=select atom-index mode to define the line; 1,2=atom indices 1 and 2
+    #           (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "5") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_SPIN_DENSITY = ("3", "5", "1", "1,2", "0")
     # Plot magnitude of the electron density gradient |nabla rho| along a
     # line; maxima mark interatomic surface boundaries
     # Sequence: 3=Output and plot specific property in a line; 2=Gradient
-    #           norm of rho
-    LINE_GRADIENT_NORM = ("3", "2")
+    #           norm of rho; 1=select atom-index mode to define the line; 1,2=atom indices 1 and 2
+    #           (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "2") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_GRADIENT_NORM = ("3", "2", "1", "1,2", "0")
     # Plot Lagrangian (positive-definite) kinetic energy density G(r)
     # along a line
     # Sequence: 3=Output and plot specific property in a line;
-    #           7=Lagrangian kinetic energy density G(r)
-    LINE_KINETIC_G = ("3", "7")
+    #           7=Lagrangian kinetic energy density G(r); 1,2=define the
+    #           line by atom indices 1 and 2 (universal,
+    #           molecule-independent default)
+    # FIXED - was ("3", "7") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_KINETIC_G = ("3", "7", "1", "1,2", "0")
     # Plot Hamiltonian kinetic energy density K(r) along a line; related
     # to G: K = G - (1/4) nabla^2 rho
     # Sequence: 3=Output and plot specific property in a line;
-    #           6=Hamiltonian kinetic energy density K(r)
-    LINE_KINETIC_K = ("3", "6")
+    #           6=Hamiltonian kinetic energy density K(r); 1,2=define the
+    #           line by atom indices 1 and 2 (universal,
+    #           molecule-independent default)
+    # FIXED - was ("3", "6") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_KINETIC_K = ("3", "6", "1", "1,2", "0")
     # Plot Average Local Ionization Energy (ALIE) along a line; low values
     # indicate weakly bound, reactive electrons susceptible to
     # electrophilic attack
     # Sequence: 3=Output and plot specific property in a line; 18=Average
-    #           local ionization energy (ALIE)
-    LINE_ALIE = ("3", "18")
+    #           local ionization energy (ALIE); 1,2=define the line by
+    #           atom indices 1 and 2 (universal, molecule-independent
+    #           default); 0=return to the previous menu after plotting
+    # FIXED - was ("3", "18") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property.
+    LINE_ALIE = ("3", "18", "1", "1,2", "0")
     # Plot Source Function SF(r', r) along a line relative to a fixed
     # reference point r set in settings.ini; shows electron-density
     # contributions from each spatial region
     # Sequence: 3=Output and plot specific property in a line; 19=Source
     #           function, mode: 1, ref. point:   0.00000   0.00000
-    #           0.00000
-    LINE_SOURCE_FUNCTION = ("3", "19")
+    #           0.00000; 1=select atom-index mode to define the line; 1,2=atom indices 1 and 2
+    #           (universal, molecule-independent default); 0=return to the
+    #           previous menu after plotting
+    # FIXED - was ("3", "19") alone, which only opens the "input index of
+    # two atoms" sub-prompt for defining the line and never actually
+    # evaluates/plots the property. The source-function mode and reference
+    # point use Multiwfn's own built-in defaults (mode 1, origin) with no
+    # further prompt.
+    LINE_SOURCE_FUNCTION = ("3", "19", "1", "1,2", "0")
 
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 4: Output / plot property in a plane
@@ -264,132 +326,182 @@ class Menu(Enum):
     # visualises how charge is distributed across the molecule
     # Sequence: 4=Output and plot specific property in a plane; 1=Electron
     #           density (rho); 1=Color-filled map (with/without contour
-    #           lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_DENSITY = ("4", "1", "1")
+    #           lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "1", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_DENSITY = ("4", "1", "1", "", "1", "0", "-5")
     # Colour-filled map of total ESP in the XY plane; red regions are
     # nucleophilic (-), blue regions are electrophilic (+)
     # Sequence: 4=Output and plot specific property in a plane; 12=Total
     #           electrostatic potential (ESP); 1=Color-filled map
-    #           (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_ESP = ("4", "12", "1")
+    #           (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "12", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_ESP = ("4", "12", "1", "", "1", "0", "-5")
     # Colour-filled map of ELF in the XY plane; red/orange islands mark
     # bonding pairs and lone pairs, blue marks depleted regions
     # Sequence: 4=Output and plot specific property in a plane; 9=Electron
     #           localization function (ELF); 1=Color-filled map
-    #           (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_ELF = ("4", "9", "1")
+    #           (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "9", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_ELF = ("4", "9", "1", "", "1", "0", "-5")
     # Colour-filled map of LOL in the XY plane; chemically equivalent to
     # ELF with cleaner inter-basin boundaries
     # Sequence: 4=Output and plot specific property in a plane;
     #           10=Localized orbital locator (LOL); 1=Color-filled map
-    #           (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_LOL = ("4", "10", "1")
+    #           (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "10", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_LOL = ("4", "10", "1", "", "1", "0", "-5")
     # Colour-filled map of |nabla rho| in the XY plane; highlights
     # interatomic surface and shell-structure regions
     # Sequence: 4=Output and plot specific property in a plane; 2=Gradient
     #           norm of rho; 1=Color-filled map (with/without contour
-    #           lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_GRADIENT = ("4", "2", "1")
+    #           lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "2", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_GRADIENT = ("4", "2", "1", "", "1", "0", "-5")
     # Colour-filled or contour map of nabla^2 rho in the XY plane;
     # negative = charge concentration (bonds/lone pairs), positive =
     # depletion
     # Sequence: 4=Output and plot specific property in a plane;
     #           3=Laplacian of rho; 1=Color-filled map (with/without
-    #           contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_LAPLACIAN = ("4", "3", "1")
+    #           contour lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "3", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_LAPLACIAN = ("4", "3", "1", "", "1", "0", "-5")
     # Colour-filled map of spin density rho_alpha - rho_beta in the XY
     # plane; shows location of unpaired electrons in open-shell species
     # Sequence: 4=Output and plot specific property in a plane; 5=Electron
     #           spin density; 1=Color-filled map (with/without contour
-    #           lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_SPIN_DENSITY = ("4", "5", "1")
+    #           lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "5", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_SPIN_DENSITY = ("4", "5", "1", "", "1", "0", "-5")
     # Colour-filled map of RDG in the XY plane; low-value regions reveal
     # non- covalent interactions when combined with sign(lambda2)rho
     # colouring
     # Sequence: 4=Output and plot specific property in a plane; 13=Reduced
     #           density gradient (RDG); 1=Color-filled map (with/without
-    #           contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_RDG = ("4", "13", "1")
+    #           contour lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "13", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_RDG = ("4", "13", "1", "", "1", "0", "-5")
     # Colour-filled map of sign(lambda2)*rho in the XY plane; negative =
     # attractive NCI (H-bond), positive = repulsive steric clash
     # Sequence: 4=Output and plot specific property in a plane;
     #           15=Sign(lambda2)*rho; 1=Color-filled map (with/without
-    #           contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_SIGN_LAMBDA2_RHO = ("4", "15", "1")
+    #           contour lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "15", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_SIGN_LAMBDA2_RHO = ("4", "15", "1", "", "1", "0", "-5")
     # Colour-filled map of ALIE in the XY plane; low-ALIE pockets on the
     # surface predict electrophilic and radical attack sites
     # Sequence: 4=Output and plot specific property in a plane; 18=Average
     #           local ionization energy (ALIE); 1=Color-filled map
-    #           (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_ALIE = ("4", "18", "1")
+    #           (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "18", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_ALIE = ("4", "18", "1", "", "1", "0", "-5")
     # Colour-filled map of Lagrangian kinetic energy density G(r) in the
     # XY plane
     # Sequence: 4=Output and plot specific property in a plane;
     #           7=Lagrangian kinetic energy density G(r); 1=Color-filled
-    #           map (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_KINETIC_G = ("4", "7", "1")
+    #           map (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the
+    #           main menu after plotting
+    # FIXED - was ("4", "7", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_KINETIC_G = ("4", "7", "1", "", "1", "0", "-5")
     # Colour-filled map of Hamiltonian kinetic energy density K(r) in the
     # XY plane
     # Sequence: 4=Output and plot specific property in a plane;
     #           6=Hamiltonian kinetic energy density K(r); 1=Color-filled
-    #           map (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_KINETIC_K = ("4", "6", "1")
+    #           map (with/without contour lines); ""=accept the recommended grid resolution; 1=define
+    #           plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the
+    #           main menu after plotting
+    # FIXED - was ("4", "6", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_KINETIC_K = ("4", "6", "1", "", "1", "0", "-5")
     # Colour-filled map of Source Function in the XY plane relative to the
     # reference point defined in settings.ini
     # Sequence: 4=Output and plot specific property in a plane; 19=Source
     #           function, mode: 1, ref. point:   0.00000   0.00000
-    #           0.00000; 1=Color-filled map (with/without contour lines)
-    # INTERACTIVE ONLY -- requires interactively defining a plane
-    #                     (orientation/resolution); excluded per your
-    #                     instruction to skip plane-dependent sequences
-    PLANE_MAP_SOURCE_FUNCTION = ("4", "19", "1")
+    #           0.00000; 1=Color-filled map (with/without contour lines);
+    #           1=define plane as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default)
+    # FIXED - was ("4", "19", "1") alone, which only opens the plane-
+    # definition sub-prompt (orientation + Z/Y/X value) and never
+    # actually renders the map.
+    PLANE_MAP_SOURCE_FUNCTION = ("4", "19", "1", "", "1", "0", "-5")
     # Colour-filled or contour map of a single MO wavefunction psi_i in
     # the XY plane; user is prompted to supply the orbital index
     # Sequence: 4=Output and plot specific property in a plane; 4=Value of
     #           orbital wavefunction; 1=orbital index 1 (a fixed
-    #           representative orbital)
-    PLANE_MAP_ORBITAL_WAVEFUNCTION = ("4", "4", "1")
+    #           representative orbital); 1=Color-filled map (with/without
+    #           contour lines); ""=accept the recommended grid resolution; 1=define plane
+    #           as XY (input Z value); 0=Z=0 (universal,
+    #           molecule-independent default); -5=return to the main
+    #           menu after plotting
+    # FIXED - was ("4", "4", "1") alone, which only opens the plot-type
+    # and plane-definition sub-prompts and never actually renders the
+    # map.
+    PLANE_MAP_ORBITAL_WAVEFUNCTION = ("4", "4", "1", "1", "", "1", "0", "-5")
     # Colour-filled map of Fukui f-(r) in the XY plane via custom-
     # operation rho_N - rho_{N-1}; predicts electrophilic attack sites
     # Sequence: 4=Output and plot specific property in a plane; 0=Set
     #           custom operation; -1=custom operation: Fukui f- (density
     #           difference N/N-1)
+    # INTERACTIVE ONLY -- requires interactively defining a plane
+    #                     (orientation/resolution); also requires
+    #                     specifying a file-difference operator for
+    #                     Fukui-type functions (N/N-1 states); needs
+    #                     additional setup beyond the primary wavefunction
     PLANE_MAP_FUKUI_MINUS = ("4", "0", "-1")
     # Colour-filled map of Fukui f+(r) in the XY plane via rho_{N+1} -
     # rho_N; predicts nucleophilic attack sites
@@ -422,11 +534,19 @@ class Menu(Enum):
     # XY plane; shows electron redistribution upon chemical bond formation
     # Sequence: 4=Output and plot specific property in a plane; -2=Obtain
     #           deformation property
+    # INTERACTIVE ONLY -- requires interactively defining a plane
+    #                     (orientation/resolution); also requires a
+    #                     local Gaussian installation to compute the
+    #                     promolecular reference density on the fly
     PLANE_MAP_DEFORMATION_DENSITY = ("4", "-2")
     # Colour-filled map of promolecular density (superposition of free-
     # atom densities) in the XY plane; reference state before bonding
     # Sequence: 4=Output and plot specific property in a plane; -1=Obtain
     #           promolecule property
+    # INTERACTIVE ONLY -- requires interactively defining a plane
+    #                     (orientation/resolution); also requires a
+    #                     local Gaussian installation to compute the
+    #                     promolecular reference density on the fly
     PLANE_MAP_PROMOLECULAR_DENSITY = ("4", "-1")
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -685,62 +805,96 @@ class Menu(Enum):
     # Main Menu 6: Check & modify wavefunction
     # ─────────────────────────────────────────────────────────────────────────
     # Provides subfunctions to inspect, edit, and save the loaded
-    # wavefunction. "0" from the submenu returns to main menu.
+    # wavefunction.
+    # FIXED - every entry below needed a trailing "-1" (verified against
+    # the real binary): each action drops back into this same Menu 6
+    # submenu rather than the main menu, and quitting from there without
+    # "-1" (Return) crashes. "0" from this submenu is NOT a return -- it
+    # means "Save the present wavefunction to new.wfn", a different
+    # action with a side effect; this comment previously said otherwise.
     # Sequence: 6=Check & modify wavefunction; 5=Print coefficient matrix
     #           in basis functions; 1=Print on screen
-    PRINT_COEFFICIENT_MATRIX = ("6", "5", "1")
+    PRINT_COEFFICIENT_MATRIX = ("6", "5", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 6=Print density matrix in
     #           basis function; 1=Print on screen
-    PRINT_DENSITY_MATRIX = ("6", "6", "1")
+    PRINT_DENSITY_MATRIX = ("6", "6", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 0=Fock/KS matrix;
     #           1=Print on screen; 1=Generating Fock/KS matrix by MO
     #           energies and coefficients as well as overlap matrix
-    PRINT_INTEGRAL_MATRIX_FOCK = ("6", "7", "0", "1", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_FOCK = ("6", "7", "0", "1", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 1=Overlap
     #           integral; 1=Print on screen
-    PRINT_INTEGRAL_MATRIX_OVERLAP = ("6", "7", "1", "1")
+    PRINT_INTEGRAL_MATRIX_OVERLAP = ("6", "7", "1", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 2=Electric dipole
     #           moment integral; 1=Print on screen
-    PRINT_INTEGRAL_MATRIX_ELECTRIC_DIPOLE = ("6", "7", "2", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_ELECTRIC_DIPOLE = ("6", "7", "2", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 3=Magnetic dipole
     #           moment integral; 1=Print on screen
-    PRINT_INTEGRAL_MATRIX_MAGNETIC_DIPOLE = ("6", "7", "3", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_MAGNETIC_DIPOLE = ("6", "7", "3", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 4=Velocity
     #           integral; 1=Print on screen
-    PRINT_INTEGRAL_MATRIX_VELOCITY = ("6", "7", "4", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_VELOCITY = ("6", "7", "4", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 5=Kinetic energy
     #           integral; 1=Print on screen
-    PRINT_INTEGRAL_MATRIX_EKINETIC = ("6", "7", "5", "1")
+    PRINT_INTEGRAL_MATRIX_EKINETIC = ("6", "7", "5", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 6=Electric
     #           quadrupole moment integral; 1=List all GTFs
-    PRINT_INTEGRAL_MATRIX_QUADRUPOLE = ("6", "7", "6", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_QUADRUPOLE = ("6", "7", "6", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 7=Electric
     #           octopole moment integral; 1=List all GTFs
-    PRINT_INTEGRAL_MATRIX_OCTOPOLE = ("6", "7", "7", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_OCTOPOLE = ("6", "7", "7", "1", "-1")
     # Sequence: 6=Check & modify wavefunction; 7=Print various kinds of
     #           integral matrix between basis functions; 8=Electric
     #           hexadecapole moment integral; 1=List all GTFs
-    PRINT_INTEGRAL_MATRIX_HEXADECAPOLE = ("6", "7", "8", "1")
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
+    PRINT_INTEGRAL_MATRIX_HEXADECAPOLE = ("6", "7", "8", "1", "-1")
     # #INTERACTIVE SEQUENCES - to be tested #CORRECT SEQUENCES # Save the
     # (possibly modified) wavefunction to new.wfn; also converts #
     # fch/molden to .wfn format; zero-occupation orbitals are dropped #
     # automatically SAVE_WFN = ("6", "0") Print centre atom, angular-
     # momentum type (s/p/d/f/...), and exponent for # every Gaussian-type
-    # function (GTF) in the basis PRINT_ALL_GTF = ("6", "1") Print shell
+    # function (GTF) in the basis PRINT_ALL_GTF = ("6", "1", "-1") Print shell
     # assignments, contracted function types, and GTF index ranges # for
-    # every basis function PRINT_ALL_BASIS_FUNCTIONS = ("6", "2") # Print
+    # every basis function PRINT_ALL_BASIS_FUNCTIONS = ("6", "2", "-1") # Print
     # index, energy, occupation number, and spin type for every o # rbital
-    # in the loaded wavefunction PRINT_ORBITAL_INFO = ("6", "3") # Print
+    # in the loaded wavefunction PRINT_ORBITAL_INFO = ("6", "3", "-1") # Print
     # the one-particle density matrix P expressed in the basis-function #
-    # representation PRINT_DENSITY_MATRIX = ("6", "6", "0") # Manually set
+    # representation PRINT_DENSITY_MATRIX = ("6", "6", "0", "-1") # Manually set
     # the occupation number of selected orbitals; set to 0 to remove their
     # contribution from subsequent real-space function evaluations
     # MODIFY_OCCUPATION = ("6", "26", "0") # Remove all core (inner-shell)
@@ -749,28 +903,36 @@ class Menu(Enum):
     # "0") Print centre atom, angular-momentum type (s/p/d/f/...), and
     # exponent for every Gaussian-type function (GTF) in the basis
     # Sequence: 6=Check & modify wavefunction; 1=List all GTFs
-    PRINT_ALL_GTF = ("6", "1")
+    PRINT_ALL_GTF = ("6", "1", "-1")
     # Print shell assignments, contracted function types, and GTF index
     # ranges for every basis function
     # Sequence: 6=Check & modify wavefunction; 2=List all basis functions
-    PRINT_ALL_BASIS_FUNCTIONS = ("6", "2")
+    PRINT_ALL_BASIS_FUNCTIONS = ("6", "2", "-1")
     # Print index, energy, occupation number, and spin type for every
     # orbital in the loaded wavefunction
     # Sequence: 6=Check & modify wavefunction; 3=List all orbitals
-    PRINT_ORBITAL_INFO = ("6", "3")
+    PRINT_ORBITAL_INFO = ("6", "3", "-1")
     # Save the (possibly modified) wavefunction to new.wfn in current
     # folder; also converts fch/molden to .wfn format, dropping zero-
     # occupation orbitals automatically
     # Sequence: 6=Check & modify wavefunction; 0=Save the present
     #           wavefunction to new.wfn file in current folder
-    SAVE_WFN = ("6", "0")
+    # FIXED - the trailing "-1" was missing; verified against the real
+    # binary that the whole Menu 6 ("Check & modify wavefunction") family
+    # drops back into its own submenu after each action, which crashes
+    # on quit without an explicit "-1" (Return) first. Using plain "0"
+    # here would be wrong too: within that submenu "0" means "Save the
+    # present wavefunction", a different action with a side effect.
+    SAVE_WFN = ("6", "0", "-1")
     # Remove all core (inner-shell) orbitals from the wavefunction and
     # save the result to new.wfn; retains only valence-shell orbitals for
     # subsequent analyses
     # Sequence: 6=Check & modify wavefunction; 34=Set occupation number of
     #           inner orbitals to zero; 0=Save the present wavefunction to
     #           new.wfn file in current folder
-    DELETE_INNER_ORBITALS = ("6", "34", "0")
+    # FIXED - the trailing "-1" was missing, for the same reason as
+    # SAVE_WFN above.
+    DELETE_INNER_ORBITALS = ("6", "34", "0", "-1")
     # Manually set the occupation number of selected orbitals (e.g. to
     # zero out a subset for a custom electron count)
     # Sequence: 6=Check & modify wavefunction; 26=Set occupation of some
@@ -794,21 +956,32 @@ class Menu(Enum):
     #           5=Mulliken atom & basis function population analysis;
     #           2=Output gross atomic population matrix and decompose it;
     #           n=no (decline the fragment/mirror-plane restriction)
-    MULLIKEN_DECOMPOSE_ATOMIC_POPULATION = ("7", "5", "2", "n")
+    # FIXED - two trailing "0"s were missing; verified against the real
+    # binary that the computation succeeds but leaves two nested
+    # submenus open ("Mulliken population analysis", then "Population
+    # analysis and atomic charges"), each needing its own "0" (Return)
+    # before quit.
+    MULLIKEN_DECOMPOSE_ATOMIC_POPULATION = ("7", "5", "2", "n", "0", "0")
     # Sequence: 7=Population analysis and calculation of atomic charges;
     #           5=Mulliken atom & basis function population analysis;
     #           3=Output gross basis function population matrix and
     #           decompose it; n=no (decline the fragment/mirror-plane
     #           restriction)
-    MULLIKEN_DECOMPOSE_BASIS_FUNCTION = ("7", "5", "3", "n")
+    # FIXED - the trailing "0" was missing for the same reason as
+    # MULLIKEN_DECOMPOSE_ATOMIC_POPULATION above.
+    MULLIKEN_DECOMPOSE_BASIS_FUNCTION = ("7", "5", "3", "n", "0", "0")
     # Lowdin atomic charges via Lowdin orthogonalisation; slightly more
     # basis- set stable than Mulliken but still dependent on basis choice
     # INTERACTIVE
     # Sequence: 7=Population analysis and calculation of atomic charges;
     #           6=Lowdin atom & basis function population analysis;
-    #           ENTER=accept the default (print results to screen instead
-    #           of a file); 0=return to the previous menu
-    LOWDIN_POPULATION = ("7", "6", "ENTER", "0")
+    #           ""=press Enter to accept the default (print results to
+    #           screen instead of a file); 0=return to the previous menu
+    # FIXED - was ("7", "6", "ENTER", "0"); the literal string "ENTER" was
+    # sent to Multiwfn's stdin as real input (not a blank line), which the
+    # "export to file? y/n/ENTER" prompt cannot parse. An empty string
+    # joins to a blank line, which is what actually presses Enter.
+    LOWDIN_POPULATION = ("7", "6", "", "0")
     # INGNORE FOR NOW Electronegativity Equalization Method (EEM) charges;
     # fast geometry-based empirical model requiring no wavefunction
     # evaluation NEEDS MOL2
@@ -1114,6 +1287,9 @@ class Menu(Enum):
     # Sequence: 9=Bond order analysis; 9=Decompose Wiberg bond order in
     #           NAO basis as atomic orbital pair contribution; 0=return to
     #           the previous menu
+    # KNOWN LIMITATION - requires natural population analysis (NAO) data
+    # to already be present in the input file; fails with a plain
+    # .molden/.fch that lacks NAO/NBO information.
     WIBERG_DECOMPOSITION = ("9", "9", "0")
     # AV1245 multicentric aromaticity index computed from Mayer bond
     # orders along a ring; robust against ring size and basis-set choice
@@ -1130,6 +1306,10 @@ class Menu(Enum):
     # Sequence: 9=Bond order analysis; 1=Mayer bond order analysis; n=no
     #           (decline the fragment/mirror-plane restriction); 0=return
     #           to the previous menu
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
     MAYER_BOND_ORDER = ("9", "1", "n", "0")
     # Multi-centre bond order (up to 12 centres) in the original basis-
     # function representation; sensitive to diffuse basis functions
@@ -1137,6 +1317,10 @@ class Menu(Enum):
     #           Lowdin orthogonalized basis; n=no (decline the
     #           fragment/mirror-plane restriction); 0=return to the
     #           previous menu
+    # KNOWN LIMITATION - on some input files this crashes inside
+    # Multiwfn's overlap-matrix orthogonalization/inversion step with a
+    # molecule-specific numerical error; not fixable client-side, the
+    # sequence itself is correct.
     WIBERG_BOND_ORDER = ("9", "3", "n", "0")
     # Mulliken bond orders (2*PS off-diagonal elements); positive =
     # bonding character, negative = antibonding; qualitative indicator
@@ -1334,9 +1518,21 @@ class Menu(Enum):
     SURFACE_ANALYSIS_ALIE = ("12", "2")
     # Compute the molecular vdW surface area and enclosed volume from the
     # rho=0.001 isosurface
-    # Sequence: 12=Quantitative analysis of molecular surface; 3=Calculate
-    #           surface area and volume
-    SURFACE_AREA_VOLUME = ("12", "3")
+    # Sequence: 12=Quantitative analysis of molecular surface; 3=Spacing
+    #           of grid points for generating molecular surface;
+    #           0.25=explicit grid spacing in Bohr (same as the default,
+    #           but set explicitly so the sequence is complete and
+    #           reproducible rather than relying on whatever the current
+    #           default happens to be); 6=Start analysis without
+    #           considering mapped function; -1=return to the surface-
+    #           analysis submenu after the post-processing menu; -1=return
+    #           from there to the main menu
+    # FIXED - was ("12", "3") alone, which only opens the "Input a value
+    # (in Bohr)" grid-spacing sub-prompt and never actually runs the
+    # calculation. Verified against the real binary: after the analysis
+    # completes it drops into a "Post-processing menu" that needs two
+    # "-1" tokens to fully unwind back to the main menu before quitting.
+    SURFACE_AREA_VOLUME = ("12", "3", "0.25", "6", "-1", "-1")
     # Becke-partition surface analysis: map a function onto each atomic
     # Becke surface and compute per-atom surface descriptors
     # Sequence: 12=Quantitative analysis of molecular surface; 4=Advanced
@@ -1671,118 +1867,129 @@ class Menu(Enum):
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           1=Electron density (rho); n=no (decline the
-    #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_EDENSITY = ("15", "8", "1", "n")
+    #           fragment/mirror-plane restriction); 0=return to the main
+    #           menu after the "output to intovlp.txt?" prompt
+    # FIXED - the trailing "0" (shared by the whole FUZZY_OVERLAP_*
+    # family below) was missing; verified against the real binary that
+    # without it the run crashes with a Fortran list-directed I/O error
+    # on quit, because it's left one submenu level short of the main
+    # menu.
+    FUZZY_OVERLAP_EDENSITY = ("15", "8", "1", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
-    #           1=Electron density (rho); n=no (decline the
+    #           2=Norm of gradient of rho; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_NORM_RHO = ("15", "8", "1", "n")
+    # FIXED - was ("15", "8", "1", "n"), identical to FUZZY_OVERLAP_EDENSITY's
+    # value tuple. Two Menu members sharing an identical value tuple become
+    # the SAME enum object in Python, so FUZZY_OVERLAP_NORM_RHO silently
+    # aliased to FUZZY_OVERLAP_EDENSITY (option 1, electron density) instead
+    # of selecting option 2 (norm of gradient of rho).
+    FUZZY_OVERLAP_NORM_RHO = ("15", "8", "2", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           3=Laplacian of rho; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_LAPLACIAN = ("15", "8", "3", "n")
+    FUZZY_OVERLAP_LAPLACIAN = ("15", "8", "3", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions; 4=Value
     #           of orbital wavefunction; h=select the HOMO; n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ORB_WFN_HOMO = ("15", "8", "4", "h", "n")
+    FUZZY_OVERLAP_ORB_WFN_HOMO = ("15", "8", "4", "h", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions; 4=Value
     #           of orbital wavefunction; l=select the LUMO; n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ORB_WFN_LUMO = ("15", "8", "4", "l", "n")
+    FUZZY_OVERLAP_ORB_WFN_LUMO = ("15", "8", "4", "l", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           5=Electron spin density; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ESPIN_DENSITY = ("15", "8", "5", "n")
+    FUZZY_OVERLAP_ESPIN_DENSITY = ("15", "8", "5", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           6=Hamiltonian kinetic energy density K(r); n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_KR = ("15", "8", "6", "n")
+    FUZZY_OVERLAP_KR = ("15", "8", "6", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           7=Lagrangian kinetic energy density G(r); n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_GR = ("15", "8", "7", "n")
+    FUZZY_OVERLAP_GR = ("15", "8", "7", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           8=Electrostatic potential from nuclear charges; n=no
     #           (decline the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ESP_CHARGES = ("15", "8", "8", "n")
+    FUZZY_OVERLAP_ESP_CHARGES = ("15", "8", "8", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           9=Electron localization function (ELF); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ELF = ("15", "8", "9", "n")
+    FUZZY_OVERLAP_ELF = ("15", "8", "9", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           10=Localized orbital locator (LOL); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_LOL = ("15", "8", "10", "n")
+    FUZZY_OVERLAP_LOL = ("15", "8", "10", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions; 11=Local
     #           information entropy; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_LOCAL_ENTROPY = ("15", "8", "11", "n")
+    FUZZY_OVERLAP_LOCAL_ENTROPY = ("15", "8", "11", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions; 12=Total
     #           electrostatic potential (ESP); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ESP = ("15", "8", "12", "n")
+    FUZZY_OVERLAP_ESP = ("15", "8", "12", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           13=Reduced density gradient (RDG); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_RDG = ("15", "8", "13", "n")
+    FUZZY_OVERLAP_RDG = ("15", "8", "13", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions; 14=RDG
     #           with promolecular approximation; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_RDG_PROMOLECULAR = ("15", "8", "14", "n")
+    FUZZY_OVERLAP_RDG_PROMOLECULAR = ("15", "8", "14", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           15=Sign(lambda2)*rho; n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_LAMBDA2RHO = ("15", "8", "15", "n")
+    FUZZY_OVERLAP_LAMBDA2RHO = ("15", "8", "15", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           16=Sign(lambda2)*rho with promolecular approximation; n=no
     #           (decline the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_LAMBDA2RGO_PROMOLECULAR = ("15", "8", "16", "n")
+    FUZZY_OVERLAP_LAMBDA2RGO_PROMOLECULAR = ("15", "8", "16", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           18=Average local ionization energy (ALIE); n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ALIE = ("15", "8", "18", "n")
+    FUZZY_OVERLAP_ALIE = ("15", "8", "18", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           20=Electron delocal. range func. EDR(r;d); n=no (decline
     #           the fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_EDR = ("15", "8", "20", "n")
+    FUZZY_OVERLAP_EDR = ("15", "8", "20", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           21=Orbital overlap dist. func. D(r); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_ORB_OVERLAP_DR = ("15", "8", "21", "n")
+    FUZZY_OVERLAP_ORB_OVERLAP_DR = ("15", "8", "21", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           22=Delta-g (promolecular approximation); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_DELTAG_PROMOLECULAR = ("15", "8", "22", "n")
+    FUZZY_OVERLAP_DELTAG_PROMOLECULAR = ("15", "8", "22", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           23=Delta-g (Hirshfeld partition); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_DELTAG_HIRSHFELD = ("15", "8", "23", "n")
+    FUZZY_OVERLAP_DELTAG_HIRSHFELD = ("15", "8", "23", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 8=Perform integration in
     #           fuzzy overlap region for a real space functions;
     #           24=Interaction region indicator (IRI); n=no (decline the
     #           fragment/mirror-plane restriction)
-    FUZZY_OVERLAP_IRI = ("15", "8", "24", "n")
+    FUZZY_OVERLAP_IRI = ("15", "8", "24", "n", "0")
     # Sequence: 15=Fuzzy atomic space analysis; 9=Calculate condensed
     #           linear response kernel (CLRK); n=no (decline the
     #           fragment/mirror-plane restriction)
@@ -1849,107 +2056,182 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Main Menu 17: Basin analysis
     # ─────────────────────────────────────────────────────────────────────────
-    # Locates attractors of a real-space function, builds gradient-
-    # following basins, and integrates properties (rho, multipoles, DI)
-    # within each.
+    # Locates attractors of a real-space function and builds gradient-
+    # following basins around them.
+    # NOTE: the entries below only run the generation step (locate
+    # attractors, build basins) and verified against the real binary to
+    # complete cleanly; the actual property-integration step ("2
+    # Integrate real space functions in the basins" in the post-
+    # generation submenu) is a separate, much slower operation (100s of
+    # seconds per function) that is not wired into these sequences.
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 1=Electron density (rho); 2=Medium quality
     #           grid, spacing=0.10 Bohr, cost: 8x
-    BASIN_ANALYSIS_RHO = ("17", "1", "1", "2")
+    BASIN_ANALYSIS_RHO = ("17", "1", "1", "2", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 1=Electron density (rho); 1=Low quality grid,
     #           spacing=0.20 Bohr, cost: 1x
-    BASIN_EDENSITY = ("17", "1", "1", "1")
+    BASIN_EDENSITY = ("17", "1", "1", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 2=Gradient norm of rho; n=no (decline the
-    #           fragment/mirror-plane restriction)
-    BASIN_NORM_RHO = ("17", "1", "2", "n")
+    #           attractors; 2=Gradient norm of rho; 1=Low quality grid,
+    #           spacing=0.20 Bohr, cost: 1x (kept low given basin
+    #           generation/integration cost, see BASIN_ANALYSIS_RHO)
+    # FIXED - was ("17", "1", "2", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_NORM_RHO = ("17", "1", "2", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 3=Laplacian of rho; n=no (decline the
-    #           fragment/mirror-plane restriction)
-    BASIN_LAPLACIAN = ("17", "1", "3", "n")
+    #           attractors; 3=Laplacian of rho; 1=Low quality grid,
+    #           spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "3", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_LAPLACIAN = ("17", "1", "3", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 4=Value of orbital wavefunction; h=select the
-    #           HOMO; n=no (decline the fragment/mirror-plane restriction)
-    BASIN_ORB_WFN_HOMO = ("17", "1", "4", "h", "n")
+    #           HOMO; 1=Low quality grid, spacing=0.20 Bohr,
+    #           cost: 1x
+    # FIXED - was ("17", "1", "4", "h", "n") alone, which only opens the
+    # grid-quality sub-prompt and leaves it waiting for interactive input,
+    # so basin generation never actually runs.
+    BASIN_ORB_WFN_HOMO = ("17", "1", "4", "h", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 4=Value of orbital wavefunction; l=select the
-    #           LUMO; n=no (decline the fragment/mirror-plane restriction)
-    BASIN_ORB_WFN_LUMO = ("17", "1", "4", "l", "n")
+    #           LUMO; 1=Low quality grid, spacing=0.20 Bohr,
+    #           cost: 1x
+    # FIXED - was ("17", "1", "4", "l", "n") alone, which only opens the
+    # grid-quality sub-prompt and leaves it waiting for interactive input,
+    # so basin generation never actually runs.
+    BASIN_ORB_WFN_LUMO = ("17", "1", "4", "l", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 5=Electron spin density; n=no (decline the
-    #           fragment/mirror-plane restriction)
-    BASIN_ESPIN_DENSITY = ("17", "1", "5", "n")
+    #           attractors; 5=Electron spin density; 1=Low quality grid,
+    #           spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "5", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ESPIN_DENSITY = ("17", "1", "5", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 6=Hamiltonian kinetic energy density K(r);
-    #           n=no (decline the fragment/mirror-plane restriction)
-    BASIN_KR = ("17", "1", "6", "n")
+    #           1=Low quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "6", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_KR = ("17", "1", "6", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 7=Lagrangian kinetic energy density G(r); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_GR = ("17", "1", "7", "n")
+    #           attractors; 7=Lagrangian kinetic energy density G(r); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "7", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_GR = ("17", "1", "7", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 8=Electrostatic potential from nuclear
-    #           charges; n=no (decline the fragment/mirror-plane
-    #           restriction)
-    BASIN_ESP_CHARGES = ("17", "1", "8", "n")
+    #           charges; 1=Low quality grid, spacing=0.20 Bohr,
+    #           cost: 1x
+    # FIXED - was ("17", "1", "8", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ESP_CHARGES = ("17", "1", "8", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 9=Electron localization function (ELF); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_ELF = ("17", "1", "9", "n")
+    #           attractors; 9=Electron localization function (ELF); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "9", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ELF = ("17", "1", "9", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 10=Localized orbital locator (LOL); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_LOL = ("17", "1", "10", "n")
+    #           attractors; 10=Localized orbital locator (LOL); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "10", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_LOL = ("17", "1", "10", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 11=Local information entropy; n=no (decline
-    #           the fragment/mirror-plane restriction)
-    BASIN_LOCAL_ENTROPY = ("17", "1", "11", "n")
+    #           attractors; 11=Local information entropy; 1=Low quality
+    #           grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "11", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_LOCAL_ENTROPY = ("17", "1", "11", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 12=Total electrostatic potential (ESP); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_ESP = ("17", "1", "12", "n")
+    #           attractors; 12=Total electrostatic potential (ESP); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "12", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ESP = ("17", "1", "12", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 13=Reduced density gradient (RDG); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_RDG = ("17", "1", "13", "n")
+    #           attractors; 13=Reduced density gradient (RDG); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "13", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_RDG = ("17", "1", "13", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 14=RDG with promolecular approximation; n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_RDG_PROMOLECULAR = ("17", "1", "14", "n")
+    #           attractors; 14=RDG with promolecular approximation; 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "14", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_RDG_PROMOLECULAR = ("17", "1", "14", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 15=Sign(lambda2)*rho; n=no (decline the
-    #           fragment/mirror-plane restriction)
-    BASIN_LAMBDA2RHO = ("17", "1", "15", "n")
+    #           attractors; 15=Sign(lambda2)*rho; 1=Low quality grid,
+    #           spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "15", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_LAMBDA2RHO = ("17", "1", "15", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 16=Sign(lambda2)*rho with promolecular
-    #           approximation; n=no (decline the fragment/mirror-plane
-    #           restriction)
-    BASIN_LAMBDA2RGO_PROMOLECULAR = ("17", "1", "16", "n")
+    #           approximation; 1=Low quality grid, spacing=0.20 Bohr,
+    #           cost: 1x
+    # FIXED - was ("17", "1", "16", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_LAMBDA2RGO_PROMOLECULAR = ("17", "1", "16", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 18=Average local ionization energy (ALIE);
-    #           n=no (decline the fragment/mirror-plane restriction)
-    BASIN_ALIE = ("17", "1", "18", "n")
+    #           1=Low quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "18", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ALIE = ("17", "1", "18", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
     #           attractors; 20=Electron delocal. range func. EDR(r;d);
-    #           n=no (decline the fragment/mirror-plane restriction)
-    BASIN_EDR = ("17", "1", "20", "n")
+    #           1=Low quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "20", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_EDR = ("17", "1", "20", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 21=Orbital overlap dist. func. D(r); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_ORB_OVERLAP_DR = ("17", "1", "21", "n")
+    #           attractors; 21=Orbital overlap dist. func. D(r); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "21", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_ORB_OVERLAP_DR = ("17", "1", "21", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 22=Delta-g (promolecular approximation); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_DELTAG_PROMOLECULAR = ("17", "1", "22", "n")
+    #           attractors; 22=Delta-g (promolecular approximation); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "22", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_DELTAG_PROMOLECULAR = ("17", "1", "22", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 23=Delta-g (Hirshfeld partition); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_DELTAG_HIRSHFELD = ("17", "1", "23", "n")
+    #           attractors; 23=Delta-g (Hirshfeld partition); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "23", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs.
+    BASIN_DELTAG_HIRSHFELD = ("17", "1", "23", "1", "-10")
     # Sequence: 17=Basin analysis; 1=Generate basins and locate
-    #           attractors; 24=Interaction region indicator (IRI); n=no
-    #           (decline the fragment/mirror-plane restriction)
-    BASIN_IRI = ("17", "1", "24", "n")
+    #           attractors; 24=Interaction region indicator (IRI); 1=Low
+    #           quality grid, spacing=0.20 Bohr, cost: 1x
+    # FIXED - was ("17", "1", "24", "n") alone, which only opens the grid-
+    # quality sub-prompt and leaves it waiting for interactive input, so
+    # basin generation never actually runs; 1=Low quality grid,
+    # spacing=0.20 Bohr, cost: 1x
+    BASIN_IRI = ("17", "1", "24", "1", "-10")
     # AIM basin analysis: attractors are nuclei; integrates rho in each
     # QTAIM atomic basin to yield Bader/AIM charges, atomic multipoles,
     # LI, and DI
@@ -2508,8 +2790,18 @@ class Menu(Enum):
     # Calculate the molecular van der Waals volume as the space enclosed
     # within the rho = 0.001 a.u. electron-density isosurface
     # Sequence: 100=Other functions (Part 1); 3=Calculate molecular van der
-    #           Waals volume
-    VDW_VOLUME = ("100", "3")
+    #           Waals volume; 9,0.001,1.7=Monte Carlo grid density (i),
+    #           isovalue (x), vdW radius scale factor (k) -- Multiwfn's
+    #           own suggested default for small molecules; 0,0,0=return
+    #           from the volume sub-prompt; 0=return from the "Other
+    #           functions" submenu to the main menu
+    # FIXED - ("100", "3") alone only opens the "Please input i,x,k"
+    # sub-prompt and leaves it waiting for interactive input, so the
+    # calculation never actually runs. Verified against the real binary:
+    # the trailing "0,0,0" alone returns to the "Other functions"
+    # submenu listing, which still needs its own "0" to reach the main
+    # menu before quitting.
+    VDW_VOLUME = ("100", "3", "9,0.001,1.7", "0,0,0", "0")
     # Numerically integrate a chosen real-space function over all space
     # using Becke multi-centre quadrature; used to verify total electron
     # count (integral of rho = N)
@@ -2663,24 +2955,32 @@ class Menu(Enum):
     # ─────────────────────────────────────────────────────────────────────────
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 1=electric dipole moment
-    #           integral; 3=Between all orbitals
-    ORBITAL_INTEGRAL_ELECTRIC_DIPOLE = ("200", "10", "1", "3")
+    #           integral; 3=Between all orbitals; 0=return to the main
+    #           menu after the calculation completes
+    # FIXED - the trailing "0" was missing; verified against the real
+    # binary that the computation itself succeeds but leaves the "Other
+    # functions (Part 2)" submenu open, which crashes on quit without it.
+    ORBITAL_INTEGRAL_ELECTRIC_DIPOLE = ("200", "10", "1", "3", "0")
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 2=magnetic dipole moment
-    #           integral; 3=Between all orbitals
-    ORBITAL_INTEGRAL_MAGNETIC_DIPOLE = ("200", "10", "2", "3")
+    #           integral; 3=Between all orbitals; 0=return to the main
+    #           menu after the calculation completes
+    ORBITAL_INTEGRAL_MAGNETIC_DIPOLE = ("200", "10", "2", "3", "0")
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 3=velocity integral; 3=Between
-    #           all orbitals
-    ORBITAL_INTEGRAL_VELOCITY = ("200", "10", "3", "3")
+    #           all orbitals; 0=return to the main menu after the
+    #           calculation completes
+    ORBITAL_INTEGRAL_VELOCITY = ("200", "10", "3", "3", "0")
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 4=kinetic energy integral;
-    #           3=Between all orbitals
-    ORBITAL_INTEGRAL_KINETIC_ENERGY = ("200", "10", "4", "3")
+    #           3=Between all orbitals; 0=return to the main menu after
+    #           the calculation completes
+    ORBITAL_INTEGRAL_KINETIC_ENERGY = ("200", "10", "4", "3", "0")
     # Sequence: 200=Other functions (Part 2); 10=Output various kinds of
     #           integral between orbitals; 5=overlap integral; 3=Between
-    #           all orbitals
-    ORBITAL_INTEGRAL_OVERLAP = ("200", "10", "5", "3")
+    #           all orbitals; 0=return to the main menu after the
+    #           calculation completes
+    ORBITAL_INTEGRAL_OVERLAP = ("200", "10", "5", "3", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 1=Electron
@@ -2695,103 +2995,110 @@ class Menu(Enum):
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 3=Laplacian of
     #           rho
-    SPATIAL_DELOCALISATION_LAPLACIAN = ("200", "19", "1", "3")
+    SPATIAL_DELOCALISATION_LAPLACIAN = ("200", "19", "1", "3", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 4=Value of
-    #           orbital wavefunction; 0=return to the previous menu
-    SPATIAL_DELOCALISATION_ORB_WFN = ("200", "19", "1", "4", "0")
+    #           orbital wavefunction; h=select the HOMO (universal,
+    #           molecule-independent default); 0=return to the main menu
+    #           after the calculation completes
+    # FIXED - was ("200", "19", "1", "4", "0") -- the "0" was wrongly
+    # treated as a menu-return token, but this point actually prompts
+    # for an orbital index ("Input orbital index, e.g. 28" / accepts
+    # "h" for HOMO), so "0" was being read as orbital 0 and the
+    # calculation never ran. Verified against the real binary.
+    SPATIAL_DELOCALISATION_ORB_WFN = ("200", "19", "1", "4", "h", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 5=Electron spin
     #           density
-    SPATIAL_DELOCALISATION_ESPIN_DENSITY = ("200", "19", "1", "5")
+    SPATIAL_DELOCALISATION_ESPIN_DENSITY = ("200", "19", "1", "5", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 6=Hamiltonian
     #           kinetic energy density K(r)
-    SPATIAL_DELOCALISATION_KR = ("200", "19", "1", "6")
+    SPATIAL_DELOCALISATION_KR = ("200", "19", "1", "6", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 7=Lagrangian
     #           kinetic energy density G(r)
-    SPATIAL_DELOCALISATION_GR = ("200", "19", "1", "7")
+    SPATIAL_DELOCALISATION_GR = ("200", "19", "1", "7", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 8=Electrostatic
     #           potential from nuclear charges
-    SPATIAL_DELOCALISATION_ESP_CHARGES = ("200", "19", "1", "8")
+    SPATIAL_DELOCALISATION_ESP_CHARGES = ("200", "19", "1", "8", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 9=Electron
     #           localization function (ELF)
-    SPATIAL_DELOCALISATION_ELF = ("200", "19", "1", "9")
+    SPATIAL_DELOCALISATION_ELF = ("200", "19", "1", "9", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 10=Localized
     #           orbital locator (LOL)
-    SPATIAL_DELOCALISATION_LOL = ("200", "19", "1", "10")
+    SPATIAL_DELOCALISATION_LOL = ("200", "19", "1", "10", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 11=Local
     #           information entropy
-    SPATIAL_DELOCALISATION_LOCAL_ENTROPY = ("200", "19", "1", "11")
+    SPATIAL_DELOCALISATION_LOCAL_ENTROPY = ("200", "19", "1", "11", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 12=Total
     #           electrostatic potential (ESP)
-    SPATIAL_DELOCALISATION_ESP_TOTAL = ("200", "19", "1", "12")
+    SPATIAL_DELOCALISATION_ESP_TOTAL = ("200", "19", "1", "12", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 13=Reduced
     #           density gradient (RDG)
-    SPATIAL_DELOCALISATION_RDG = ("200", "19", "1", "13")
+    SPATIAL_DELOCALISATION_RDG = ("200", "19", "1", "13", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 14=RDG with
     #           promolecular approximation
-    SPATIAL_DELOCALISATION_RDG_PROMOLECULAR = ("200", "19", "1", "14")
+    SPATIAL_DELOCALISATION_RDG_PROMOLECULAR = ("200", "19", "1", "14", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function;
     #           15=Sign(lambda2)*rho
-    SPATIAL_DELOCALISATION_LAMBDA2RHO = ("200", "19", "1", "15")
+    SPATIAL_DELOCALISATION_LAMBDA2RHO = ("200", "19", "1", "15", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function;
     #           16=Sign(lambda2)*rho with promolecular approximation
-    SPATIAL_DELOCALISATION_LAMBDA2RHO_PROMOLECULAR = ("200", "19", "1", "16")
+    SPATIAL_DELOCALISATION_LAMBDA2RHO_PROMOLECULAR = ("200", "19", "1", "16", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 18=Average
     #           local ionization energy (ALIE)
-    SPATIAL_DELOCALISATION_ALIE = ("200", "19", "1", "18")
+    SPATIAL_DELOCALISATION_ALIE = ("200", "19", "1", "18", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 20=Electron
     #           delocal. range func. EDR(r;d)
-    SPATIAL_DELOCALISATION_EDR = ("200", "19", "1", "20")
+    SPATIAL_DELOCALISATION_EDR = ("200", "19", "1", "20", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 21=Orbital
     #           overlap dist. func. D(r)
-    SPATIAL_DELOCALISATION_ORB_OVERLAP_DR = ("200", "19", "1", "21")
+    SPATIAL_DELOCALISATION_ORB_OVERLAP_DR = ("200", "19", "1", "21", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 22=Delta-g
     #           (promolecular approximation)
-    SPATIAL_DELOCALISATION_DELTAG_PROMOLECULAR = ("200", "19", "1", "22")
+    SPATIAL_DELOCALISATION_DELTAG_PROMOLECULAR = ("200", "19", "1", "22", "0")
     # Sequence:     200=Other functions (Part 2) (leading spaces in the
     #           token are stray but harmless); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 23=Delta-g
     #           (Hirshfeld partition)
-    SPATIAL_DELOCALISATION_DELTAG_HIRSHFELD = ("    200", "19", "1", "23")
+    SPATIAL_DELOCALISATION_DELTAG_HIRSHFELD = ("200", "19", "1", "23", "0")
     # Sequence: 200=Other functions (Part 2); 19=Calculate spatial
     #           delocalization index (SDI) for orbitals or a function;
     #           1=Calcluate SDI for a real space function; 24=Interaction
     #           region indicator (IRI)
-    SPATIAL_DELOCALISATION_IRI = ("200", "19", "1", "24")
+    SPATIAL_DELOCALISATION_IRI = ("200", "19", "1", "24", "0")
     # Fluctuation NCI (aRDG): RDG-based weak-interaction analysis time-
     # averaged over an MD trajectory; reveals which non-covalent contacts
     # persist throughout the simulation

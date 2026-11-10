@@ -1,0 +1,144 @@
+{
+  "input_file": "",
+  "analyses": {
+    "NCI_ANALYSIS": {
+      "parsed": {
+        "analysis": "NCI_ANALYSIS",
+        "results": [
+          {
+            "total_electrons": 88.0,
+            "grid_origin_bohr": [
+              -4.573638,
+              -3.247962,
+              -5.496225
+            ],
+            "grid_end_bohr": [
+              4.586151,
+              4.841202,
+              6.280646
+            ],
+            "grid_spacing_bohr": [
+              0.118958,
+              0.118958,
+              0.118958
+            ],
+            "grid_points_xyz": [
+              78,
+              69,
+              100
+            ],
+            "grid_points_total": 538200,
+            "wall_time_s": 4.0,
+            "scatter_file": "output.txt",
+            "sign_lambda2_rho_cube": "func1.cub",
+            "rdg_cube": "func2.cub",
+            "spikes": [
+              {
+                "interaction_type": "attractive",
+                "sign_lambda2_rho_at_min": -0.039299987,
+                "rdg_min": 0.028332148,
+                "sign_lambda2_rho_range": [
+                  -0.049725098,
+                  -0.025295417
+                ],
+                "n_points": 1131,
+                "volume_bohr3": 1.903898,
+                "min_position_angstrom": [
+                  0.286586,
+                  -0.270897,
+                  -0.390476
+                ],
+                "centroid_angstrom": [
+                  0.302226,
+                  -0.237502,
+                  -0.367712
+                ],
+                "nearest_atoms": [
+                  {
+                    "atom": "Se1",
+                    "distance_angstrom": 1.3457
+                  },
+                  {
+                    "atom": "S5",
+                    "distance_angstrom": 1.4684
+                  }
+                ]
+              },
+              {
+                "interaction_type": "repulsive",
+                "sign_lambda2_rho_at_min": 0.026320861,
+                "rdg_min": 0.44409915,
+                "sign_lambda2_rho_range": [
+                  0.023669793,
+                  0.026320861
+                ],
+                "n_points": 17,
+                "volume_bohr3": 0.028617,
+                "min_position_angstrom": [
+                  0.034786,
+                  -0.648597,
+                  -0.579327
+                ],
+                "centroid_angstrom": [
+                  -0.042976,
+                  -0.615271,
+                  -0.508971
+                ],
+                "nearest_atoms": [
+                  {
+                    "atom": "Se1",
+                    "distance_angstrom": 1.4132
+                  },
+                  {
+                    "atom": "S5",
+                    "distance_angstrom": 1.5928
+                  }
+                ]
+              },
+              {
+                "interaction_type": "repulsive",
+                "sign_lambda2_rho_at_min": 0.027439579,
+                "rdg_min": 0.38846645,
+                "sign_lambda2_rho_range": [
+                  0.021557674,
+                  0.028562102
+                ],
+                "n_points": 113,
+                "volume_bohr3": 0.190221,
+                "min_position_angstrom": [
+                  0.790186,
+                  -0.207947,
+                  -0.453426
+                ],
+                "centroid_angstrom": [
+                  0.600779,
+                  -0.111572,
+                  -0.362622
+                ],
+                "nearest_atoms": [
+                  {
+                    "atom": "Se1",
+                    "distance_angstrom": 1.4321
+                  },
+                  {
+                    "atom": "S5",
+                    "distance_angstrom": 1.5371
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "raw_stdout_file": "NCI_ANALYSIS.txt",
+      "timestamp": "2026-11-09T15:11:25.410665"
+    }
+  },
+  "output_dir": "",
+  "generated_files": [
+    "NCI_ANALYSIS.txt",
+    "func1.cub",
+    "func2.cub",
+    "output.txt"
+  ]
+}
