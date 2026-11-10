@@ -10,8 +10,8 @@ authors:
   - family-names: "Szczypinski"
     given-names: "Filip T."
 
-version: "2.0.1"
-date-released: "2026-10-28"
+version: "2.1.0"
+date-released: "2026-11-10"
 
 abstract: >-
   pyMultiwfn is a Python interface and automation toolkit for Multiwfn.
