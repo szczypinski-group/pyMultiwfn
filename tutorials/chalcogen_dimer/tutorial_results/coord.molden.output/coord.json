@@ -1,5 +1,5 @@
 {
-  "input_file": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\chalcogen_dimer\\coord.molden",
+  "input_file": "",
   "analyses": {
     "NCI_ANALYSIS": {
       "parsed": {
@@ -134,7 +134,7 @@
       "timestamp": "2026-11-09T15:11:25.410665"
     }
   },
-  "output_dir": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\chalcogen_dimer\\tutorial_results\\coord.molden.output",
+  "output_dir": "",
   "generated_files": [
     "NCI_ANALYSIS.txt",
     "func1.cub",

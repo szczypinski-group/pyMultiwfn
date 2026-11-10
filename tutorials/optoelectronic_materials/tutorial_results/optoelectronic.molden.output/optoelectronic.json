@@ -1,5 +1,5 @@
 {
-  "input_file": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\optoelectronic_materials\\optoelectronic.molden",
+  "input_file": "",
   "analyses": {
     "VIEW_STRUCTURE": {
       "parsed": {
@@ -462,7 +462,7 @@
       "timestamp": "2026-11-09T15:47:32.263670"
     }
   },
-  "output_dir": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\optoelectronic_materials\\tutorial_results\\optoelectronic.molden.output",
+  "output_dir": "",
   "generated_files": [
     "VIEW_STRUCTURE.txt"
   ]

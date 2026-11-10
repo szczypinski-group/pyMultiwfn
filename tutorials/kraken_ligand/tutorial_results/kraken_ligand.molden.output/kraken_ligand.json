@@ -1,5 +1,5 @@
 {
-  "input_file": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\kraken_ligand\\kraken_ligand.molden",
+  "input_file": "",
   "analyses": {
     "QMSA_ALIE": {
       "parsed": {
@@ -1738,7 +1738,7 @@
       "timestamp": "2026-11-09T15:19:04.094869"
     }
   },
-  "output_dir": "C:\\Szcz_Projects\\pyMultiwfn\\tutorials\\kraken_ligand\\tutorial_results\\kraken_ligand.molden.output",
+  "output_dir": "",
   "generated_files": [
     "QMSA_ALIE.txt",
     "QMSA_ESP.txt",
